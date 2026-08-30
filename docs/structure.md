@@ -162,5 +162,6 @@ Route::middleware(['auth'])->group(function () {
 - **Penamaan route**: `role.resource.aksi` → `admin.users.index`, `pegawai.bookings.store`.
 - **Controller per role** di sub-folder (`Admin/`, `Pengurus/`, `Pegawai/`) agar jelas batas wewenangnya.
 - **Logika bisnis di Service**, controller hanya koordinasi HTTP.
+- **Model**: setiap model yang dipakai factory di test wajib memakai trait `HasFactory`; tabel bernama tunggal (mis. `bidang`, `seksi`) wajib mendefinisikan `$table` eksplisit (pluralisasi otomatis Eloquent salah menebaknya).
 - **Blade partial** untuk komponen berulang (tabel, kartu mobil, badge status).
 - Badge status: `dipinjam` (kuning), `dikembalikan` (hijau), `perlu_diperiksa` (merah), `maintenance` (abu-abu).

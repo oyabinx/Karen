@@ -55,7 +55,9 @@ class MaintenanceController extends Controller
     {
         $maintenance->update($request->validated());
 
-        // Rentang baru bisa menabrak booking lain
+        // Dua arah: booking yang TIDAK lagi tertabrak dan belum diganti
+        // kembali ke dipinjam; yang masih tertabrak ditandai ulang.
+        $this->replacements->revertPendingForVehicle($maintenance->vehicle);
         $terdampak = $this->replacements->flagConflictingBookings($maintenance);
 
         $pesan = 'Jadwal maintenance diperbarui.';
@@ -73,7 +75,7 @@ class MaintenanceController extends Controller
     {
         $maintenance->update(['status' => 'selesai']);
 
-        return back()->with('success', 'Maintenance ditandai selesai. Kendaraan kembali tersedia mulai besok.');
+        return back()->with('success', 'Maintenance ditandai selesai — jadwal ini tidak lagi memblokir ketersediaan.');
     }
 
     /**

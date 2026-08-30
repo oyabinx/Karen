@@ -132,6 +132,33 @@ class MaintenanceTest extends TestCase
         $this->assertSame(Booking::STATUS_MENUNGGU_PENGGANTIAN, $booking->refresh()->status);
     }
 
+    public function test_update_menjauh_dari_booking_mengembalikan_status_dipinjam(): void
+    {
+        $v = Vehicle::factory()->create();
+        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-10', 'end_date' => '2026-09-11']);
+
+        $booking = Booking::create([
+            'user_id' => User::factory()->create()->id,
+            'vehicle_id' => $v->id,
+            'start_date' => '2026-09-10',
+            'end_date' => '2026-09-11',
+            'address' => 'Kantor B',
+            'purpose' => 'Rapat',
+            'status' => Booking::STATUS_MENUNGGU_PENGGANTIAN,
+        ]);
+
+        // Geser jadwal menjauh (20-21 Sept) → booking tidak lagi tertabrak
+        $this->actingAs($this->pengurus)
+            ->put("/pengurus/maintenances/{$m->id}", [
+                'vehicle_id' => $v->id,
+                'start_date' => '2026-09-20',
+                'end_date' => '2026-09-21',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(Booking::STATUS_DIPINJAM, $booking->refresh()->status);
+    }
+
     public function test_tandai_selesai_dan_hapus_jadwal(): void
     {
         $v = Vehicle::factory()->create();

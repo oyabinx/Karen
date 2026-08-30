@@ -140,6 +140,44 @@
  (whereNull original_vehicle_id).
 
 ────────────────────────────────────────────────────────────────────
+ 6.5 REVIEW PASCA-FASE (sebelum masuk Fase 4b — instruksi user)
+────────────────────────────────────────────────────────────────────
+
+ Pemeriksaan menyeluruh kode vs docs vs log menemukan:
+
+ 🔴 BUG LOGIKA DIPERBAIKI — update jadwal menjauh:
+   Jadwal digeser sehingga tidak lagi menabrak booking, namun
+   booking tetap menunggu_penggantian (tidak ada mekanisme balik),
+   dan UI penggantian tidak bisa memilih mobil lama (kandidat
+   mengecualikannya). FIX: MaintenanceController::update kini
+   revert-then-reflag — revertPendingForVehicle() lalu
+   flagConflictingBookings(); test baru
+   test_update_menjauh_dari_booking_mengembalikan_status_dipinjam.
+   AKAR DOCS (aturan baru user: bug = markdown kurang rinci):
+   penggantian_mobil.md tidak mendefinisikan perilaku update dua
+   arah → DIPERBAIKI docs: "booking yang tidak lagi tertabrak dan
+   belum diganti otomatis kembali dipinjam; yang sudah diganti
+   tetap di pengganti".
+
+ ⚠ PREISI DOCS — status maintenance pemblokir:
+   tech.md §4.1 tidak menyebut bahwa hanya maintenance
+   'terjadwal' yang memblokir (implementasi sudah benar) → docs
+   diperjelas agar implementasi berikutnya tidak keliru.
+
+ ⚠ KONVENSI MODEL BARU di structure.md:
+   "model ber-factory wajib trait HasFactory; tabel tunggal wajib
+   $table eksplisit" — mencegah repeat bug import HasFactory &
+   pluralisasi fase 1.
+
+ ✗ Typos (spasi nama test) dinilai BUKAN kesalahan docs — tidak
+   ada bagian markdown yang bisa mencegahnya; dicatat apa adanya.
+
+ Copy kecil: pesan tombol "selesai" diperbaiki ("tidak lagi
+ memblokir ketersediaan" — ketersediaan berbasis tanggal).
+
+ Suite setelah review: 91 PASSED (247 assertions).
+
+────────────────────────────────────────────────────────────────────
  7. KONSUMSI FASE BERIKUTNYA (Fase 4b — Anggaran & Dokumen)
 ────────────────────────────────────────────────────────────────────
 

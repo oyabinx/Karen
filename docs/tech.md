@@ -173,7 +173,7 @@ A1 <= B2 AND A2 >= B1
 
 Mobil **tersedia** pada rentang [mulai, akhir] jika **TIDAK** ada:
 - booking dengan status `dipinjam` ATAU `menunggu_penggantian` yang overlap dengan rentang;
-- jadwal maintenance yang overlap dengan rentang;
+- jadwal maintenance **berstatus `terjadwal`** yang overlap dengan rentang (yang sudah `selesai` TIDAK memblokir — ketersediaan berbasis tanggal & status);
 - event berstatus `terjadwal` yang rentangnya overlap (mobil termasuk armada event);
 - mobil berstatus `tidak_bisa_dipinjam`;
 - mobil bercondition `perlu_diperiksa`.

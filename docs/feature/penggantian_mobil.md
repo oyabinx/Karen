@@ -10,7 +10,7 @@ Apabila pengurus menjadwalkan maintenance untuk mobil yang **ternyata sudah memi
 
 ### Pemicu
 - Saat pengurus **membuat** jadwal maintenance dan rentangnya overlap dengan booking berstatus `dipinjam` (termasuk booking mendatang).
-- Saat pengurus **mengubah** jadwal maintenance sehingga rentang baru menabrak booking lain.
+- Saat pengurus **mengubah** jadwal maintenance: setelah rentang berubah, sistem menilai **dua arah** — booking yang **masih** tertabrak ditandai `menunggu_penggantian`, dan booking yang **tidak lagi** tertabrak serta **belum** diganti otomatis kembali ke `dipinjam` (mobil semula). Booking yang sudah memakai mobil pengganti tetap di mobil penggantinya.
 - Mobil dengan booking `menunggu_penggantian` dianggap **sudah tidak menahan ketersediaan mobil lama** terhadap maintenance.
 
 > Mekanisme konfirmasi pengganti ini **juga dipakai oleh fitur Event Armada Bidang** — pembuat event memilih pengganti untuk booking yang ditabrak armada event, lihat [event_bidang.md](event_bidang.md).
