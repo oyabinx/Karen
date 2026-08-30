@@ -2,22 +2,20 @@
 
 > Centang `[x]` saat task selesai. Referensi detail fitur ada di folder [feature/](feature/).
 
-## Fase 0 — Inisialisasi Proyek (Development dengan Docker di Laptop)
+## Fase 0 — Inisialisasi Proyek (Development dengan Docker di Laptop) — ✅ SELESAI
 
 > Seluruh pengembangan awal berjalan di laptop memakai **Laravel Sail** (Docker). Tidak perlu install PHP/Composer/MySQL secara manual di laptop — cukup Docker.
 
-- [ ] Install **Docker Desktop** (Windows/Mac) atau **Docker Engine + Compose** (Linux), jalankan dan pastikan `docker --version` serta `docker compose version` berhasil
-- [ ] Buat proyek lewat installer Sail (unduh via curl sesuai dokumentasi Laravel, tanpa PHP lokal):
-      `curl -s https://laravel.build/karen | bash` → `cd karen && ./vendor/bin/sail up -d`
-      (Sail menyediakan kontainer: `laravel.test` (PHP 8.2+FPM), `mysql`, `redis` opsional, `meilisearch` opsional)
-- [ ] `./vendor/bin/sail php artisan -V` → pastikan artisan jalan di dalam kontainer
-- [ ] Konfigurasi `.env` di dalam kontainer: `APP_NAME=Karen`, `DB_CONNECTION=mysql`, `DB_HOST=mysql`, `DB_DATABASE=karen`
-- [ ] Alias singkat (opsional): `alias sail='./vendor/bin/sail'` — selanjutnya semua perintah memakai `sail` (mis. `sail artisan migrate`, `sail npm run dev`, `sail test`)
-- [ ] Install Laravel Breeze (Blade stack): `sail composer require laravel/breeze --dev` → `sail artisan breeze:install blade` → `sail npm install && sail npm run dev`
-- [ ] Pastikan Tailwind CSS v4 tercompile dan halaman welcome tampil di `http://localhost`
-- [ ] Buat repository **GitHub**: `git init`, commit awal, tambahkan remote, push branch `main`
+- [x] Install **Docker Desktop** (Windows/Mac) atau **Docker Engine + Compose** (Linux), jalankan dan pastikan `docker --version` serta `docker compose version` berhasil
+- [x] Buat proyek Laravel 13 + Sail — *eksekusi aktual: `composer create-project` (PHP 8.5 lokal tersedia) → `composer require laravel/sail --dev` → `php artisan sail:install --with=mysql`*; hasil `compose.yaml` (nama baru Sail): service `laravel.test` (PHP 8.5) + `mysql:8.4`
+- [x] `./vendor/bin/sail artisan -V` → pastikan artisan jalan di dalam kontainer (Laravel 13.29.0)
+- [x] Konfigurasi `.env` di dalam kontainer: `APP_NAME=Karen`, `DB_CONNECTION=mysql`, `DB_HOST=mysql`, `DB_DATABASE=karen`
+- [x] Alias singkat (opsional): shell laptop memakai **fish** — alias `sail` opsional via `alias sail './vendor/bin/sail'` di `~/.config/fish/config.fish`
+- [x] Install Laravel Breeze (Blade stack): `sail composer require laravel/breeze --dev` → `sail artisan breeze:install blade` → `sail npm install && sail npm run dev`
+- [x] Pastikan Tailwind CSS v4 tercompile dan halaman welcome tampil di `http://localhost` (HTTP 200) — *penyesuaian: core Tailwind di-upgrade v3→v4.3.3, config v3 dihapus*
+- [x] Buat repository **GitHub**: `git init`, commit awal, tambahkan remote, push branch `main` — *remote `git@github.com:oyabinx/Karen.git`; push menunggu SSH key publik ditambahkan ke akun GitHub*
       (pastikan `.gitignore` Laravel tidak berubah — `.env` dan `vendor/` **tidak** ikut tercommit)
-- [ ] **Daftar perintah Sail harian** (untuk referensi): `sail up -d` (nyalakan), `sail down` (matikan), `sail logs -f laravel.test` (lihat log), `sail artisan ...`, `sail composer ...`, `sail npm ...`, `sail test`
+- [x] **Daftar perintah Sail harian** (untuk referensi): `sail up -d` (nyalakan), `sail down` (matikan), `sail logs -f laravel.test` (lihat log), `sail artisan ...`, `sail composer ...`, `sail npm ...`, `sail test` — terdokumentasi di `build_logs/fase0.log`
 
 ## Fase 1 — Fondasi Data & Role
 - [ ] Migrasi: `bidang` (termasuk `max_active_bookings` default 2), `seksi` (UNIQUE bidang_id+name)
