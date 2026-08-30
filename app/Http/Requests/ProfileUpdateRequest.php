@@ -3,16 +3,14 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * Aturan profil (docs/feature/profil.md):
+     * nomor HP WAJIB diisi setiap kali profil disimpan.
      */
     public function rules(): array
     {
@@ -26,6 +24,21 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            // Format nomor HP Indonesia: 08xx / 62xxx / +62xxx
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^(\+62|62|0)8[1-9][0-9]{6,10}$/',
+                Rule::unique(User::class)->ignore($this->user()->id),
+            ],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'nama',
+            'phone' => 'nomor HP',
         ];
     }
 }

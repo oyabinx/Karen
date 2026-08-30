@@ -26,13 +26,13 @@
 - [x] Middleware `EnsureUserHasRole` + alias `role:`
 - [x] Ubah registrasi Breeze: dinonaktifkan (user hanya dibuat admin) — *route/controller/view/test register dihapus; GET /register → 404*
 
-## Fase 2 — Layout, Autentikasi & Profil
-- [ ] Layout utama `app.blade.php`: sidebar desktop (≥lg) + navbar/drawer/bottom-nav mobile (<lg) sesuai → [feature/ui_responsive.md](feature/ui_responsive.md)
-- [ ] Breakpoint responsive Tailwind (mobile-first): tabel→kartu di mobile, grid & form adaptif, touch target 44px
-- [ ] Router dashboard per role (`DashboardController` → view admin/pengurus/pegawai)
-- [ ] Halaman login email + password (Breeze, disesuaikan bahasa Indonesia)
-- [ ] Fitur ubah profil: nama, email, **nomor HP wajib** (validasi regex HP Indonesia) → [feature/profil.md](feature/profil.md)
-- [ ] Ganti password (bawaan Breeze)
+## Fase 2 — Layout, Autentikasi & Profil — ✅ SELESAI
+- [x] Layout utama `app.blade.php`: sidebar desktop (≥lg) + navbar/drawer/bottom-nav mobile (<lg) sesuai → [feature/ui_responsive.md](feature/ui_responsive.md) — *menu per role via `App\Support\KarenMenu` (item muncul otomatis saat route fase berikutnya terdaftar)*
+- [x] Breakpoint responsive Tailwind (mobile-first): tabel→kartu di mobile, grid & form adaptif, touch target 44px — *tabel→kartu diterapkan bertahap di tiap halaman fase berikutnya; kerangka & touch target jadi*
+- [x] Router dashboard per role (`DashboardController` → view admin/pengurus/pegawai) — *+ banner pengingat nomor HP di semua dashboard*
+- [x] Halaman login email + password (Breeze, disesuaikan bahasa Indonesia) — *+ laravel-lang locale `id` untuk semua pesan validasi framework*
+- [x] Fitur ubah profil: nama, email, **nomor HP wajib** (validasi regex HP Indonesia) → [feature/profil.md](feature/profil.md) — *fitur hapus-akun mandiri Breeze dihapus (hanya admin menonaktifkan)*
+- [x] Ganti password (bawaan Breeze) — *UI diterjemahkan*
 
 ## Fase 3 — Admin: Manajemen User, Organisasi & Kuota
 - [ ] CRUD user (tambah, lihat, ubah, nonaktifkan/soft delete, atur role + seksi) → [feature/manajemen_user.md](feature/manajemen_user.md)

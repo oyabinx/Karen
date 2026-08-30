@@ -10,26 +10,27 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_profile_page_is_displayed(): void
+    public function test_halaman_profil_dapat_ditampilkan(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['phone' => '081234567890']);
 
-        $response = $this
-            ->actingAs($user)
-            ->get('/profile');
+        $response = $this->actingAs($user)->get('/profile');
 
         $response->assertOk();
+        $response->assertSee('Informasi Profil');
+        $response->assertSee('Nomor HP (wajib)');
     }
 
-    public function test_profile_information_can_be_updated(): void
+    public function test_profil_dapat_diperbarui_dengan_nomor_hp_valid(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['phone' => '081234567890']);
 
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
-                'name' => 'Test User',
-                'email' => 'test@example.com',
+                'name' => 'Nama Baru',
+                'email' => 'baru@karen.test',
+                'phone' => '081298765432',
             ]);
 
         $response
@@ -38,62 +39,124 @@ class ProfileTest extends TestCase
 
         $user->refresh();
 
-        $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
+        $this->assertSame('Nama Baru', $user->name);
+        $this->assertSame('baru@karen.test', $user->email);
+        $this->assertSame('081298765432', $user->phone);
         $this->assertNull($user->email_verified_at);
     }
 
-    public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
+    public function test_profil_tidak_bisa_disimpan_tanpa_nomor_hp(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['phone' => '081234567890']);
 
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
-                'name' => 'Test User',
+                'name' => $user->name,
                 'email' => $user->email,
+                'phone' => '',
             ]);
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
-
-        $this->assertNotNull($user->refresh()->email_verified_at);
+        $response->assertSessionHasErrors('phone');
+        $this->assertSame('081234567890', $user->refresh()->phone);
     }
 
-    public function test_user_can_delete_their_account(): void
+    public function test_nomor_hp_format_tidak_valid_ditolak(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['phone' => '081234567890']);
 
-        $response = $this
+        foreach (['12345', '0812345', 'halo', '081234567890123456'] as $invalid) {
+            $this
+                ->actingAs($user)
+                ->patch('/profile', [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $invalid,
+                ])
+                ->assertSessionHasErrors('phone');
+        }
+    }
+
+    public function test_nomor_hp_tidak_boleh_duplikat_antar_user(): void
+    {
+        User::factory()->create(['phone' => '081211122233']);
+        $user = User::factory()->create(['phone' => '081244455566']);
+
+        $this
             ->actingAs($user)
-            ->delete('/profile', [
-                'password' => 'password',
-            ]);
-
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/');
-
-        $this->assertGuest();
-        // User memakai soft delete (nonaktif, data riwayat tetap tersimpan)
-        $this->assertSoftDeleted($user);
+            ->patch('/profile', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => '081211122233',
+            ])
+            ->assertSessionHasErrors('phone');
     }
 
-    public function test_correct_password_must_be_provided_to_delete_account(): void
+    public function test_nomor_hp_boleh_mempertahankan_nilai_sendiri(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['phone' => '081233344455']);
+
+        $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => 'Nama Diubah',
+                'email' => $user->email,
+                'phone' => '081233344455',
+            ])
+            ->assertSessionHasNoErrors();
+    }
+
+    public function test_email_tidak_boleh_duplikat(): void
+    {
+        $lain = User::factory()->create();
+        $user = User::factory()->create(['phone' => '081255566677']);
+
+        $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => $user->name,
+                'email' => $lain->email,
+                'phone' => $user->phone,
+            ])
+            ->assertSessionHasErrors('email');
+    }
+
+    public function test_kata_sandi_dapat_diubah(): void
+    {
+        $user = User::factory()->create(['phone' => '081277788899']);
 
         $response = $this
             ->actingAs($user)
             ->from('/profile')
-            ->delete('/profile', [
-                'password' => 'wrong-password',
+            ->put('/password', [
+                'current_password' => 'password',
+                'password' => 'kata-sandi-baru',
+                'password_confirmation' => 'kata-sandi-baru',
             ]);
 
         $response
-            ->assertSessionHasErrorsIn('userDeletion', 'password')
+            ->assertSessionHasNoErrors()
             ->assertRedirect('/profile');
+
+        $this->assertTrue(
+            $this->post('/login', [
+                'email' => $user->email,
+                'password' => 'kata-sandi-baru',
+            ])->assertRedirect()->isRedirection()
+        );
+    }
+
+    public function test_tidak_ada_fitur_hapus_akun_mandiri(): void
+    {
+        $user = User::factory()->create(['phone' => '081299900011']);
+
+        // Route DELETE /profile dihapus — akun hanya dinonaktifkan admin
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('profile.destroy'));
+
+        $this
+            ->actingAs($user)
+            ->delete('/profile', ['password' => 'password'])
+            ->assertStatus(405);
 
         $this->assertNotNull($user->fresh());
     }

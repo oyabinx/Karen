@@ -1,0 +1,154 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 2                      ║
+║               Layout, Autentikasi & Profil (UI Dasar)              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 2 — Layout, Autentikasi & Profil
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — layout responsive 2 pola, dashboard
+                3 role, login & profil Bahasa Indonesia, nomor HP
+                wajib, 33/33 test HIJAU
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 2 membangun kerangka UI aplikasi: layout responsive (desktop
+ sidebar / mobile drawer + bottom-nav) sesuai docs/feature/
+ ui_responsive.md, router dashboard per role, halaman login &
+ profil berbahasa Indonesia dengan nomor HP wajib, serta pesan
+ validasi framework berbahasa Indonesia.
+
+────────────────────────────────────────────────────────────────────
+ 2. LAYOUT RESPONSIVE (docs/feature/ui_responsive.md)
+────────────────────────────────────────────────────────────────────
+
+ resources/views/layouts/app.blade.php (ditulis ulang total):
+ • DESKTOP (≥lg): sidebar tetap kiri 256px — logo Karen, menu
+   dikelompokkan per seksi, identitas user + tombol Keluar.
+ • MOBILE (<lg): topbar sticky dengan tombol hamburger (≥44px)
+   → drawer geser (Alpine.js, tutup via overlay/ESC/klik item).
+ • BOTTOM NAV mobile (fixed, 3 slot ≥56px): Beranda · Profil ·
+   Keluar — slot "Cari Mobil" & "Peminjaman Aktif" disiapkan
+   untuk Fase 5 (komentar penanda di layout).
+ • Semua tombol target sentuh min 44×44px (aturan ui_responsive).
+ • File Breeze lama dihapus: layouts/navigation.blade.php,
+   dashboard.blade.php (default), profile/partials/*.
+
+ app/Support/KarenMenu.php (baru):
+ • Generator menu per role (Utama/Administrasi/Kendaraan/
+   Monitoring/Peminjaman).
+ • Item HANYA muncul bila route-nya terdaftar (Route::has) —
+   menu otomatis melengkapi diri seiring fase berikutnya,
+   tanpa mengubah layout lagi.
+ • Admin: Manajemen User, Bidang & Seksi, Integrasi Google.
+   Pengurus (+admin): Kendaraan, Maintenance, Event, Monitoring,
+   Keluhan, Laporan. Pegawai (+pengurus): Cari Mobil,
+   Peminjaman Saya.
+
+────────────────────────────────────────────────────────────────────
+ 3. DASHBOARD PER ROLE
+────────────────────────────────────────────────────────────────────
+
+ • app/Http/Controllers/DashboardController.php — router view
+   sesuai role: dashboard.{admin|pengurus|pegawai}.
+ • Route /dashboard: middleware 'auth' saja ('verified' Breeze
+   dihapus — aplikasi internal tidak mewajibkan verifikasi
+   email; email diisi admin).
+ • 3 view dashboard:
+   - admin   : kartu ringkasan (user/bidang/seksi/armada) + daftar
+               tugas admin
+   - pengurus: kartu ringkasan (armada/bisa dipinjam/maintenance
+               aktif/peminjaman berjalan) + tugas pengurus
+   - pegawai : kartu PEMINJAMAN AKTIF (jika ada — slot tombol
+               "Kembalikan" untuk Fase 6) + ringkasan aturan
+               peminjaman + penempatan seksi/bidang
+ • partials/phone-reminder.blade.php: banner peringatan "Nomor
+   HP belum diisi" tampil di semua dashboard bila user.phone
+   kosong (docs/feature/profil.md & dashboard.md).
+
+────────────────────────────────────────────────────────────────────
+ 4. LOGIN BAHASA INDONESIA
+────────────────────────────────────────────────────────────────────
+
+ • auth/login.blade.php: judul "Selamat datang di Karen — Sistem
+   Peminjaman Kendaraan Dinas", label Email/Kata Sandi/Ingat
+   saya, tombol "Masuk", tautan "Lupa kata sandi?".
+ • Tombol utama full-width di mobile, kolom berdampingan di
+   desktop (sm:flex-row).
+
+────────────────────────────────────────────────────────────────────
+ 5. PROFIL — NOMOR HP WAJIB
+────────────────────────────────────────────────────────────────────
+
+ • ProfileUpdateRequest: phone required + regex
+   ^(\+62|62|0)8[1-9][0-9]{6,10}$ + unique (kecuali sendiri);
+   attribute "nomor HP" untuk pesan error.
+ • profile/edit.blade.php (tulis ulang): dua seksi —
+   "Informasi Profil" (nama, email, HP wajib + petunjuk format,
+   role & penempatan read-only) dan "Ganti Kata Sandi".
+ • FITUR HAPUS AKUN SENDIRI DIHAPUS dari UI/route/controller
+   (Breeze default) — sesuai docs: hanya admin menonaktifkan
+   user. Route profile.destroy dihapus; DELETE /profile → 405.
+ • ProfileController::destroy() dihapus.
+
+────────────────────────────────────────────────────────────────────
+ 6. PESAN VALIDASI BAHASA INDONESIA
+────────────────────────────────────────────────────────────────────
+
+ • laravel-lang/common (dev) terpasang + `php artisan lang:add id`
+   → lang/id/validation.php + id.json (ter-commit).
+ • APP_LOCALE=id di .env — semua pesan validasi framework
+   (required, email, unique, dst.) berbahasa Indonesia.
+
+────────────────────────────────────────────────────────────────────
+ 7. TEST SUITE BARU/DISESUAIKAN
+────────────────────────────────────────────────────────────────────
+
+ tests/Feature/DashboardTest.php (baru, 6 test):
+   ✓ tamu dialihkan ke login
+   ✓ admin/pengurus/pegawai melihat dashboard masing-masing
+   ✓ banner HP muncul bila kosong, hilang bila terisi
+
+ tests/Feature/ProfileTest.php (tulis ulang, 9 test):
+   ✓ halaman profil tampil
+   ✓ perbarui profil sukses (nama+email+HP valid)
+   ✓ simpan TANPA HP ditolak
+   ✓ 4 format HP invalid ditolak (12345, 0812345, halo, >15 digit)
+   ✓ HP duplikat antar user ditolak
+   ✓ HP milik sendiri boleh dipertahankan
+   ✓ email duplikat ditolak
+   ✓ ganti kata sandi + login dengan sandi baru
+   ✓ tidak ada route hapus-akun (DELETE /profile → 405)
+
+ Factory baru: BidangFactory, SeksiFactory; UserFactory diperluas
+ (role default pegawai, phone valid acak, seksi_id).
+
+────────────────────────────────────────────────────────────────────
+ 8. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ ./vendor/bin/sail test → 33 PASSED (85 assertions)
+ ✓ npm run build sukses (JS 52.89 kB, CSS tercompile ulang)
+ ✓ HTTP: /login menampilkan teks Indonesia; /dashboard guest
+   → 302 ke /login
+ ✓ Catatan perbaikan kecil saat eksekusi:
+   - trait HasFactory ditambahkan ke model Bidang & Seksi
+     (dibutuhkan factory di test)
+   - asersi dashboard diselaraskan dengan copy view (teks
+     terpotong elemen <span>)
+
+────────────────────────────────────────────────────────────────────
+ 9. KONSUMSI FASE BERIKUTNYA (Fase 3 — Admin: User, Organisasi, Kuota)
+────────────────────────────────────────────────────────────────────
+
+   • CRUD user (route admin.users.* → menu otomatis muncul)
+   • Impor massal pegawai via CSV (template + pratinjau + commit)
+   • CRUD bidang (+ kuota max_active_bookings) & seksi
+   • Validasi: seksi wajib untuk pegawai & pengurus
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 2 —
+════════════════════════════════════════════════════════════════════
