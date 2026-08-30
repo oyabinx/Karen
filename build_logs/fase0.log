@@ -7,8 +7,8 @@
   Fase        : 0 — Inisialisasi Proyek
   Environment : Development (laptop, CachyOS Linux, shell fish)
   Tanggal     : 2026-08-30
-  Status      : ✅ SELESAI — 1 item tersisa (push GitHub menunggu
-                SSH key publik ditambahkan ke akun GitHub user)
+  Status      : ✅ SELESAI — semua item tuntas, kode terpush ke
+                GitHub (origin/main, autentikasi SSH sebagai oyabinx)
 
 ────────────────────────────────────────────────────────────────────
  1. RINGKASAN EKSEKUSI
@@ -92,11 +92,9 @@
  [3.8] Git & GitHub
    • git init → branch "main" (rename dari master)
    • Remote: git@github.com:oyabinx/Karen.git (SSH)
-   • SSH key ed25519 DIGENERATE untuk user (~/.ssh/id_ed25519 +
-     config Host github.com) — menunggu user menambahkan public
-     key ke GitHub (Settings → SSH and GPG keys)
-   • Push tertunda HINGGA key ditambahkan (satu-satunya sisa
-     item Fase 0); semua commit sudah tersimpan lokal
+   • SSH key ed25519 digenerate (~/.ssh/id_ed25519 + config),
+     public key ditambahkan user ke GitHub
+   • git push -u origin main → SUKSES (branch tracking aktif)
    • Diverifikasi: .env & vendor/ TIDAK ter-commit
 
  [3.9] Dokumentasi (docs/) yang diperbarui pada fase ini
@@ -136,10 +134,8 @@
  ✓ .env & vendor tidak ter-commit; branch main
  ✓ taskplan.md Fase 0 diceklis + catatan metode aktual
  ✓ build_logs/fase0.log ditulis
- ⚠ git push origin main — MENUNGGU user menambahkan SSH key
-   publik ke GitHub:
-   ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIfVlOHXhJ3ruBZPSbwEqw9t
-   fGnuqK3hJNjt4at7AZNq oyabin@karen-dev
+ ✓ git push origin main → SUKSES (SSH terautentikasi, branch
+   main tracking origin/main, 5 commit terkirim)
 
 ────────────────────────────────────────────────────────────────────
  6. PERINTAH SAIL HARIAN (REFERENSI)
