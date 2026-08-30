@@ -7,6 +7,7 @@ use App\Http\Requests\Pengurus\BudgetSaveRequest;
 use App\Models\Vehicle;
 use App\Services\BudgetService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BudgetController extends Controller
@@ -19,9 +20,12 @@ class BudgetController extends Controller
         private readonly BudgetService $budgets,
     ) {}
 
-    public function edit(Vehicle $vehicle, ?int $year = null): View
+    public function edit(Request $request, Vehicle $vehicle): View
     {
-        $year ??= now()->year;
+        // Tahun anggaran dapat dipilih via ?year= — alokasi tiap tahun
+        // INDEPENDEN (2026 ≠ 2027), docs/feature/anggaran_maintenance.md
+        $year = (int) $request->query('year', now()->year);
+        $year = max(2000, min(2100, $year));
 
         return view('pengurus.budgets.edit', [
             'vehicle' => $vehicle,
@@ -35,8 +39,13 @@ class BudgetController extends Controller
 
     public function update(BudgetSaveRequest $request, Vehicle $vehicle): RedirectResponse
     {
-        $this->budgets->setBudgets($vehicle, (int) $request->input('year'), $request->input('amounts'));
+        $year = (int) $request->input('year');
 
-        return back()->with('success', 'Anggaran tahun '.$request->input('year').' disimpan.');
+        $this->budgets->setBudgets($vehicle, $year, $request->input('amounts'));
+
+        // Kembali ke halaman tahun yang baru disunting (bukan tahun berjalan)
+        return redirect()
+            ->route('pengurus.budgets.edit', ['vehicle' => $vehicle, 'year' => $year])
+            ->with('success', 'Anggaran tahun '.$year.' disimpan.');
     }
 }

@@ -17,7 +17,8 @@ Alur: keluhan pengembalian muncul di dashboard pengurus → pengurus menjadwalka
 ### 1. Anggaran per Kendaraan
 - Data kendaraan ditambah field **tahun pembuatan** (`year`).
 - Pengurus menginput **total anggaran tiap pos per mobil** sekali (misalnya per tahun anggaran).
-- Sistem menampilkan sisa anggaran per pos: `total anggaran − realisasi (nilai nota × 1,13)`.
+- **Alokasi tiap tahun INDEPENDEN** (mis. 2026 ≠ 2027): tersimpan per `(vehicle, pos, year)`; halaman anggaran memiliki **pemilih tahun** ( navigasi ◀/▶ atau isi kolom tahun) untuk melihat/mengelola tahun tertentu tanpa menimpa tahun lain.
+- Sistem menampilkan sisa anggaran per pos: `total anggaran − realisasi (nilai nota × 1,13)` — dihitung per tahun anggaran yang sedang dilihat.
 
 ### 2. Jadwal Maintenance dari Keluhan
 - Keluhan yang masuk (dari form pengembalian) tampil di dashboard pengurus.

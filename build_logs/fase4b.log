@@ -152,14 +152,34 @@
     builder — kontrak JSON kini numerik konsisten).
 
 ────────────────────────────────────────────────────────────────────
- 7. KONSUMSI FASE BERIKUTNYA (Fase 4c — Event Armada Bidang)
+ 7. KONSUMSI FASE BERIKUTNYA
 ────────────────────────────────────────────────────────────────────
 
-   • EventService (validasi armada layak, kunci N mobil,
-     autoFinish) + wizard UI (admin & pengurus)
-   • Penyelesaian tabrakan: reuse ReplacementService via endpoint
-     /pengurus/events/...
-   • Pengecualian kuota bidang pada BookingService (Fase 5)
+   • Fase 4c: EventService, wizard event, penyelesaian konflik
+     reuse ReplacementService (TERLAKSANA — lihat fase4c.log)
+   • Fase 5: BookingService + kuota bidang + pencarian ketersediaan
+
+────────────────────────────────────────────────────────────────────
+ 8. TINDAK LANJUT PASCA-REVIEW (alokasi anggaran per tahun)
+────────────────────────────────────────────────────────────────────
+
+ Pertanyaan user: "alokasi anggaran 2026 vs 2027 berbeda — sudah
+ difasilitasi?" — HASIL:
+ ✓ Level DATA sudah benar sejak desain: vehicle_budgets berkey
+   (vehicle, pos, YEAR) — tahun tersimpan terpisah; setBudgets
+   upsert per tahun (mengisi 2027 tidak menimpa 2026); realisasi
+   & sisa dihitung per tahun; kartu inventaris per tahun.
+ ✗ CELAH UX DITEMUKAN: halaman selalu membuka tahun berjalan tanpa
+   pemilih tahun → melihat/mengelola 2027 tidak nyaman.
+   FIX: parameter ?year= pada halaman anggaran (divalidasi
+   2000–2100) + pemilih tahun ◀/▶ di header + redirect kembali ke
+   tahun yang disunting setelah simpan.
+   DOCS: anggaran_maintenance.md §1 — "alokasi tiap tahun
+   independen + pemilih tahun".
+ Test baru: test_anggaran_tiap_tahun_independen (setBudgets dua
+ tahun berbeda; ?year=2027 tampil benar; 8 baris tersimpan).
+
+ Suite: 126 PASSED (365 assertions).
 
 ════════════════════════════════════════════════════════════════════
                           — AKHIR FASE 4b —

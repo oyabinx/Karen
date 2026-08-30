@@ -1,8 +1,20 @@
 <x-app-layout title="Anggaran — {{ $vehicle->name }}">
     <div class="mb-6">
         <a href="{{ route('pengurus.vehicles.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Kembali ke kendaraan</a>
-        <h1 class="text-2xl font-semibold mt-2">Anggaran Maintenance — {{ $vehicle->name }}</h1>
-        <p class="text-sm text-gray-500 mt-1">{{ $vehicle->plate_number }} · tahun pembuatan {{ $vehicle->year }} · tahun anggaran {{ $year }}</p>
+        <div class="flex flex-wrap items-end justify-between gap-3 mt-2">
+            <div>
+                <h1 class="text-2xl font-semibold">Anggaran Maintenance — {{ $vehicle->name }}</h1>
+                <p class="text-sm text-gray-500 mt-1">{{ $vehicle->plate_number }} · tahun pembuatan {{ $vehicle->year }} · alokasi tiap tahun bersifat independen</p>
+            </div>
+            {{-- Pemilih tahun anggaran: 2026 dan 2027 (dst.) punya alokasi terpisah --}}
+            <div class="flex items-center gap-1 bg-white rounded-lg border border-gray-300 p-1">
+                <a href="{{ route('pengurus.budgets.edit', ['vehicle' => $vehicle, 'year' => $year - 1]) }}"
+                   class="px-3 py-1.5 rounded-md hover:bg-gray-100 text-gray-600 min-h-[44px] flex items-center" aria-label="Tahun sebelumnya">◀</a>
+                <span class="px-3 font-semibold">{{ $year }}</span>
+                <a href="{{ route('pengurus.budgets.edit', ['vehicle' => $vehicle, 'year' => $year + 1]) }}"
+                   class="px-3 py-1.5 rounded-md hover:bg-gray-100 text-gray-600 min-h-[44px] flex items-center" aria-label="Tahun berikutnya">▶</a>
+            </div>
+        </div>
     </div>
 
     @if (session('success'))

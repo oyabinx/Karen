@@ -42,6 +42,33 @@ class BudgetDocumentTest extends TestCase
         $this->assertDatabaseHas('vehicle_budgets', ['vehicle_id' => $v->id, 'post' => 'servis', 'year' => 2026, 'amount' => 5000000]);
     }
 
+    public function test_anggaran_tiap_tahun_independen(): void
+    {
+        $v = Vehicle::factory()->create();
+
+        // Alokasi 2026 dan 2027 BERBEDA — tidak saling menimpa
+        app(BudgetService::class)->setBudgets($v, 2026, ['servis' => 5000000, 'suku_cadang' => 8000000, 'ac' => 2000000, 'pelumas' => 1500000]);
+        app(BudgetService::class)->setBudgets($v, 2027, ['servis' => 7000000, 'suku_cadang' => 6000000, 'ac' => 2500000, 'pelumas' => 2000000]);
+
+        $s2026 = app(BudgetService::class)->summary($v, 2026);
+        $s2027 = app(BudgetService::class)->summary($v, 2027);
+
+        $this->assertSame(5000000.0, $s2026['servis']['anggaran']);
+        $this->assertSame(7000000.0, $s2027['servis']['anggaran']);
+        $this->assertSame(1500000.0, $s2026['pelumas']['anggaran']);
+        $this->assertSame(2000000.0, $s2027['pelumas']['anggaran']);
+
+        // Halaman dengan ?year=2027 menampilkan alokasi 2027
+        $this->actingAs($this->pengurus)
+            ->get("/pengurus/vehicles/{$v->id}/budgets?year=2027")
+            ->assertOk()
+            ->assertSee('value="7000000', false)
+            ->assertDontSee('value="5000000', false);
+
+        // 8 baris anggaran tersimpan (4 pos × 2 tahun)
+        $this->assertSame(8, \App\Models\VehicleBudget::where('vehicle_id', $v->id)->count());
+    }
+
     public function test_halaman_anggaran_dapat_dilihat(): void
     {
         $v = Vehicle::factory()->create();
