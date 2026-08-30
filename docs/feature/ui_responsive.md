@@ -16,7 +16,7 @@ Karen adalah **satu codebase web responsive** (tidak ada aplikasi mobile terpisa
 
 ### Navigasi
 - **Desktop (≥ lg)**: sidebar tetap di kiri — menu dikelompokkan per fungsi; dapat di-collapse jadi ikon saja.
-- **Mobile (< lg)**: navbar atas ringkas (logo + notifikasi badge + avatar) + **menu drawer hamburger**; aksi paling sering (dashboard, cari mobil, peminjaman aktif) juga tersedia via **bottom navigation bar** (maks 4 item) agar satu jempol terjangkau.
+- **Mobile (< lg)**: navbar atas ringkas (logo + notifikasi badge + avatar) + **menu drawer hamburger**; aksi paling sering juga tersedia via **bottom navigation bar** (maks 4 item) agar satu jempol terjangkau — implementasi awal: Beranda · Profil · Keluar; slot "Cari Mobil" & "Peminjaman Aktif" aktif saat Fase 5 (peminjaman) tersedia.
 
 ### Tabel Data (user, kendaraan, booking, laporan)
 - **Desktop**: tabel penuh dengan kolom lengkap + filter di atas.

@@ -24,10 +24,10 @@ Admin mengelola akun pengguna sistem: membuat, melihat, mengubah, menonaktifkan,
 ### Impor Massal via CSV (Bulk Upload)
 Supaya admin tidak menginput pegawai satu per satu:
 
-- **Unduh Template CSV** — tombol "Unduh Template CSV" menyediakan file draft berformat tetap sehingga admin tidak perlu membuat file sendiri:
+- **Unduh Template CSV** — tombol "Unduh Template CSV" menyediakan file draft berformat tetap sehingga admin tidak perlu membuat file sendiri. **Pemisah kolom memakai titik koma (`;`)** agar kompatibel dengan locale Excel Indonesia (yang menggunakan koma sebagai desimal):
   ```csv
-  nama,email,password,bidang,seksi,role
-  Budi Santoso,budi@kantor.go.id,Password123,Bidang Umum,Seksi Kepegawaian,pegawai
+  nama;email;password;bidang;seksi;role
+  Budi Santoso;budi@kantor.go.id;Password123;Bidang Umum;Seksi Kepegawaian;pegawai
   ```
   (kolom `role` opsional — kosong = `pegawai`; template berisi 1 baris contoh + komentar header yang diabaikan sistem)
 - **Unggah CSV** → sistem menampilkan **pratinjau (dry-run)**: seluruh baris divalidasi tanpa menulis ke database; baris valid ditandai ✅, baris bermasalah ditandai ❌ beserta alasannya per baris (email duplikat di file/database, seksi tidak ditemukan di bawah bidang tersebut, password < 8 karakter, format email salah, nama kosong).
@@ -42,7 +42,7 @@ Supaya admin tidak menginput pegawai satu per satu:
 | GET | `/admin/users/{user}/edit` | Form ubah |
 | PUT | `/admin/users/{user}` | Proses ubah |
 | DELETE | `/admin/users/{user}` | Nonaktifkan (soft delete) |
-| PATCH | `/admin/users/{user}/restore` | Aktifkan kembali |
+| PATCH | `/admin/users/{id}/restore` | Aktifkan kembali — parameter `{id}` dengan pencarian manual `withTrashed()` karena user nonaktif tersembunyi dari route-model binding |
 | GET | `/admin/users/template` | Unduh template CSV impor massal |
 | POST | `/admin/users/import` | Unggah CSV → pratinjau validasi (dry-run) |
 | POST | `/admin/users/import/commit` | Konfirmasi: tulis baris valid ke database |
