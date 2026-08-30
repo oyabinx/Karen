@@ -4,7 +4,7 @@
 
 | Komponen | Teknologi | Keterangan |
 |----------|-----------|------------|
-| Backend & Framework | PHP 8.2+ / **Laravel 12** | Monolith (server-rendered) |
+| Backend & Framework | PHP 8.2+ / **Laravel 13** | Monolith (server-rendered) |
 | Frontend | Blade + **Tailwind CSS v4** + Alpine.js (seperlunya) | Vite untuk build asset |
 | Database | **MySQL 8** / MariaDB 10.11+ | |
 | Dokumen PDF | **barryvdh/laravel-dompdf** | generate bend26 & draft nota per pos |
