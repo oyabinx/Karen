@@ -25,3 +25,6 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Build logs dokumentasi proyek (jangan diabaikan)
+!build_logs/*.log

@@ -1,0 +1,177 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 0                      ║
+║              Inisialisasi Proyek (Docker/Sail di Laptop)           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 0 — Inisialisasi Proyek
+  Environment : Development (laptop, CachyOS Linux, shell fish)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — 1 item tersisa (push GitHub menunggu
+                SSH key publik ditambahkan ke akun GitHub user)
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 0 menyiapkan fondasi pengembangan lokal berbasis Docker
+ (Laravel Sail): scaffold Laravel 13 + Breeze + Tailwind v4,
+ kontainer PHP 8.5 & MySQL 8.4 berjalan, migrasi awal sukses,
+ aplikasi merespons HTTP 200, git repo siap (push menunggu
+ kredensial GitHub milik user).
+
+────────────────────────────────────────────────────────────────────
+ 2. PRASYARAT YANG DIVERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ Docker Engine            29.7.2   (daemon dinyalakan oleh user)
+ ✓ Docker Compose           5.5.0
+ ✓ PHP (host, untuk scaffold) 8.5.9
+ ✓ Composer                 2.10.2
+ ✓ Node.js                  26.7.0
+ ✓ Git                      2.55.0
+ ✓ User "oyabin" tergabung grup docker (akses via newgrp docker
+   pada sesi lama; sesi baru setelah re-login tidak perlu)
+
+────────────────────────────────────────────────────────────────────
+ 3. PEKERJAAN YANG DILAKUKAN
+────────────────────────────────────────────────────────────────────
+
+ [3.1] Scaffold Laravel
+   • laravel/laravel 13.17 (v13 — dokumentasi diselaraskan dari
+     "Laravel 12" menjadi "Laravel 13")
+   • Terpasang di /home/oyabin/Projects/Karen (repo root = app
+     root, folder docs/ tetap di dalamnya sesuai structure.md)
+
+ [3.2] Laravel Sail + MySQL
+   • composer require laravel/sail --dev (v1.67)
+   • php artisan sail:install --with=mysql
+   • HASIL: compose.yaml (Sail versi baru memakai nama file
+     "compose.yaml", bukan "docker-compose.yml")
+       - service laravel.test : PHP 8.5 (image sail-8.5/app)
+       - service mysql        : mysql:8.4, volume sail-mysql
+   • sail up -d → kedua kontainer BERJALAN
+       karen-laravel.test-1  : Up
+       karen-mysql-1         : Up (healthy)
+
+ [3.3] Konfigurasi .env (development)
+   • APP_NAME=Karen
+   • DB_CONNECTION=mysql | DB_HOST=mysql | DB_PORT=3306
+   • DB_DATABASE=karen    | DB_USERNAME=sail | DB_PASSWORD=password
+
+ [3.4] Laravel Breeze (Blade stack) v2.4
+   • Scaffold auth lengkap (login, logout, reset password,
+     verifikasi email, registrasi — registrasi akan dinonaktifkan
+     di Fase 1), layout app/guest, komponen Blade
+
+ [3.5] Penyesuaian Tailwind CSS v3 → v4 (akibat spec responsive)
+   • Scaffold Breeze semula campuran: plugin @tailwindcss/vite v4
+     namun core tailwindcss ^3.1 dengan directive v3
+   • app.css ditulis ulang ke paradigma v4 (@import 'tailwindcss'
+     + @plugin '@tailwindcss/forms' + @source blade)
+   • tailwind.config.js & postcss.config.js DIHAPUS (tidak perlu
+     di v4); npm uninstall autoprefixer postcss
+   • npm install -D tailwindcss@^4 → v4.3.3
+   • Build sukses: CSS 21.67 kB (gzip 6 kB), tanpa directive v3
+
+ [3.6] Kontainer & Migrasi Awal
+   • sail artisan -V (di dalam kontainer) → Laravel 13.29.0
+   • sail artisan migrate --force → SUKSES:
+       - migration table        DONE
+       - 0001_..._create_users  DONE
+       - 0001_..._create_cache  DONE
+       - 0001_..._create_jobs   DONE
+   • Catatan: eksekusi pertama gagal karena MySQL masih
+     "health: starting" — percobaan ulang setelah healthy sukses
+     (di Fase berikutnya, tunggu status healthy sebelum migrate)
+
+ [3.7] Verifikasi HTTP
+   • GET http://localhost/      → HTTP 200 (0.4s)
+   • GET http://localhost/login → HTTP 200
+
+ [3.8] Git & GitHub
+   • git init → branch "main" (rename dari master)
+   • Remote: git@github.com:oyabinx/Karen.git (SSH)
+   • SSH key ed25519 DIGENERATE untuk user (~/.ssh/id_ed25519 +
+     config Host github.com) — menunggu user menambahkan public
+     key ke GitHub (Settings → SSH and GPG keys)
+   • Push tertunda HINGGA key ditambahkan (satu-satunya sisa
+     item Fase 0); semua commit sudah tersimpan lokal
+   • Diverifikasi: .env & vendor/ TIDAK ter-commit
+
+ [3.9] Dokumentasi (docs/) yang diperbarui pada fase ini
+   • Impor massal pegawai via CSV (template unduhan + pratinjau
+     validasi + commit + laporan gagal) → manajemen_user.md +
+     taskplan Fase 3
+   • UI Responsive desktop vs mobile → ui_responsive.md (baru,
+     17 file fitur) + taskplan Fase 2 + product.md
+   • "Laravel 12" → "Laravel 13" di seluruh docs
+   • Taskplan Fase 0: semua item diceklis dengan catatan metode
+     aktual eksekusi
+
+────────────────────────────────────────────────────────────────────
+ 4. OUTPUT / ARTEFAK
+────────────────────────────────────────────────────────────────────
+
+ • compose.yaml              — 2 service (laravel.test, mysql)
+ • .env                      — terkonfigurasi untuk Sail
+ • app/, resources/, routes/ — scaffold Laravel 13 + Breeze Blade
+ • public/build/             — asset production hasil vite build
+ • database/migrations       — migrasi bawaan (users/cache/jobs)
+ • docs/                     — 17 file markdown perencanaan
+ • build_logs/fase0.log      — dokumen ini
+ • KONTAINER BERJALAN        — karen-laravel.test-1, karen-mysql-1
+
+────────────────────────────────────────────────────────────────────
+ 5. CHECKLIST PENUTUP FASE 0 (cek ulang menyeluruh)
+────────────────────────────────────────────────────────────────────
+
+ ✓ Docker daemon hidup & akses grup docker berfungsi
+ ✓ Kontainer laravel.test + mysql berjalan (mysql: healthy)
+ ✓ Artisan berjalan DI DALAM kontainer (13.29.0)
+ ✓ Migrasi awal sukses (users, cache, jobs)
+ ✓ Aplikasi merespons HTTP 200 (/ dan /login)
+ ✓ Tailwind v4 terpasang & asset ter-build
+ ✓ Breeze Blade lengkap (login/logout/reset)
+ ✓ .env & vendor tidak ter-commit; branch main
+ ✓ taskplan.md Fase 0 diceklis + catatan metode aktual
+ ✓ build_logs/fase0.log ditulis
+ ⚠ git push origin main — MENUNGGU user menambahkan SSH key
+   publik ke GitHub:
+   ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIfVlOHXhJ3ruBZPSbwEqw9t
+   fGnuqK3hJNjt4at7AZNq oyabin@karen-dev
+
+────────────────────────────────────────────────────────────────────
+ 6. PERINTAH SAIL HARIAN (REFERENSI)
+────────────────────────────────────────────────────────────────────
+
+   ./vendor/bin/sail up -d        nyalakan kontainer
+   ./vendor/bin/sail down         matikan kontainer
+   ./vendor/bin/sail ps           status kontainer
+   ./vendor/bin/sail logs -f      ikuti log laravel.test
+   ./vendor/bin/sail artisan ...  perintah artisan (migrate, dll)
+   ./vendor/bin/sail composer ... kelola dependensi PHP
+   ./vendor/bin/sail npm ...      npm (install/run dev/build)
+   ./vendor/bin/sail test         jalankan test suite
+   ./vendor/bin/sail mysql        masuk console MySQL
+
+   (opsional) tambahkan di ~/.config/fish/config.fish:
+   alias sail './vendor/bin/sail'
+
+────────────────────────────────────────────────────────────────────
+ 7. KONSUMSI FASE BERIKUTNYA (Fase 1 — Fondasi Data & Role)
+────────────────────────────────────────────────────────────────────
+
+   • Migrasi: bidang (max_active_bookings default 2), seksi
+   • Migrasi: users + role/phone/seksi_id + soft delete
+   • Migrasi: vehicles, maintenances, bookings, complaints,
+     events, event_vehicles, vehicle_budgets, maintenance_costs,
+     generated_documents, integration_settings, integration_logs
+   • Model Eloquent + relasi
+   • Seeder: 5 bidang, contoh seksi, admin pertama, contoh mobil
+   • Middleware EnsureUserHasRole + alias role:
+   • Nonaktifkan registrasi Breeze
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 0 —
+════════════════════════════════════════════════════════════════════
