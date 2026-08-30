@@ -50,14 +50,14 @@
 - [x] **Deteksi booking yang menabrak jadwal maintenance** → status `menunggu_penggantian` — *`ReplacementService::flagConflictingBookings` saat create/update jadwal*
 - [x] `ReplacementService`: cari mobil pengganti tersedia otomatis + halaman konfirmasi pengurus (pilih pengganti / batalkan booking) → [feature/penggantian_mobil.md](feature/penggantian_mobil.md) — *assign dalam transaksi+lock & cek ulang; hapus jadwal mengembalikan booking yang belum diganti*
 
-## Fase 4c — Event Armada Bidang (Admin & Pengurus)
-- [ ] Migrasi: `events`, `event_vehicles` → [feature/event_bidang.md](feature/event_bidang.md)
-- [ ] Wizard event: info (nama, bidang, tanggal — **durasi fleksibel, boleh >3 hari**, jumlah mobil N) + pemilihan armada (kelompok bebas vs menabrak)
-- [ ] `EventService`: validasi mobil layak (bisa dipinjam, baik, tanpa maintenance, tanpa event lain), kunci N armada
-- [ ] Penyelesaian tabrakan: booking terdampak → `menunggu_penggantian` + pilih pengganti per booking (reuse `ReplacementService`, endpoint `/pengurus/events/...`)
-- [ ] Kuotasi: armada event **dikecualikan** dari kuota bidang (update `BookingService`/query ketersediaan + pengecualian event)
-- [ ] Scheduler `EventService::autoFinish()` (00:02): event lewat `end_date` → `selesai`
-- [ ] Pembatalan event (armada lepas; booking tergeser tetap di mobil pengganti) + banner notifikasi peminjam tergeser
+## Fase 4c — Event Armada Bidang (Admin & Pengurus) — ✅ SELESAI
+- [x] Migrasi: `events`, `event_vehicles` → [feature/event_bidang.md](feature/event_bidang.md) — *sudah termigrasi di Fase 1*
+- [x] Wizard event: info (nama, bidang, tanggal — **durasi fleksibel, boleh >3 hari**, jumlah mobil N) + pemilihan armada (kelompok bebas vs menabrak) — *pratinjau armada via GET; validasi server-side isEligible + jumlah tepat N*
+- [x] `EventService`: validasi mobil layak (bisa dipinjam, baik, tanpa maintenance, tanpa event lain), kunci N armada
+- [x] Penyelesaian tabrakan: booking terdampak → `menunggu_penggantian` + pilih pengganti per booking (reuse `ReplacementService`, endpoint `/pengurus/events/...`) — *konfirmasi event ditolak selama ada konflik; kandidat otomatis di luar armada event*
+- [x] Kuotasi: armada event **dikecualikan** dari kuota bidang (update `BookingService`/query ketersediaan + pengecualian event) — *tercapai lewat desain: event bukan booking (kuota menghitung booking); ketersediaan sudah mengecualikan event sejak Fase 4*
+- [x] Scheduler `EventService::autoFinish()` (00:02): event lewat `end_date` → `selesai` — *idempoten; teruji*
+- [x] Pembatalan event (armada lepas; booking tergeser tetap di mobil pengganti) + banner notifikasi peminjam tergeser — *booking BELUM diganti kembali dipinjam (docs diperinci); banner dashboard pegawai ada sejak Fase 2*
 
 ## Fase 4b — Pengurus: Anggaran Maintenance & Dokumen — ✅ SELESAI
 - [x] Migrasi: `vehicles.year`, `vehicle_budgets`, `maintenance_costs`, `generated_documents`; status maintenance (`terjadwal`/`selesai`) → [feature/anggaran_maintenance.md](feature/anggaran_maintenance.md) — *seluruh tabel sudah termigrasi di Fase 1; fase ini hanya implementasi fitur*

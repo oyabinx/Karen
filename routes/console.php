@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\IntegrationLog;
+use App\Services\EventService;
 use App\Services\Google\SheetsBudgetSync;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -25,3 +26,8 @@ Schedule::call(fn () => app(SheetsBudgetSync::class)->runIfDue())
 Schedule::call(fn () => IntegrationLog::where('ran_at', '<', now()->subDays(90))->delete())
     ->weekly()
     ->name('integration-logs:purge');
+
+// Event armada lewat end_date → selesai otomatis (idempoten)
+Schedule::call(fn () => app(EventService::class)->autoFinish())
+    ->dailyAt('00:02')
+    ->name('events:auto-finish');

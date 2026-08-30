@@ -35,7 +35,7 @@ Langkah 4 — konfirmasi:
 
 ### 3. Selesai & Pembatalan
 - Event berakhir otomatis setelah `end_date` lewat (scheduler menandai `selesai`; ketersediaan mobil lepas berbasis tanggal).
-- Pembatalan event oleh admin/pengurus: mobil event langsung lepas. **Booking yang sudah digeser tetap memakai mobil penggantinya** (tidak dipindahkan balik) — tercatat di riwayat.
+- Pembatalan event oleh admin/pengurus: mobil event langsung lepas. **Booking yang sudah digeser tetap memakai mobil penggantinya** (tidak dipindahkan balik) — tercatat di riwayat. Booking yang **belum** diganti otomatis kembali ke status `dipinjam` dengan mobil semula — konsisten dengan pembatalan jadwal maintenance (lihat [penggantian_mobil.md](penggantian_mobil.md) bagian Pemicu).
 
 ### 4. Perubahan Skema
 - `events`: `id`, `name`, `bidang_id` FK, `start_date`, `end_date`, `note` NULL, `status` ENUM('terjadwal','selesai','dibatalkan'), `created_by` FK users, `timestamps`.

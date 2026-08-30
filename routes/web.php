@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Pengurus\BudgetController;
 use App\Http\Controllers\Pengurus\DocumentController;
+use App\Http\Controllers\Pengurus\EventController;
 use App\Http\Controllers\Pengurus\MaintenanceController;
 use App\Http\Controllers\Pengurus\ReplacementController;
 use App\Http\Controllers\Pengurus\VehicleController;
@@ -102,6 +103,21 @@ Route::middleware(['auth', 'role:pengurus'])
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
         Route::post('/vehicles/{vehicle}/generate-kartu-inventaris', [DocumentController::class, 'kartuInventaris'])->name('documents.kartu');
+    });
+
+// ── EVENT ARMADA BIDANG — pengurus DAN admin (docs/feature/event_bidang.md) ──
+Route::middleware(['auth', 'role:admin|pengurus'])
+    ->prefix('pengurus/events')
+    ->name('pengurus.events.')
+    ->group(function () {
+        Route::get('/', [EventController::class, 'index'])->name('index');
+        Route::get('/create', [EventController::class, 'create'])->name('create');
+        Route::post('/', [EventController::class, 'store'])->name('store');
+        Route::get('/{event}/conflicts', [EventController::class, 'conflicts'])->name('conflicts');
+        Route::patch('/{event}/conflicts/{booking}', [EventController::class, 'assignBooking'])->name('conflicts.assign');
+        Route::patch('/{event}/conflicts/{booking}/cancel', [EventController::class, 'cancelBooking'])->name('conflicts.cancel');
+        Route::patch('/{event}/confirm', [EventController::class, 'confirm'])->name('confirm');
+        Route::patch('/{event}/cancel', [EventController::class, 'cancel'])->name('cancel');
     });
 
 require __DIR__.'/auth.php';

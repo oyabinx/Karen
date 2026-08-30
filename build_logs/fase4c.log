@@ -1,0 +1,139 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                   KAREN — BUILD LOG · FASE 4c                      ║
+║                  Event Armada Bidang (Admin & Pengurus)            ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 4c — Event Armada Bidang
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — wizard event (admin+pengurus), kelompok
+                armada bebas/menabrak, penyelesaian konflik reuse
+                ReplacementService, pembatalan & autoFinish,
+                122/122 test HIJAU
+
+  Aturan proses: setiap bug → periksa markdown-nya. Hasil §5.
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 4c menghadirkan event armada bidang: satu bidang memakai
+ banyak mobil sekaligus DI ATAS kuota (otomatis bebas kuota karena
+ pemakaian event bukan booking), dengan durasi fleksibel
+ (boleh >3 hari), hanya oleh admin & pengurus. Booking yang
+ ditabrak armada digeser dengan mobil pengganti yang dipilih
+ pembuat event (reuse mekanisme Fase 4).
+
+ Catatan: tabel events/event_vehicles SUDAH dimigrasi di Fase 1;
+ ketersediaan sudah mengecualikan armada event sejak Fase 4
+ (AvailabilityService). Pengecualian kuota tercapai lewat desain
+ (event ≠ booking) — BookingService kuota menyusul Fase 5.
+
+────────────────────────────────────────────────────────────────────
+ 2. EventService
+────────────────────────────────────────────────────────────────────
+
+ • armadaOptions(start, end): kendaraan LAYAK (bisa_dipinjam,
+   kondisi baik, tanpa maintenance terjadwal overlap, tanpa event
+   lain overlap) dikelompokkan BEBAS vs MENABRAK (dengan jumlah
+   booking konflik per unit — withCount).
+ • isEligible(vehicle, …): validasi server-side per kendaraan pada
+   submit (anti-manipulasi pilihan checkbox).
+ • createEvent: event terjadwal + attach armada + booking dipinjam
+   yang overlap → menunggu_penggantian (langsung + redirect ke
+   halaman konflik bila ada terdampak).
+ • unresolvedConflicts(event): booking menunggu_penggantian pada
+   armada event yang masih overlap.
+ • cancelEvent: status dibatalkan (armada lepas otomatis —
+   ketersediaan berbasis status+tanggal); booking BELUM diganti
+   kembali dipinjam (mobil semula) via revertPendingForVehicle;
+   yang SUDAH diganti tetap di penggantinya.
+ • autoFinish: event terjadwal lewat end_date → selesai (idempoten).
+
+────────────────────────────────────────────────────────────────────
+ 3. WIZARD UI + ROUTE
+────────────────────────────────────────────────────────────────────
+
+ Route /pengurus/events — middleware role:admin|pengurus
+ (GRUP TERPISAH dari grup pengurus murni):
+   GET / (daftar) · GET /create (wizard) · POST / (buat)
+   GET /{event}/conflicts (konflik + kandidat)
+   PATCH /{event}/conflicts/{booking} (tetapkan pengganti)
+   PATCH /{event}/conflicts/{booking}/cancel (batalkan booking)
+   PATCH /{event}/confirm · PATCH /{event}/cancel
+
+ Wizard (view create): Langkah 1 form info (nama, bidang, tanggal —
+ tanpa batas 3 hari, jumlah mobil N, catatan) + tombol "Lihat
+ Armada" (GET refresh menampilkan pratinjau); Langkah 2 grid
+ checkbox armada berkelompok ✅ Bebas / ⚠ Menabrak (badge jumlah
+ peminjaman ditabrak); validasi: jumlah terpilih harus TEPAT N dan
+ setiap unit layak (closure ke isEligible).
+ Halaman konflik: kartu per booking tertabrak + kandidat pengganti
+ (otomatis mengecualikan seluruh armada event karena event
+ terjadwal memblokir ketersediaan) + tombol batalkan peminjaman.
+ Konfirmasi event DITOLAK selama masih ada konflik tak selesai.
+ Daftar event: badge status + konflik + aksi konfirmasi/batalkan.
+ Banner peminjam tergeser: SUDAH ada sejak Fase 2 (dashboard
+ pegawai menampilkan status menunggu_penggantian).
+
+ Scheduler: routes/console.php + autoFinish dailyAt('00:02')
+ (sesuai docs/tech.md §4.3). Menu sidebar "Event Armada" muncul
+ otomatis untuk admin & pengurus (KarenMenu).
+
+────────────────────────────────────────────────────────────────────
+ 4. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ sail test → 122 PASSED (350 assertions), +11 baru
+   (EventArmadaTest): akses role (admin+pengurus 200, pegawai 403);
+   event 7 hari (fleksibel) mengunci armada & lepas setelahnya;
+   event kedua tidak bisa menabrak armada event pertama;
+   kendaraan maintenance ditolak; jumlah armada harus tepat N;
+   alur lengkap menabrak booking → konflik → konfirmasi ditolak →
+   tetapkan pengganti (original_vehicle_id) → konfirmasi sukses;
+   batalkan booking dari konflik; batalkan event melepas armada +
+   mengembalikan booking belum diganti (tanggal tanpa booking
+   bebas, tanggal milik booking tetap terblokir — perilaku benar);
+   booking sudah diganti tetap di pengganti; autoFinish idempoten
+   (event hari ini TIDAK di-auto-finish); armada options
+   dikelompokkan benar.
+ ✓ Smoke HTTP: /pengurus/events pengurus 200, admin 200, pegawai
+   403; /create 200; /create?tanggal 200.
+
+────────────────────────────────────────────────────────────────────
+ 5. BUG → PERIKSA MARKDOWN
+────────────────────────────────────────────────────────────────────
+
+ 1) Key array PHP ganda ('vehicles' dua entri rule saling menimpa)
+    → ketahuan saat self-review sebelum test. Murni impl;
+    PERBAIKI konvensi? Laravel menimpa key duplikat secara diam —
+    dicatat di log ini sebagai catatan impl, docs structure.md
+    tidak perlu berubah (bukan domain bisnis).
+ 2) Ekspektasi test salah pada "batalkan event → armada lepas":
+    test mengira mobil bebas di 10-02..03, padahal booking yang
+    DIKEMBALIKAN sah memegang tanggal itu. BUKAN bug kode —
+    perilaku sistem benar; test diperbaiki (dibebaskan di tanggal
+    tanpa booking + tetap terblokir di tanggal milik booking).
+ 3) CELAH DOCS DITEMUKAN & DITUTUP (sebelum jadi bug): docs
+    event_bidang.md pembatalan hanya menulis "booking yang sudah
+    digeser tetap memakai penggantinya" — TIDAK merinci nasib
+    booking yang BELUM diganti. Implementasi konsisten memilih
+    kembali ke dipinjam (mobil semula), sejajar aturan pembatalan
+    maintenance di penggantian_mobil.md → DITAMBAHKAN eksplisit ke
+    event_bidang.md §3 dengan rujukan silang.
+
+────────────────────────────────────────────────────────────────────
+ 6. KONSUMSI FASE BERIKUTNYA (Fase 5 — Peminjaman Inti)
+────────────────────────────────────────────────────────────────────
+
+   • Halaman cari mobil (pegawai & pengurus) + AvailabilityService
+   • BookingService: durasi ≤3 hari, hari-penuh, 1 booking aktif,
+     KUOTA BIDANG (default 2 / khusus 3; event otomatis dikecualikan
+     karena bukan booking), transaksi + lockForUpdate
+   • Route role:pegawai|pengurus + riwayat peminjaman pribadi
+   • Slot bottom-nav mobile "Cari Mobil" & "Peminjaman" (ui_responsive)
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 4c —
+════════════════════════════════════════════════════════════════════
