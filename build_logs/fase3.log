@@ -1,0 +1,143 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 3                      ║
+║           Admin: Manajemen User, Organisasi & Kuota                ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 3 — Admin: Manajemen User, Organisasi & Kuota
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — CRUD user + impor CSV + bidang/seksi/kuota,
+                60/60 test HIJAU, halaman admin terverifikasi via HTTP
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 3 memberikan admin kemampuan penuh mengelola pengguna dan
+ struktur organisasi: CRUD user (role + seksi + nonaktifkan/aktifkan),
+ IMPOR MASSAL PEGAWAI VIA CSV (template → pratinjau → commit →
+ laporan gagal), serta CRUD bidang (dengan kuota peminjaman) & seksi.
+
+────────────────────────────────────────────────────────────────────
+ 2. MANAJEMEN USER
+────────────────────────────────────────────────────────────────────
+
+ Route (middleware role:admin, prefix /admin):
+   GET  /admin/users                daftar + filter
+   GET  /admin/users/create|POST    tambah user
+   GET  /admin/users/{user}/edit    form ubah
+   PUT  /admin/users/{user}         simpan ubahan
+   DELETE /admin/users/{user}       nonaktifkan (soft delete)
+   PATCH /admin/users/{id}/restore  aktifkan kembali
+
+ Fitur:
+ • Daftar user: pencarian nama/email, filter role, bidang, status
+   (aktif/nonaktif/semua), pagination 15.
+ • Tabel lengkap di desktop; KARTU bertumpuk di mobile (pola
+   responsive ui_responsive.md diterapkan pertama kali).
+ • Seksi WAJIB untuk role pegawai & pengurus, opsional admin
+   (UserStoreRequest/UserUpdateRequest) — dropdown seksi
+   dikelompokkan per bidang (optgroup).
+ • Email & nomor HP validasi unique; password opsional saat ubah
+   (kosong = tetap).
+ • Nonaktifkan = soft delete (riwayat peminjaman utuh); larangan
+   menonaktifkan akun sendiri.
+ • Pesan sukses/error sesi berbahasa Indonesia.
+
+────────────────────────────────────────────────────────────────────
+ 3. IMPOR MASSAL PEGAWAI VIA CSV (fitur permintaan user)
+────────────────────────────────────────────────────────────────────
+
+ Service: app/Services/UserCsvImporter.php
+ • Template (GET /admin/users/template): header
+   nama;email;password;bidang;seksi;role + 1 baris contoh —
+   pemisah ";" (aman dengan Excel locale Indonesia).
+ • Unggah (POST /admin/users/import) → DRY-RUN: seluruh baris
+   divalidasi TANPA menulis DB; pratinjau disimpan di session.
+ • Halaman pratinjau (GET /admin/users/import): kartu per baris
+   ✓/✗ + daftar alasan (bahasa Indonesia).
+ • Commit (POST /admin/users/import/commit): hanya baris valid
+   dibuat; cek ulang email (aman bila pratinjau basi); ringkasan
+   "X dibuat, Y dilewati"; session dibersihkan.
+ • Laporan gagal (GET /admin/users/import/failed): CSV berisi
+   baris bermasalah + kolom alasan_gagal untuk diperbaiki &
+   diunggah ulang.
+
+ Validasi per baris: nama & email & password wajib (password
+ min 8), email valid + unik di database + unik dalam file, bidang
+ harus terdaftar, seksi harus terdaftar DI BAWAH bidang tsb,
+ role admin/pengurus/pegawai (kosong = pegawai), seksi wajib
+ untuk pegawai/pengurus. Header tidak sesuai template → satu
+ pesan error jelas.
+
+────────────────────────────────────────────────────────────────────
+ 4. ORGANISASI: BIDANG + KUOTA & SEKSI
+────────────────────────────────────────────────────────────────────
+
+ Route: /admin/bidang (GET/POST/PUT/DELETE) +
+        /admin/bidang/{bidang}/seksi (POST) + /admin/seksi/{seksi}
+        (PUT/DELETE)
+ • Halaman /admin/bidang: kartu <details> expandable per bidang —
+   badge kuota ("Kuota: X mobil") & jumlah seksi; form ubah nama +
+   kuota inline; daftar seksi (ubah nama / hapus + jumlah anggota);
+   form tambah seksi; form tambah bidang baru.
+ • Kuota: wajib, integer 1–5 (default 2; bidang khusus diset 3).
+ • Hapus bidang DITOLAK bila masih punya seksi; hapus seksi
+   DITOLAK bila masih punya anggota (guard di controller +
+   pesan error Indonesia).
+ • Nama seksi unik dalam satu bidang (validasi + unique index DB).
+
+────────────────────────────────────────────────────────────────────
+ 5. BUG DITEMUKAN & DIPERBAIKI SAAT EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ 1) RESTORE USER 404 SENYAP: route-model binding {user} tidak
+    menemukan user yang sudah ter-nonaktifkan (soft-deleted
+    tersembunyi dari query default) → PATCH restore tidak pernah
+    dijalankan. FIX: binding manual User::withTrashed()->
+    findOrFail($id) pada route {id}.
+ 2) VALIDASI UNIQUE SEKSI TEMBUS SAMPAI DB: rule unique di
+    SeksiRequest tidak mengetahui bidang dari route store
+    (/admin/bidang/{bidang}/seksi) sehingga cek unik dilewati dan
+    MySQL yang menolak (Integrity constraint 1062). FIX: resolusi
+    bidang_id dari tiga sumber (input pindah-bidang > route seksi
+    edit > route bidang store).
+
+────────────────────────────────────────────────────────────────────
+ 6. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ ./vendor/bin/sail test → 60 PASSED (169 assertions):
+     UserManagementTest (10): CRUD, seksi wajib per role, email
+       duplikat, password kosong tak berubah, nonaktif/restore,
+       larangan hapus diri, 403 non-admin, pencarian & filter
+     BidangSeksiTest (9): halaman organisasi, CRUD bidang+kuota,
+       validasi kuota 1–5, guard hapus berseksi/beranggota,
+       unik seksi per bidang, 403 non-admin
+     UserImportCsvTest (8): unduh template, pratinjau campur
+       valid/invalid (dry-run tak menulis DB), header salah
+       ditolak, commit hanya baris valid + default role pegawai,
+       impor ulang semua gagal (email terdaftar), duplikat dalam
+       file terdeteksi, laporan gagal CSV, 403 non-admin
+     (33 test fase sebelumnya tetap hijau)
+ ✓ Smoke HTTP (login sungguhan admin@karen.test):
+     login 302 → /admin/users 200, /users/create 200,
+     /users/import 200, /users/template 200, /admin/bidang 200
+ ✓ Sidebar admin otomatis menampilkan menu Manajemen User &
+   Bidang & Seksi (KarenMenu berbasis Route::has — fase 2)
+
+────────────────────────────────────────────────────────────────────
+ 7. KONSUMSI FASE BERIKUTNYA (Fase 4 — Pengurus: Kendaraan
+    & Maintenance + Deteksi Booking & Penggantian)
+────────────────────────────────────────────────────────────────────
+
+   • CRUD kendaraan (nama, plat, TAHUN PEMBUATAN, kapasitas, foto)
+   • Toggle status bisa/tidak_bisa_dipinjam; kondisi perlu_diperiksa→baik
+   • CRUD jadwal maintenance + blokir ketersediaan rentang tanggal
+   • Deteksi booking menabrak maintenance → menunggu_penggantian
+   • ReplacementService + halaman konfirmasi pengurus
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 3 —
+════════════════════════════════════════════════════════════════════

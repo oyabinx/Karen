@@ -34,13 +34,13 @@
 - [x] Fitur ubah profil: nama, email, **nomor HP wajib** (validasi regex HP Indonesia) → [feature/profil.md](feature/profil.md) — *fitur hapus-akun mandiri Breeze dihapus (hanya admin menonaktifkan)*
 - [x] Ganti password (bawaan Breeze) — *UI diterjemahkan*
 
-## Fase 3 — Admin: Manajemen User, Organisasi & Kuota
-- [ ] CRUD user (tambah, lihat, ubah, nonaktifkan/soft delete, atur role + seksi) → [feature/manajemen_user.md](feature/manajemen_user.md)
-- [ ] **Impor massal pegawai via CSV**: unduh template CSV draft, unggah, pratinjau validasi per baris, commit baris valid, laporan baris gagal → [feature/manajemen_user.md](feature/manajemen_user.md)
-- [ ] CRUD bidang (5 bidang hasil seeder dapat diubah nama) → [feature/organisasi.md](feature/organisasi.md)
-- [ ] CRUD seksi per bidang
-- [ ] **Pengaturan kuota peminjaman per bidang** (`max_active_bookings`, default 2; satu bidang diset 3) → [feature/kuota_bidang.md](feature/kuota_bidang.md)
-- [ ] Validasi: email unique, role valid, **seksi wajib untuk pegawai dan pengurus** (opsional hanya admin)
+## Fase 3 — Admin: Manajemen User, Organisasi & Kuota — ✅ SELESAI
+- [x] CRUD user (tambah, lihat, ubah, nonaktifkan/soft delete, atur role + seksi) → [feature/manajemen_user.md](feature/manajemen_user.md) — *filter pencarian/role/bidang/status; tabel desktop ↔ kartu mobile; guard larangan nonaktifkan akun sendiri*
+- [x] **Impor massal pegawai via CSV**: unduh template CSV draft, unggah, pratinjau validasi per baris, commit baris valid, laporan baris gagal → [feature/manajemen_user.md](feature/manajemen_user.md) — *`UserCsvImporter` (template → dry-run → commit → laporan gagal CSV)*
+- [x] CRUD bidang (5 bidang hasil seeder dapat diubah nama) → [feature/organisasi.md](feature/organisasi.md) — *kartu expandable + badge kuota*
+- [x] CRUD seksi per bidang — *unik per bidang; guard hapus berseksi/beranggota*
+- [x] Pengaturan kuota peminjaman per bidang (`max_active_bookings`, default 2; satu bidang diset 3) → [feature/kuota_bidang.md](feature/kuota_bidang.md) — *field kuota pada form bidang, validasi 1–5*
+- [x] Validasi: email unique, role valid, **seksi wajib untuk pegawai dan pengurus** (opsional hanya admin)
 
 ## Fase 4 — Pengurus: Manajemen Kendaraan, Maintenance & Penggantian
 - [ ] CRUD kendaraan (nama, plat, kapasitas, foto upload) → [feature/manajemen_kendaraan.md](feature/manajemen_kendaraan.md)
