@@ -29,7 +29,8 @@
 - [ ] Ubah registrasi Breeze: dinonaktifkan (user hanya dibuat admin)
 
 ## Fase 2 — Layout, Autentikasi & Profil
-- [ ] Layout utama `app.blade.php`: navbar/sidebar menu berbeda per role
+- [ ] Layout utama `app.blade.php`: sidebar desktop (≥lg) + navbar/drawer/bottom-nav mobile (<lg) sesuai → [feature/ui_responsive.md](feature/ui_responsive.md)
+- [ ] Breakpoint responsive Tailwind (mobile-first): tabel→kartu di mobile, grid & form adaptif, touch target 44px
 - [ ] Router dashboard per role (`DashboardController` → view admin/pengurus/pegawai)
 - [ ] Halaman login email + password (Breeze, disesuaikan bahasa Indonesia)
 - [ ] Fitur ubah profil: nama, email, **nomor HP wajib** (validasi regex HP Indonesia) → [feature/profil.md](feature/profil.md)

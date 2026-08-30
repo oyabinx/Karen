@@ -113,7 +113,7 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 - Notifikasi SMS/WhatsApp otomatis.
 - Akses aplikasi dari internet (intranet only; integrasi Google hanya via outbound sync Google Sheets).
 - Peminjaman dengan satuan jam (hanya hari penuh).
-- Aplikasi mobile native (web responsive saja).
+- Aplikasi mobile native (web responsive saja — spesifikasi tampilan desktop vs mobile ada di [feature/ui_responsive.md](feature/ui_responsive.md)).
 - Integrasi GPS/tracking kendaraan.
 - Manajemen bahan bakar / BBM.
 
