@@ -42,13 +42,13 @@
 - [x] Pengaturan kuota peminjaman per bidang (`max_active_bookings`, default 2; satu bidang diset 3) → [feature/kuota_bidang.md](feature/kuota_bidang.md) — *field kuota pada form bidang, validasi 1–5*
 - [x] Validasi: email unique, role valid, **seksi wajib untuk pegawai dan pengurus** (opsional hanya admin)
 
-## Fase 4 — Pengurus: Manajemen Kendaraan, Maintenance & Penggantian
-- [ ] CRUD kendaraan (nama, plat, kapasitas, foto upload) → [feature/manajemen_kendaraan.md](feature/manajemen_kendaraan.md)
-- [ ] Toggle status kendaraan: `bisa_dipinjam` / `tidak_bisa_dipinjam`
-- [ ] Tandai kondisi kembali `baik` setelah selesai diperiksa
-- [ ] CRUD jadwal maintenance (rentang tanggal + catatan); kendaraan maintenance tidak muncul di pencarian
-- [ ] **Deteksi booking yang menabrak jadwal maintenance** → status `menunggu_penggantian`
-- [ ] `ReplacementService`: cari mobil pengganti tersedia otomatis + halaman konfirmasi pengurus (pilih pengganti / batalkan booking) → [feature/penggantian_mobil.md](feature/penggantian_mobil.md)
+## Fase 4 — Pengurus: Manajemen Kendaraan, Maintenance & Penggantian — ✅ SELESAI
+- [x] CRUD kendaraan (nama, plat, kapasitas, foto upload) → [feature/manajemen_kendaraan.md](feature/manajemen_kendaraan.md) — *+ tahun pembuatan; grid kartu responsive; soft delete*
+- [x] Toggle status kendaraan: `bisa_dipinjam` / `tidak_bisa_dipinjam` — *PATCH /vehicles/{v}/status*
+- [x] Tandai kondisi kembali `baik` setelah selesai diperiksa — *PATCH /vehicles/{v}/condition*
+- [x] CRUD jadwal maintenance (rentang tanggal + catatan); kendaraan maintenance tidak muncul di pencarian — *`AvailabilityService` memblokir rentang overlap; validasi larangan dua jadwal overlap (docs diperbarui)*
+- [x] **Deteksi booking yang menabrak jadwal maintenance** → status `menunggu_penggantian` — *`ReplacementService::flagConflictingBookings` saat create/update jadwal*
+- [x] `ReplacementService`: cari mobil pengganti tersedia otomatis + halaman konfirmasi pengurus (pilih pengganti / batalkan booking) → [feature/penggantian_mobil.md](feature/penggantian_mobil.md) — *assign dalam transaksi+lock & cek ulang; hapus jadwal mengembalikan booking yang belum diganti*
 
 ## Fase 4c — Event Armada Bidang (Admin & Pengurus)
 - [ ] Migrasi: `events`, `event_vehicles` → [feature/event_bidang.md](feature/event_bidang.md)

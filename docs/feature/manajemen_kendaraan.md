@@ -35,6 +35,7 @@ Pengurus mengelola data mobil dinas: menambah/mengubah unit, mengatur apakah uni
 | PATCH | `/pengurus/vehicles/{vehicle}/condition` | Set kondisi kembali `baik` |
 | GET/POST | `/pengurus/maintenances` | Daftar / tambah jadwal maintenance |
 | PUT/DELETE | `/pengurus/maintenances/{maintenance}` | Ubah / hapus jadwal |
+| PATCH | `/pengurus/maintenances/{maintenance}/finish` | Tandai perawatan selesai (input nota & anggaran menyusul di [anggaran_maintenance.md](anggaran_maintenance.md)) |
 
 ## Aturan Validasi
 - Nama: wajib, maks 100.
@@ -42,7 +43,7 @@ Pengurus mengelola data mobil dinas: menambah/mengubah unit, mengatur apakah uni
 - Tahun pembuatan: wajib, angka 1980–tahun berjalan+1.
 - Kapasitas: wajib, angka 1–20.
 - Foto: jpg/png/webp, maks 2 MB (opsional).
-- Maintenance: `end_date >= start_date`, wajib pilih kendaraan.
+- Maintenance: `end_date >= start_date`, wajib pilih kendaraan, dan **satu kendaraan tidak boleh memiliki dua jadwal maintenance yang overlap** (rentang bertumpuk ditolak sejak validasi — mencegah data ambigu saat menghitung ketersediaan).
 
 ## Skenario Uji
 1. Tambah mobil dengan foto → muncul di daftar dan bisa dicari pegawai.

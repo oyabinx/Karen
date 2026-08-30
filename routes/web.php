@@ -5,6 +5,9 @@ use App\Http\Controllers\Admin\SeksiController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Pengurus\MaintenanceController;
+use App\Http\Controllers\Pengurus\ReplacementController;
+use App\Http\Controllers\Pengurus\VehicleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -49,6 +52,32 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/bidang/{bidang}/seksi', [SeksiController::class, 'store'])->name('seksi.store');
         Route::put('/seksi/{seksi}', [SeksiController::class, 'update'])->name('seksi.update');
         Route::delete('/seksi/{seksi}', [SeksiController::class, 'destroy'])->name('seksi.destroy');
+    });
+
+// ── PENGURUS: kendaraan, maintenance, penggantian mobil ──
+Route::middleware(['auth', 'role:pengurus'])
+    ->prefix('pengurus')
+    ->name('pengurus.')
+    ->group(function () {
+        Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
+        Route::get('/vehicles/create', [VehicleController::class, 'create'])->name('vehicles.create');
+        Route::post('/vehicles', [VehicleController::class, 'store'])->name('vehicles.store');
+        Route::get('/vehicles/{vehicle}/edit', [VehicleController::class, 'edit'])->name('vehicles.edit');
+        Route::put('/vehicles/{vehicle}', [VehicleController::class, 'update'])->name('vehicles.update');
+        Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
+        Route::patch('/vehicles/{vehicle}/status', [VehicleController::class, 'toggleStatus'])->name('vehicles.status');
+        Route::patch('/vehicles/{vehicle}/condition', [VehicleController::class, 'markGood'])->name('vehicles.condition');
+
+        Route::get('/maintenances', [MaintenanceController::class, 'index'])->name('maintenances.index');
+        Route::post('/maintenances', [MaintenanceController::class, 'store'])->name('maintenances.store');
+        Route::put('/maintenances/{maintenance}', [MaintenanceController::class, 'update'])->name('maintenances.update');
+        Route::patch('/maintenances/{maintenance}/finish', [MaintenanceController::class, 'finish'])->name('maintenances.finish');
+        Route::delete('/maintenances/{maintenance}', [MaintenanceController::class, 'destroy'])->name('maintenances.destroy');
+
+        Route::get('/replacements', [ReplacementController::class, 'index'])->name('replacements.index');
+        Route::get('/replacements/{booking}', [ReplacementController::class, 'show'])->name('replacements.show');
+        Route::patch('/replacements/{booking}/assign', [ReplacementController::class, 'assign'])->name('replacements.assign');
+        Route::patch('/replacements/{booking}/cancel', [ReplacementController::class, 'cancel'])->name('replacements.cancel');
     });
 
 require __DIR__.'/auth.php';

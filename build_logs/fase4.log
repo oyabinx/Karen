@@ -1,0 +1,157 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 4                      ║
+║      Pengurus: Kendaraan, Maintenance & Penggantian Mobil         ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 4 — Pengurus: Manajemen Kendaraan & Maintenance
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — CRUD kendaraan+foto, jadwal maintenance
+                pemblokir ketersediaan, deteksi tabrakan booking →
+                menunggu_penggantian, konfirmasi pengganti pengurus,
+                90/90 test HIJAU
+
+  CATATAN PROSES (instruksi user mulai fase ini):
+  setiap bug/error saat implementasi diperiksa dampaknya pada
+  markdown; docs diperbarui bila ketidakjelasannya berpotensi
+  menghasilkan bug. Hasilnya di section 6.
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 4 memberi pengurus kendali penuh armada: CRUD kendaraan
+ (dengan tahun pembuatan + foto), toggle status peminjaman,
+ penanganan kondisi perlu_diperiksa, jadwal maintenance yang
+ memblokir ketersediaan pada rentangnya, deteksi otomatis booking
+ yang menabrak jadwal (→ menunggu_penggantian), dan halaman
+ konfirmasi mobil pengganti.
+
+────────────────────────────────────────────────────────────────────
+ 2. SERVICES (jantung logika — dipakai ulang fase berikutnya)
+────────────────────────────────────────────────────────────────────
+
+ app/Services/AvailabilityService.php — docs/tech.md §4.1:
+ • availableBetween(start, end, excludeId?) & isAvailable(vehicle,…)
+ • Kriteria tersedia: status bisa_dipinjam + kondisi baik + TANPA
+   booking dipinjam/menunggu_penggantian overlap + TANPA maintenance
+   terjadwal overlap + TANPA event terjadwal overlap.
+ • Overlap hari-penuh: A1 <= B2 AND A2 >= B1.
+
+ app/Services/ReplacementService.php — docs/feature/penggantian_mobil.md:
+ • flagConflictingBookings(maintenance) → tandai booking dipinjam
+   yang menabrak rentang menjadi menunggu_penggantian.
+ • candidates(booking) → kandidat pengganti (exclude mobil lama).
+ • assign(booking, replacement) → transaksi DB + lockForUpdate pada
+   baris kendaraan + CEK ULANG ketersediaan di dalam transaksi;
+   original_vehicle_id terisi (jejak audit); status → dipinjam.
+ • cancel(booking) → dibatalkan.
+ • revertPendingForVehicle(vehicle) → booking yang BELUM diganti
+   kembali dipinjam saat maintenance dihapus; yang sudah diganti
+   tetap di mobil baru (original_vehicle_id terisi).
+
+────────────────────────────────────────────────────────────────────
+ 3. KENDARAAN (CRUD + status + kondisi + foto)
+────────────────────────────────────────────────────────────────────
+
+ Route /pengurus/vehicles (middleware role:pengurus):
+   index (tab: semua/tersedia/tidak_bisa_dipinjam/perlu_diperiksa),
+   create/store/edit/update/destroy(soft delete),
+   PATCH status (toggle bisa/tidak bisa dipinjam),
+   PATCH condition (set kondisi baik setelah diperiksa).
+ • View grid kartu responsive (1/2/3/4 kolom) dengan foto (fallback
+   ikon), badge status & kondisi; upload foto tersimpan di
+   storage/app/public/vehicles dengan nama acak; foto lama dihapus
+   saat diganti; storage:link dijalankan.
+ • Validasi: plat unik maks 15; tahun 1980–tahun berjalan+1;
+   kapasitas 1–20; foto jpg/png/webp maks 2 MB.
+
+────────────────────────────────────────────────────────────────────
+ 4. MAINTENANCE & PENGGANTIAN
+────────────────────────────────────────────────────────────────────
+
+ Route /pengurus/maintenances: index (tab terjadwal/selesai) +
+ form tambah inline, store, update (ubah tanggal inline — rentang
+ baru bisa menandai booking lain), PATCH finish (tandai selesai;
+ input nota & anggaran menyusul Fase 4b), destroy (menghapus jadwal
+ MENGEMBALIKAN booking yang masih menunggu dan belum diganti ke
+ status dipinjam).
+ • Validasi closure: satu kendaraan dilarang memiliki dua jadwal
+   maintenance overlap.
+
+ Route /pengurus/replacements:
+   index (daftar menunggu_penggantian, kartu amber),
+   show/{booking} (detail terdampak + grid kandidat pengganti),
+   PATCH assign (tetapkan pengganti), PATCH cancel (batalkan).
+ • Assign gagal aman (session error) bila kandidat sudah tidak
+   tersedia — booking tetap menunggu_penggantian.
+
+────────────────────────────────────────────────────────────────────
+ 5. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ sail test → 90 PASSED (245 assertions), +30 baru:
+     AvailabilityTest (7): tersedia; overlap dipinjam memblokir;
+       menunggu_penggantian memblokir; maintenance memblokir;
+       status/kondisi memblokir; event memblokir; excludeVehicleId
+     VehicleManagementTest (6): CRUD; validasi tahun/plat; foto
+       tersimpan + foto lama terhapus (Storage::fake); toggle &
+       kondisi; soft delete; 403 admin/pegawai
+     MaintenanceTest (8): buat jadwal; end<start ditolak; overlap
+       jadwal ditolak; ketersediaan terblokir rentangnya; jadwal
+       menabrak booking → menunggu_penggantian; update rentang
+       menandai booking baru; finish; hapus mengembalikan booking
+     ReplacementTest (8): daftar & detail kandidat; kandidat tanpa
+       mobil lama; penetapan pengganti (+original_vehicle_id);
+       penetapan mobil yang terbooking orang lain GAGAL; pembatalan;
+       double-proses ditolak; sudah-diganti tidak balik saat
+       maintenance dihapus; 403 admin/pegawai
+ ✓ Smoke HTTP (login pengurus@karen.test): /pengurus/vehicles 200,
+   /vehicles/create 200, /maintenances 200, /replacements 200,
+   /admin/users → 403 (isolasi role terbukti)
+
+────────────────────────────────────────────────────────────────────
+ 6. PEMERIKSAAN MARKDOWN (instruksi baru user)
+────────────────────────────────────────────────────────────────────
+
+ Bug/error yang terjadi selama fase ini dan hubungannya dengan docs:
+
+ a) TYPO PHP `function test penetapan…` (spasi) → murni human
+    error implementasi, TIDAK ada kaitan dengan markdown.
+ b) Import HasFactory terlewat di model Vehicle → human error
+    implementasi, bukan ketidakjelasan docs.
+ c) KETIDAKJELASAN DOCS YANG DITEMUKAN & DIPERBAIKI (pencegahan
+    bug di masa depan):
+    1. Docs tidak melarang dua jadwal maintenance overlap pada
+       satu kendaraan — tanpa aturan ini, data ambigu bisa lolos
+       dan mengganggu perhitungan ketersediaan. → DITAMBAHKAN ke
+       manajemen_kendaraan.md (aturan validasi) + implementasi
+       closure validation.
+    2. Endpoint "tandai maintenance selesai" tidak tercantum di
+       tabel endpoint docs. → DITAMBAHKAN baris PATCH
+       /pengurus/maintenances/{m}/finish (dengan catatan nota &
+       anggaran menyusul Fase 4b).
+ Ditemukan pula docs yang SUDAH akurat dan mencegah bug:
+ penggantian_mobil.md langkah 3 ("bila maintenance dibatalkan,
+ booking dapat dikembalikan ke mobil semula") + kalimat "booking
+ yang sudah diganti tetap memakai pengganti" → implementasi
+ revertPendingForVehicle mengikuti persis aturan ini
+ (whereNull original_vehicle_id).
+
+────────────────────────────────────────────────────────────────────
+ 7. KONSUMSI FASE BERIKUTNYA (Fase 4b — Anggaran & Dokumen)
+────────────────────────────────────────────────────────────────────
+
+   • Migrasi anggaran (vehicle_budgets, maintenance_costs,
+     generated_documents; kolom nota pada maintenances sudah ada)
+   • Halaman anggaran 4 pos per mobil + sisa real-time
+   • Input nota dipilah 4 pos × 1,13 (BudgetService)
+   • resources/draft_documents/ (bend26, draft nota, kartu
+     inventaris) + DocumentService (dompdf) + halaman unduh
+   • Integrasi Google Sheets API (halaman konfigurasi admin,
+     SheetsBudgetSync, task sync — Fase 4b/10.4)
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 4 —
+════════════════════════════════════════════════════════════════════

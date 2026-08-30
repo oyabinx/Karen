@@ -1,0 +1,74 @@
+<x-app-layout title="Data Kendaraan">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold">Data Kendaraan</h1>
+            <p class="text-sm text-gray-500">Kelola armada: status peminjaman, kondisi unit, dan foto.</p>
+        </div>
+        <a href="{{ route('pengurus.vehicles.create') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px]">+ Tambah Kendaraan</a>
+    </div>
+
+    @if (session('success'))
+        <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{{ session('error') }}</div>
+    @endif
+
+    {{-- Tab filter --}}
+    <div class="flex flex-wrap gap-2 mb-5 text-sm">
+        @foreach (['semua' => 'Semua', 'tersedia' => 'Tersedia', 'tidak_bisa_dipinjam' => 'Tidak Bisa Dipinjam', 'perlu_diperiksa' => 'Perlu Diperiksa'] as $key => $label)
+            <a href="{{ route('pengurus.vehicles.index', ['tab' => $key]) }}"
+               class="px-3.5 py-2 rounded-full font-medium min-h-[44px] flex items-center {{ $tab === $key ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50' }}">{{ $label }}</a>
+        @endforeach
+    </div>
+
+    {{-- Grid kartu (desktop 3-4 kolom, mobile 1-2) --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        @forelse ($vehicles as $v)
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col {{ $v->trashed() ? 'opacity-60' : '' }}">
+                <div class="aspect-video bg-gray-100 flex items-center justify-center">
+                    @if ($v->photo_path)
+                        <img src="{{ Storage::url($v->photo_path) }}" alt="{{ $v->name }}" class="w-full h-full object-cover">
+                    @else
+                        <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8l2 5H6l2-5zM4 12h16v5h-2a2 2 0 11-4 0h-4a2 2 0 11-4 0H4v-5z"/></svg>
+                    @endif
+                </div>
+
+                <div class="p-4 flex-1 flex flex-col">
+                    <p class="font-semibold">{{ $v->name }}</p>
+                    <p class="text-sm text-gray-500">{{ $v->plate_number }} · {{ $v->year }} · {{ $v->capacity }} kursi</p>
+
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $v->status === 'bisa_dipinjam' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600' }}">
+                            {{ $v->status === 'bisa_dipinjam' ? 'Bisa dipinjam' : 'Tidak bisa dipinjam' }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $v->condition === 'baik' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                            {{ $v->condition === 'baik' ? 'Kondisi baik' : 'Perlu diperiksa' }}
+                        </span>
+                        @if ($v->trashed())
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-500">Nonaktif</span>
+                        @endif
+                    </div>
+
+                    <div class="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                        <a href="{{ route('pengurus.vehicles.edit', $v) }}" class="text-indigo-600 hover:underline">Ubah</a>
+                        @if (! $v->trashed())
+                            <form method="POST" action="{{ route('pengurus.vehicles.status', $v) }}">
+                                @csrf @method('PATCH')
+                                <button class="text-gray-600 hover:underline">{{ $v->status === 'bisa_dipinjam' ? 'Blokir peminjaman' : 'Izinkan dipinjam' }}</button>
+                            </form>
+                        @endif
+                        @if ($v->condition === 'perlu_diperiksa')
+                            <form method="POST" action="{{ route('pengurus.vehicles.condition', $v) }}">
+                                @csrf @method('PATCH')
+                                <button class="text-green-600 hover:underline" onclick="return confirm('Tandai kondisi kembali baik?')">Set kondisi baik</button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="col-span-full bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">Belum ada kendaraan pada kategori ini.</div>
+        @endforelse
+    </div>
+</x-app-layout>
