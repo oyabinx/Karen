@@ -18,15 +18,17 @@ Langkah 2 — pemilihan armada:
   - ⚠️ **Menabrak** — ada booking aktif overlap (booking inilah yang akan digeser).
 - Pembuat event memilih tepat N mobil (boleh campuran kedua kelompok).
 - Mobil yang **sedang dipakai event lain** pada rentang sama **tidak bisa ditabrak** (event tidak boleh menggeser event).
+- Aturan **dua arah**: event menolak kendaraan yang sedang maintenance, dan sebaliknya **pembuatan jadwal maintenance baru ditolak bila menabrak armada event terjadwal** (mobil tidak bisa di bengkel dan dipakai event sekaligus — lihat [manajemen_kendaraan.md](manajemen_kendaraan.md)).
 
 Langkah 3 — penyelesaian tabrakan (bila ada mobil "menabrak"):
 - Semua booking terdampak otomatis berstatus `menunggu_penggantian`.
 - Untuk **tiap booking terdampak**, sistem mencarikan **kandidat mobil pengganti** yang tersedia pada rentang booking tersebut (kriteria ketersediaan biasa, **di luar N mobil event**).
 - Pembuat event **memilih unit pengganti** per booking → booking kembali `dipinjam` dengan mobil baru (`original_vehicle_id` tercatat).
 - Bila tidak ada kandidat untuk suatu booking, pembuat event harus memilih: **batalkan booking tersebut** atau **lepaskan mobil itu dari event dan pilih mobil event lain**.
+- Halaman konflik event dapat menampilkan booking `menunggu_penggantian` lain pada mobil armada yang sama (mis. yang ditandai oleh maintenance) — hal ini disengaja karena booking tersebut sama-sama menunggu keputusan pengganti, dan penetapan pengganti dari halaman mana pun menyelesaikannya.
 
 Langkah 4 — konfirmasi:
-- Event tersimpan berstatus `terjadwal`; N mobil terkunci sebagai armada event.
+- **Armada terkunci sejak pembuatan event** (status `terjadwal` langsung memblokir ketersediaan mobil bagi non-event) — tombol **Konfirmasi** adalah *checkpoint* deklarasi bahwa seluruh konflik telah selesai, bukan saat penguncian. Konfirmasi ditolak selama masih ada konflik tanpa keputusan.
 - Dashboard pegawai peminjam yang digeser menampilkan banner (sama seperti alur penggantian maintenance).
 
 ### 2. Aturan Kuota
@@ -35,7 +37,7 @@ Langkah 4 — konfirmasi:
 
 ### 3. Selesai & Pembatalan
 - Event berakhir otomatis setelah `end_date` lewat (scheduler menandai `selesai`; ketersediaan mobil lepas berbasis tanggal).
-- Pembatalan event oleh admin/pengurus: mobil event langsung lepas. **Booking yang sudah digeser tetap memakai mobil penggantinya** (tidak dipindahkan balik) — tercatat di riwayat. Booking yang **belum** diganti otomatis kembali ke status `dipinjam` dengan mobil semula — konsisten dengan pembatalan jadwal maintenance (lihat [penggantian_mobil.md](penggantian_mobil.md) bagian Pemicu).
+- Pembatalan event oleh admin/pengurus: mobil event langsung lepas. **Booking yang sudah digeser tetap memakai mobil penggantinya** (tidak dipindahkan balik) — tercatat di riwayat. Booking yang **belum** diganti dikembalikan ke status `dipinjam` dengan mobil semula **hanya bila mobil itu bebas penuh pada rentang booking** (aturan availability-aware yang sama dengan pembatalan maintenance — lihat [penggantian_mobil.md](penggantian_mobil.md) bagian Batasan revert); bila masih ditahan blokir lain, booking tetap menunggu penggantian.
 
 ### 4. Perubahan Skema
 - `events`: `id`, `name`, `bidang_id` FK, `start_date`, `end_date`, `note` NULL, `status` ENUM('terjadwal','selesai','dibatalkan'), `created_by` FK users, `timestamps`.

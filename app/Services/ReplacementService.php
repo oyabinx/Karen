@@ -108,16 +108,43 @@ class ReplacementService
     /**
      * Kembalikan booking yang masih menunggu_penggantian ke mobil
      * semula — dipakai saat jadwal maintenance dibatalkan/dihapus
-     * (docs/feature/penggantian_mobil.md langkah 3).
+     * atau event dibatalkan (docs/feature/penggantian_mobil.md).
      *
-     * @return int jumlah booking yang dikembalikan
+     * AVAILABILITY-AWARE: booking hanya dikembalikan bila mobil semula
+     * benar-benar bebas pada rentangnya (tanpa maintenance/event lain
+     * yang masih menahan). Bila tidak bebas, booking TETAP
+     * menunggu_penggantian untuk diselesaikan manual — mencegah
+     * booking dipinjam di mobil yang ternyata masih dikuasai blokir
+     * lain. Booking yang sudah diganti tidak disentuh.
+     *
+     * @return int jumlah booking yang berhasil dikembalikan
      */
     public function revertPendingForVehicle(Vehicle $vehicle): int
     {
-        return Booking::query()
+        $pending = Booking::query()
             ->where('vehicle_id', $vehicle->id)
             ->where('status', Booking::STATUS_MENUNGGU_PENGGANTIAN)
             ->whereNull('original_vehicle_id') // yang sudah diganti tetap di mobil baru
-            ->update(['status' => Booking::STATUS_DIPINJAM]);
+            ->get();
+
+        $dikembalikan = 0;
+
+        foreach ($pending as $booking) {
+            $bebas = $this->availability->isFreeIgnoringBooking(
+                $vehicle,
+                Carbon::parse($booking->start_date),
+                Carbon::parse($booking->end_date),
+                $booking->id,
+            );
+
+            if (! $bebas) {
+                continue;
+            }
+
+            $booking->update(['status' => Booking::STATUS_DIPINJAM]);
+            $dikembalikan++;
+        }
+
+        return $dikembalikan;
     }
 }

@@ -29,6 +29,7 @@ Alur: keluhan pengembalian muncul di dashboard pengurus → pengurus menjadwalka
   - nama bengkel, nomor & tanggal nota (informatif);
   - rincian nilai nota **dipilah ke 4 pos** (servis / suku cadang / AC / pelumas) — boleh sebagian pos bernilai 0.
 - Sistem menyimpan nilai asli tiap pos dan menghitung `nilai × 1,13` sebagai **realisasi anggaran**.
+- **Atribusi tahun realisasi**: realisasi dihitung per tahun berdasarkan **tahun tanggal nota** (fallback: tahun tanggal mulai maintenance bila nota tanpa tanggal) — menentukan anggaran tahun mana yang dikurangi.
 - Input nota bersifat **upsert**: identitas nota (bengkel/nomor/tanggal) yang tidak dikirim mempertahankan nilai lama — revisi nilai tidak menghapus identitas yang sudah tersimpan.
 
 ### 4. Generate Dokumen

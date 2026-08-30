@@ -38,6 +38,21 @@ class MaintenanceRequest extends FormRequest
                         $fail('Kendaraan ini sudah memiliki jadwal maintenance yang bertumpuk pada rentang tanggal tersebut.');
                     }
                 },
+                // Aturan dua arah: maintenance juga tidak boleh menabrak
+                // armada event terjadwal (mobil tidak bisa di bengkel dan
+                // dipakai event sekaligus) — docs/feature/manajemen_kendaraan.md
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    $overlap = \App\Models\Event::query()
+                        ->whereHas('vehicles', fn ($q) => $q->where('vehicles.id', $this->input('vehicle_id')))
+                        ->where('status', 'terjadwal')
+                        ->whereDate('start_date', '<=', $value)
+                        ->whereDate('end_date', '>=', $this->input('start_date'))
+                        ->exists();
+
+                    if ($overlap) {
+                        $fail('Kendaraan ini menjadi armada event terjadwal pada rentang tanggal tersebut — atur jadwal maintenance di luar rentang event.');
+                    }
+                },
             ],
             'note' => ['nullable', 'string', 'max:255'],
         ];

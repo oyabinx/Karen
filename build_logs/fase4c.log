@@ -134,6 +134,67 @@
    • Route role:pegawai|pengurus + riwayat peminjaman pribadi
    • Slot bottom-nav mobile "Cari Mobil" & "Peminjaman" (ui_responsive)
 
+────────────────────────────────────────────────────────────────────
+ 7. REVIEW PASCA-FASE 4 LENGKAP (4 + review + 4b + 4c — instruksi user)
+────────────────────────────────────────────────────────────────────
+
+ Penelusuran skenario silang lintas fitur menemukan 3 tabrakan
+ logika nyata + 2 inkonsistensi minor. Semua diperbaiki.
+
+ TABRAKAN A — maintenance ↔ event tidak dua arah:
+   Event menolak mobil yang sedang maintenance, tetapi pembuatan
+   maintenance TIDAK menolak mobil armada event → mobil bisa
+   tercatat di bengkel sekaligus dipakai event.
+   JALAN TENGAH: aturan simetris — MaintenanceRequest menolak
+   rentang yang menabrak armada event terjadwal.
+   DOCS: manajemen_kendaraan.md + event_bidang.md (dua arah).
+
+ TABRAKAN B — revert buta penyebab:
+   revertPendingForVehicle mengembalikan SEMUA booking menunggu
+   yang belum diganti, tanpa cek bebas-tidaknya mobil semula →
+   booking bisa jadi dipinjam di mobil yang masih dikuasai blokir
+   lain (contoh nyata: ditandai event, lalu maintenance lain di
+   mobil sama di-update → salah status dipinjam).
+   JALAN TENGAH: revert AVAILABILITY-AWARE — AvailabilityService::
+   isFreeIgnoringBooking(); hanya kembalikan bila mobil bebas penuh
+   pada rentang booking (tanpa maintenance/event lain, status &
+   kondisi layak); bila tidak, booking tetap menunggu_penggantian
+   untuk diselesaikan manual.
+   DOCS: penggantian_mobil.md "Batasan revert" + event_bidang.md §3.
+
+ TABRAKAN B2 (turunan B, ketahuan dari test) — urutan cancelEvent:
+   revert dijalankan SELAGI event masih terjadwal → event itu
+   sendiri memblokir pengecekan → revert selalu gagal senyap.
+   FIX: status dibatalkan DULU, baru revert.
+
+ TABRAKAN C — waktu penguncian armada event:
+   Docs: terkunci saat "konfirmasi"; implementasi: terkunci sejak
+   pembuatan (status terjadwal). JALAN TENGAH: dipertahankan
+   kunci-sejak-pembuatan (lebih aman, tanpa celah); tombol
+   Konfirmasi didefinisikan ulang sebagai checkpoint deklarasi
+   konflik selesai. DOCS: event_bidang.md langkah 4 diperjelas.
+
+ MINOR D — halaman konflik event bisa menampilkan booking yang
+   ditandai maintenance pada mobil armada yang sama. JALAN TENGAH:
+   dibiarkan (booking tsb sama-sama butuh keputusan; assign dari
+   halaman mana pun menyelesaikannya) — kini terdokumentasi
+   eksplisit di event_bidang.md langkah 3.
+
+ MINOR E — atribusi tahun realisasi anggaran belum terdefinisi di
+   docs. JALAN TENGAH: tahun nota (fallback tahun mulai
+   maintenance) — ditambahkan ke anggaran_maintenance.md.
+
+ Konsistensi lain DIVERIFIKASI aman: ketersediaan satu sumber
+ (AvailabilityService) untuk semua fitur; kandidat pengganti selalu
+ via query yang sama; kuota event otomatis bebas (event bukan
+ booking); event tidak bisa mengeser event; maintenance tidak bisa
+ bertumpuk; autoFinish idempoten; menunggu_penggantian memblokir
+ mobil lama & menahan kuota.
+
+ Hasil: 125 test PASSED (357 assertions) — termasuk 3 test baru
+ CrossFeatureConsistencyTest (dua arah A, revert B, kontrol
+ positif revert).
+
 ════════════════════════════════════════════════════════════════════
                           — AKHIR FASE 4c —
 ════════════════════════════════════════════════════════════════════

@@ -13,6 +13,8 @@ Apabila pengurus menjadwalkan maintenance untuk mobil yang **ternyata sudah memi
 - Saat pengurus **mengubah** jadwal maintenance: setelah rentang berubah, sistem menilai **dua arah** — booking yang **masih** tertabrak ditandai `menunggu_penggantian`, dan booking yang **tidak lagi** tertabrak serta **belum** diganti otomatis kembali ke `dipinjam` (mobil semula). Booking yang sudah memakai mobil pengganti tetap di mobil penggantinya.
 - Mobil dengan booking `menunggu_penggantian` dianggap **sudah tidak menahan ketersediaan mobil lama** terhadap maintenance.
 
+> **Batasan revert**: pengembalian ke mobil semula hanya dilakukan bila mobil itu **benar-benar bebas** pada rentang booking (tanpa maintenance/event lain yang masih menahan, status `bisa_dipinjam`, kondisi `baik`). Bila mobil semula ternyata masih dikuasai blokir lain, booking **tetap** `menunggu_penggantian` dan diselesaikan manual lewat halaman penggantian — mencegah booking aktif di mobil yang tidak tersedia.
+
 > Mekanisme konfirmasi pengganti ini **juga dipakai oleh fitur Event Armada Bidang** — pembuat event memilih pengganti untuk booking yang ditabrak armada event, lihat [event_bidang.md](event_bidang.md).
 
 ### Proses

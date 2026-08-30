@@ -43,7 +43,7 @@ Pengurus mengelola data mobil dinas: menambah/mengubah unit, mengatur apakah uni
 - Tahun pembuatan: wajib, angka 1980–tahun berjalan+1.
 - Kapasitas: wajib, angka 1–20.
 - Foto: jpg/png/webp, maks 2 MB (opsional).
-- Maintenance: `end_date >= start_date`, wajib pilih kendaraan, dan **satu kendaraan tidak boleh memiliki dua jadwal maintenance yang overlap** (rentang bertumpuk ditolak sejak validasi — mencegah data ambigu saat menghitung ketersediaan).
+- Maintenance: `end_date >= start_date`, wajib pilih kendaraan, **satu kendaraan tidak boleh memiliki dua jadwal maintenance yang overlap** (rentang bertumpuk ditolak sejak validasi — mencegah data ambigu saat menghitung ketersediaan), dan **rentang maintenance tidak boleh menabrak armada event terjadwal** (aturan dua arah: event juga menolak kendaraan yang sedang maintenance — mobil tidak bisa berada di bengkel dan dipakai event sekaligus).
 
 ## Skenario Uji
 1. Tambah mobil dengan foto → muncul di daftar dan bisa dicari pegawai.

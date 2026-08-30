@@ -136,13 +136,15 @@ class EventService
      */
     public function cancelEvent(Event $event): int
     {
+        // Status dahulu — agar event ini tidak ikut memblokir pengecekan
+        // ketersediaan saat menilai kelayakan revert booking
+        $event->update(['status' => 'dibatalkan']);
+
         $dikembalikan = 0;
 
         foreach ($event->vehicles as $vehicle) {
             $dikembalikan += $this->replacements->revertPendingForVehicle($vehicle);
         }
-
-        $event->update(['status' => 'dibatalkan']);
 
         return $dikembalikan;
     }

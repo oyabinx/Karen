@@ -48,4 +48,31 @@ class AvailabilityService
     {
         return $this->availableBetween($start, $end)->contains('id', $vehicle->id);
     }
+
+    /**
+     * Apakah mobil bebas pada rentang — mengabaikan SATU booking tertentu
+     * (dipakai saat menilai kelayakan revert booking menunggu_penggantian
+     * ke mobil semula: booking itu sendiri tidak boleh menghalangi).
+     */
+    public function isFreeIgnoringBooking(Vehicle $vehicle, Carbon $start, Carbon $end, int $ignoreBookingId): bool
+    {
+        return Vehicle::query()
+            ->whereKey($vehicle->id)
+            ->where('status', 'bisa_dipinjam')
+            ->where('condition', 'baik')
+            ->whereDoesntHave('bookings', fn ($q) => $q
+                ->whereIn('status', ['dipinjam', 'menunggu_penggantian'])
+                ->where('id', '!=', $ignoreBookingId)
+                ->whereDate('start_date', '<=', $end->endOfDay())
+                ->whereDate('end_date', '>=', $start->startOfDay()))
+            ->whereDoesntHave('maintenances', fn ($q) => $q
+                ->where('status', 'terjadwal')
+                ->whereDate('start_date', '<=', $end->endOfDay())
+                ->whereDate('end_date', '>=', $start->startOfDay()))
+            ->whereDoesntHave('events', fn ($q) => $q
+                ->where('status', 'terjadwal')
+                ->whereDate('start_date', '<=', $end->endOfDay())
+                ->whereDate('end_date', '>=', $start->startOfDay()))
+            ->exists();
+    }
 }
