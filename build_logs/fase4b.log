@@ -1,0 +1,166 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                   KAREN — BUILD LOG · FASE 4b                      ║
+║          Anggaran Maintenance, Dokumen & Integrasi Google          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 4b — Anggaran Maintenance & Dokumen
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — anggaran 4 pos + nota ×1,13 + generate
+                bend26/draft nota/kartu inventaris (dompdf) +
+                integrasi Google Sheets (config admin + sync +
+                scheduler), 111/111 test HIJAU
+
+  Aturan proses yang dijalankan (instruksi user):
+  setiap bug diperiksa akar docs-nya; docs dirinci bila
+  ketidakjelasannya memicu bug. Hasil di section 6.
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 4b melengkapi pengurus dengan pengelolaan anggaran maintenance
+ 4 pos per kendaraan, input nota bengkel dengan koefisien 1,13,
+ pembangkitan dokumen PDF (bend26, draft nota per pos, kartu
+ inventaris), serta integrasi Google Sheets via service account
+ dengan halaman konfigurasi admin (runtime di database).
+
+ Catatan: tabel anggaran (vehicle_budgets, maintenance_costs,
+ generated_documents, kolom maintenances) SUDAH dimigrasikan di
+ Fase 1 — tugas migrasi fase ini tinggal dicoret dengan catatan.
+
+────────────────────────────────────────────────────────────────────
+ 2. ANGGARAN & NOTA (BudgetService)
+────────────────────────────────────────────────────────────────────
+
+ • setBudgets(vehicle, year, amounts) — upsert 4 pos per tahun.
+ • summary(vehicle, year) — per pos: anggaran, realisasi (×1,13),
+   sisa; sisa negatif = peringatan merah, TIDAK memblokir (docs).
+ • realizationPerPost — realisasi ditahun-kan berdasarkan
+   COALESCE(nota_date, start_date) maintenance.
+ • inputNota — upsert identitas nota + 4 pos; raw × 1,13 (2
+   desimal); maintenance otomatis berstatus selesai. Identitas
+   yang tidak dikirim MEMPERTAHANKAN nilai lama (upsert, bukan
+   replace — lihat section 6).
+ • Halaman /pengurus/vehicles/{v}/budgets: form 4 pos (tahun
+   anggaran dapat diubah) + tabel Realisasi & Sisa + tombol
+   Generate Kartu Inventaris. Tombol "Anggaran" pada kartu
+   kendaraan.
+
+────────────────────────────────────────────────────────────────────
+ 3. DOKUMEN (DocumentService + resources/draft_documents/)
+────────────────────────────────────────────────────────────────────
+
+ • Folder master draft DIBUAT: bend26.blade.php, draft_nota.blade.
+   php, kartu_inventaris.blade.php + README (variabel tiap
+   template). Namespace view 'drafts' didaftarkan di
+   AppServiceProvider.
+ • generateForMaintenance: 1 bend26 + draft nota HANYA untuk pos
+   bernilai > 0. kartuInventaris: rekap riwayat tahun anggaran +
+   anggaran vs realisasi vs sisa (pos negatif merah).
+ • File: storage/app/documents/{nama}-v{N}.pdf; generated_documents
+   mencatat version — regenerasi menaikkan versi, file lama tetap
+   sebagai ARSIP; daftar dokumen menampilkan versi terbaru saja.
+ • Dep: barryvdh/laravel-dompdf ^3.1.
+ • Halaman /pengurus/documents (filter kendaraan + unduh) — menu
+   sidebar "Dokumen (bend26/nota)" otomatis muncul (KarenMenu).
+ • Arsip sekunder ke Google Drive (opsional) via DriveUploader —
+   kegagalan Drive TIDAK mengganggu generate lokal.
+
+────────────────────────────────────────────────────────────────────
+ 4. INTEGRASI GOOGLE (Mode A — outbound, runtime di database)
+────────────────────────────────────────────────────────────────────
+
+ • GoogleSettings — akses konfigurasi; kunci service account
+   disimpan TERENKRIPSI (Crypt) di integration_settings; ekstraksi
+   ID HANYA dari URL (docs: input berupa URL, bukan ID mentah).
+ • SheetsBudgetSync:
+   - pull: tab Anggaran (plat; pos; nominal; tahun) → upsert
+     vehicle_budgets (cocok berdasarkan plat nomor).
+   - push: tab Realisasi ditulis ulang penuh (clear+append) dari
+     payload kontrak (plat, id maintenance, bengkel, nota, tanggal,
+     pos, raw, ×1,13).
+   - run(): pull+push + log integration_logs (durasi ms; pesan
+     gagal TIDAK memuat kredensial).
+   - runIfDue(): interval 5/15/30/60 menit dari setting — task
+     scheduler berjalan tiap 5 menit dan memeriksa jatuh tempo
+     sendiri, sehingga admin dapat mengubah interval TANPA
+     menyentuh cron server.
+   - testConnection(): 5 langkah bertahap (kunci → token →
+     spreadsheet → tab → folder Drive opsional) + log.
+ • DriveUploader (opsional): upload PDF ke folder arsip; scope
+   drive.file minimal.
+ • Halaman admin /admin/integrasi/google (hanya admin):
+   status aktif + interval, upload/ganti/hapus kunci (email SA
+   ditampilkan sebagai konfirmasi), URL spreadsheet + nama 2 tab,
+   Drive toggle + URL folder, tombol Test Koneksi (hasil per
+   langkah ✓/✗), Sinkron Sekarang, log 20 terakhir.
+ • routes/console.php: Schedule budgets:sync-sheets tiap 5 menit
+   (via facade Illuminate\Support\Facades\Schedule) + purge log
+   > 90 hari tiap minggu. Dep: google/apiclient.
+
+────────────────────────────────────────────────────────────────────
+ 5. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ sail test → 111 PASSED (308 assertions), +20 baru:
+     BudgetDocumentTest (10): simpan anggaran + sisa; halaman;
+       nota ×1,13 (500rb→565rb, 300rb→339rb) + status selesai;
+       nota kosong ditolak; bend26 + draft nota hanya pos > 0;
+       regenerate versi naik + arsip; sisa negatif tidak blokir;
+       kartu inventaris; daftar+unduh dokumen; 403 non-pengurus
+     IntegrationConfigTest (10): halaman admin; 403 non-admin;
+       simpan konfigurasi + kunci TERENKRIPSI (nilai mentah tidak
+       ada di DB); kunci bukan SA ditolak; URL salah format
+       ditolak; interval 5/15/30/60 saja; hapus kunci; baris
+       realisasi sesuai kontrak JSON; sync nonaktif = diam;
+       sync tanpa kredensial tercatat gagal
+ ✓ Smoke HTTP: /budgets 200, /documents 200, /maintenances/1/
+   costs 200, /admin/integrasi/google → admin 200 / pengurus 403
+
+────────────────────────────────────────────────────────────────────
+ 6. BUG → PERIKSA MARKDOWN (aturan user) — temuan & tindakan
+────────────────────────────────────────────────────────────────────
+
+ 1) IntegrationLog QueryException "column not found":
+    model memakai timestamps bawaan padahal skema docs memakai
+    ran_at saja → FIX model ($timestamps = false). DOCS SUDAH
+    BENAR (tabel tanpa created_at/updated_at); bug murni
+    implementasi — namun konvensi "model tabel non-timestamps
+    wajib $timestamps=false" layak masuk structure.md →
+    DITAMBAHKAN pada konvensi model.
+ 2) extractor menerima ID mentah ("bukan-url" lolos):
+    docs mensyaratkan input berupa URL → implementasi awal
+    menyimpang (menerima bare ID). FIX: URL-only, selaras docs.
+    Contoh aturan baru bekerja: docs jelas → penyimpangan
+    implementasi tertangkap test.
+ 3) inputNota menghapus nomor/tanggal nota bila field tak
+    dikirim (nilai lama tertimpa null): docs tidak merinci
+    perilaku upsert identitas → FIX service (pertahankan nilai
+    lama) + DOKUMENTASI DITAMBAHKAN di anggaran_maintenance.md
+    ("input nota bersifat upsert — field yang tidak dikirim
+    mempertahankan nilai lama").
+ 4) `Schedule` di routes/console.php: docs/tech.md menulis
+    `Schedule::call(...)` gaya lama; di Laravel 13 yang benar
+    facade Illuminate\Support\Facades\Schedule. DOCS tech.md
+    diperbarui (§4.3) ke penulisan yang benar agar tidak
+    menyesatkan ulang.
+ 5) Human error murni (tanpa kaitan docs, dicatat jujur):
+    assertSee "Realisasi & Sisa" vs entity &amp;; nilai decimal
+    string vs float pada kontrak (diperbaiki dengan cast di
+    builder — kontrak JSON kini numerik konsisten).
+
+────────────────────────────────────────────────────────────────────
+ 7. KONSUMSI FASE BERIKUTNYA (Fase 4c — Event Armada Bidang)
+────────────────────────────────────────────────────────────────────
+
+   • EventService (validasi armada layak, kunci N mobil,
+     autoFinish) + wizard UI (admin & pengurus)
+   • Penyelesaian tabrakan: reuse ReplacementService via endpoint
+     /pengurus/events/...
+   • Pengecualian kuota bidang pada BookingService (Fase 5)
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 4b —
+════════════════════════════════════════════════════════════════════

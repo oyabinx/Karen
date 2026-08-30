@@ -29,6 +29,7 @@ Alur: keluhan pengembalian muncul di dashboard pengurus → pengurus menjadwalka
   - nama bengkel, nomor & tanggal nota (informatif);
   - rincian nilai nota **dipilah ke 4 pos** (servis / suku cadang / AC / pelumas) — boleh sebagian pos bernilai 0.
 - Sistem menyimpan nilai asli tiap pos dan menghitung `nilai × 1,13` sebagai **realisasi anggaran**.
+- Input nota bersifat **upsert**: identitas nota (bengkel/nomor/tanggal) yang tidak dikirim mempertahankan nilai lama — revisi nilai tidak menghapus identitas yang sudah tersimpan.
 
 ### 4. Generate Dokumen
 Setelah input nota disimpan, sistem menggenerate (PDF, via library dompdf). **Master draft dokumen dikelola satu sistem di Karen** — folder `resources/draft_documents/` di dalam project berisi template draft (bend26, draft nota, kartu inventaris pemeliharaan kendaraan) yang dipakai `DocumentService` sebagai dasar generate; hasil generate tersimpan di `storage/app/documents/`. (Google Drive **tidak** dipakai sebagai tempat draft master — Google hanya untuk sinkronisasi data anggaran via Sheets API; arsip sekunder ke Drive dapat ditambahkan kemudian tanpa mengubah alur ini.)

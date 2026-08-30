@@ -52,6 +52,7 @@
 
                     <div class="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-x-4 gap-y-1 text-sm">
                         <a href="{{ route('pengurus.vehicles.edit', $v) }}" class="text-indigo-600 hover:underline">Ubah</a>
+                        <a href="{{ route('pengurus.budgets.edit', $v) }}" class="text-indigo-600 hover:underline">Anggaran</a>
                         @if (! $v->trashed())
                             <form method="POST" action="{{ route('pengurus.vehicles.status', $v) }}">
                                 @csrf @method('PATCH')

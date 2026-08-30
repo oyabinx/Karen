@@ -59,13 +59,13 @@
 - [ ] Scheduler `EventService::autoFinish()` (00:02): event lewat `end_date` → `selesai`
 - [ ] Pembatalan event (armada lepas; booking tergeser tetap di mobil pengganti) + banner notifikasi peminjam tergeser
 
-## Fase 4b — Pengurus: Anggaran Maintenance & Dokumen
-- [ ] Migrasi: `vehicles.year`, `vehicle_budgets`, `maintenance_costs`, `generated_documents`; status maintenance (`terjadwal`/`selesai`) → [feature/anggaran_maintenance.md](feature/anggaran_maintenance.md)
-- [ ] Halaman anggaran: atur total 4 pos (servis, suku cadang, AC, pelumas) per mobil + sisa anggaran real-time
-- [ ] Form input nota bengkel dipilah 4 pos + koefisien 1,13 (`BudgetService`)
-- [ ] Folder `resources/draft_documents/`: template `bend26.blade.php`, `draft_nota.blade.php`, `kartu_inventaris.blade.php`
-- [ ] Generate PDF bend26 + draft nota per pos + kartu inventaris pemeliharaan (`DocumentService`, dompdf) + halaman unduh
-- [ ] Integrasi Google Sheets API v4 via Service Account (outbound): halaman konfigurasi admin (`IntegrationController`, upload kunci terenkripsi, test koneksi, log sync — lihat [feature/integrasi_google.md](feature/integrasi_google.md)), `SheetsBudgetSync`, task `budgets:sync-sheets` sesuai interval (default 15 menit)
+## Fase 4b — Pengurus: Anggaran Maintenance & Dokumen — ✅ SELESAI
+- [x] Migrasi: `vehicles.year`, `vehicle_budgets`, `maintenance_costs`, `generated_documents`; status maintenance (`terjadwal`/`selesai`) → [feature/anggaran_maintenance.md](feature/anggaran_maintenance.md) — *seluruh tabel sudah termigrasi di Fase 1; fase ini hanya implementasi fitur*
+- [x] Halaman anggaran: atur total 4 pos (servis, suku cadang, AC, pelumas) per mobil + sisa anggaran real-time — *`/pengurus/vehicles/{v}/budgets` + `BudgetService::summary`*
+- [x] Form input nota bengkel dipilah 4 pos + koefisien 1,13 (`BudgetService`) — *`/maintenances/{m}/costs` + kalkulasi ×1,13 live di form; upsert identitas nota*
+- [x] Folder `resources/draft_documents/`: template `bend26.blade.php`, `draft_nota.blade.php`, `kartu_inventaris.blade.php` — *+ README variabel template; namespace view `drafts::`*
+- [x] Generate PDF bend26 + draft nota per pos + kartu inventaris pemeliharaan (`DocumentService`, dompdf) + halaman unduh — *versioned + arsip versi lama; halaman `/pengurus/documents`; arsip Drive opsional*
+- [x] Integrasi Google Sheets API v4 via Service Account (outbound): halaman konfigurasi admin (`IntegrationController`, upload kunci terenkripsi, test koneksi, log sync — lihat [feature/integrasi_google.md](feature/integrasi_google.md)), `SheetsBudgetSync`, task `budgets:sync-sheets` sesuai interval (default 15 menit) — *kunci terenkripsi di database; scheduler tiap 5 menit memeriksa interval sendiri*
 
 ## Fase 5 — Pegawai & Pengurus: Peminjaman (Inti)
 - [ ] Halaman cari mobil: input tanggal mulai & selesai → [feature/peminjaman.md](feature/peminjaman.md)

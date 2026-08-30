@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Pengurus;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pengurus\MaintenanceRequest;
+use App\Http\Requests\Pengurus\NotaRequest;
 use App\Models\Maintenance;
 use App\Models\Vehicle;
+use App\Services\BudgetService;
+use App\Services\DocumentService;
 use App\Services\ReplacementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,9 +20,13 @@ class MaintenanceController extends Controller
      * Jadwal maintenance (docs/feature/manajemen_kendaraan.md &
      * penggantian_mobil.md) — kendaraan maintenance tidak tersedia
      * pada rentangnya; booking yang menabrak → menunggu_penggantian.
+     * Setelah perawatan selesai: input nota 4 pos (×1,13) → generate
+     * bend26 + draft nota (docs/feature/anggaran_maintenance.md).
      */
     public function __construct(
         private readonly ReplacementService $replacements,
+        private readonly BudgetService $budgets,
+        private readonly DocumentService $documents,
     ) {}
 
     public function index(Request $request): View
@@ -95,5 +102,50 @@ class MaintenanceController extends Controller
         }
 
         return back()->with('success', $pesan);
+    }
+
+    // ── Input nota & dokumen (Fase 4b) ────────────────────────────
+
+    /**
+     * Form input nota bengkel (4 pos) untuk maintenance selesai.
+     */
+    public function costs(Maintenance $maintenance): View
+    {
+        return view('pengurus.maintenances.costs', [
+            'maintenance' => $maintenance->load('vehicle'),
+            'costs' => $maintenance->costs->keyBy('post'),
+        ]);
+    }
+
+    /**
+     * Simpan nota: nilai per pos ×1,13 = realisasi; maintenance
+     * berstatus selesai; bend26 + draft nota per pos digenerate.
+     */
+    public function inputNota(NotaRequest $request, Maintenance $maintenance): RedirectResponse
+    {
+        $this->budgets->inputNota($maintenance, [
+            'workshop_name' => $request->input('workshop_name'),
+            'nota_number' => $request->input('nota_number'),
+            'nota_date' => $request->input('nota_date'),
+            'costs' => $request->input('costs'),
+        ]);
+
+        $documents = $this->documents->generateForMaintenance($maintenance->refresh());
+
+        $nota = collect($documents)->filter(fn ($d) => $d->type === 'draft_nota')->count();
+
+        return redirect()
+            ->route('pengurus.maintenances.index', ['status' => 'selesai'])
+            ->with('success', 'Nota tersimpan (×1,13). bend26 + '.$nota.' draft nota digenerate — lihat menu Dokumen.');
+    }
+
+    /**
+     * Generate ulang dokumen (bila nota direvisi — versi lama diarsipkan).
+     */
+    public function generate(Maintenance $maintenance): RedirectResponse
+    {
+        $documents = $this->documents->generateForMaintenance($maintenance->load('costs'));
+
+        return back()->with('success', count($documents).' dokumen digenerate ulang (versi baru).');
     }
 }

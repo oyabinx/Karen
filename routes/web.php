@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\BidangController;
+use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\SeksiController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Pengurus\BudgetController;
+use App\Http\Controllers\Pengurus\DocumentController;
 use App\Http\Controllers\Pengurus\MaintenanceController;
 use App\Http\Controllers\Pengurus\ReplacementController;
 use App\Http\Controllers\Pengurus\VehicleController;
@@ -52,6 +55,13 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/bidang/{bidang}/seksi', [SeksiController::class, 'store'])->name('seksi.store');
         Route::put('/seksi/{seksi}', [SeksiController::class, 'update'])->name('seksi.update');
         Route::delete('/seksi/{seksi}', [SeksiController::class, 'destroy'])->name('seksi.destroy');
+
+        // Konfigurasi integrasi Google (runtime di database)
+        Route::get('/integrasi/google', [IntegrationController::class, 'show'])->name('integrasi.google');
+        Route::post('/integrasi/google', [IntegrationController::class, 'update'])->name('integrasi.google.update');
+        Route::delete('/integrasi/google/key', [IntegrationController::class, 'destroyKey'])->name('integrasi.google.key.destroy');
+        Route::post('/integrasi/google/test', [IntegrationController::class, 'test'])->name('integrasi.google.test');
+        Route::post('/integrasi/google/sync', [IntegrationController::class, 'syncNow'])->name('integrasi.google.sync');
     });
 
 // ── PENGURUS: kendaraan, maintenance, penggantian mobil ──
@@ -74,10 +84,24 @@ Route::middleware(['auth', 'role:pengurus'])
         Route::patch('/maintenances/{maintenance}/finish', [MaintenanceController::class, 'finish'])->name('maintenances.finish');
         Route::delete('/maintenances/{maintenance}', [MaintenanceController::class, 'destroy'])->name('maintenances.destroy');
 
+        // Input nota bengkel (4 pos × 1,13) + generate dokumen
+        Route::get('/maintenances/{maintenance}/costs', [MaintenanceController::class, 'costs'])->name('maintenances.costs');
+        Route::put('/maintenances/{maintenance}/costs', [MaintenanceController::class, 'inputNota'])->name('maintenances.nota');
+        Route::post('/maintenances/{maintenance}/generate', [MaintenanceController::class, 'generate'])->name('maintenances.generate');
+
         Route::get('/replacements', [ReplacementController::class, 'index'])->name('replacements.index');
         Route::get('/replacements/{booking}', [ReplacementController::class, 'show'])->name('replacements.show');
         Route::patch('/replacements/{booking}/assign', [ReplacementController::class, 'assign'])->name('replacements.assign');
         Route::patch('/replacements/{booking}/cancel', [ReplacementController::class, 'cancel'])->name('replacements.cancel');
+
+        // Anggaran 4 pos per kendaraan
+        Route::get('/vehicles/{vehicle}/budgets', [BudgetController::class, 'edit'])->name('budgets.edit');
+        Route::put('/vehicles/{vehicle}/budgets', [BudgetController::class, 'update'])->name('budgets.update');
+
+        // Dokumen hasil generate
+        Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
+        Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+        Route::post('/vehicles/{vehicle}/generate-kartu-inventaris', [DocumentController::class, 'kartuInventaris'])->name('documents.kartu');
     });
 
 require __DIR__.'/auth.php';

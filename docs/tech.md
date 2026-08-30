@@ -239,8 +239,15 @@ Dipicu saat maintenance dibuat/diubah dan overlap dengan booking `dipinjam`:
 `routes/console.php`:
 
 ```php
+// routes/console.php — gunakan FACADE Illuminate\Support\Facades\Schedule
+// (di Laravel 13, Schedule bukan kelas statis yang di-import langsung)
+use Illuminate\Support\Facades\Schedule;
+
 Schedule::call(fn () => app(ReturnService::class)->autoReturn())->dailyAt('00:01');
 Schedule::call(fn () => app(EventService::class)->autoFinish())->dailyAt('00:02');
+// Sinkron Sheets berjalan tiap 5 menit & memeriksa interval sendiri
+// (5/15/30/60 menit via UI admin) sehingga cron tidak perlu diubah:
+Schedule::call(fn () => app(\App\Services\Google\SheetsBudgetSync::class)->runIfDue())->everyFiveMinutes();
 ```
 
 `autoReturn()`:
