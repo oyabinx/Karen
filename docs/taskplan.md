@@ -17,14 +17,14 @@
       (pastikan `.gitignore` Laravel tidak berubah — `.env` dan `vendor/` **tidak** ikut tercommit)
 - [x] **Daftar perintah Sail harian** (untuk referensi): `sail up -d` (nyalakan), `sail down` (matikan), `sail logs -f laravel.test` (lihat log), `sail artisan ...`, `sail composer ...`, `sail npm ...`, `sail test` — terdokumentasi di `build_logs/fase0.log`
 
-## Fase 1 — Fondasi Data & Role
-- [ ] Migrasi: `bidang` (termasuk `max_active_bookings` default 2), `seksi` (UNIQUE bidang_id+name)
-- [ ] Migrasi: `users` (tambah kolom `role`, `phone`, `seksi_id`, soft delete)
-- [ ] Migrasi: `vehicles`, `maintenances`, `bookings`, `complaints` + index
-- [ ] Model Eloquent + relasi (lihat [tech.md §3](tech.md))
-- [ ] Seeder: 5 bidang, contoh seksi, akun admin pertama, contoh mobil (dev)
-- [ ] Middleware `EnsureUserHasRole` + alias `role:`
-- [ ] Ubah registrasi Breeze: dinonaktifkan (user hanya dibuat admin)
+## Fase 1 — Fondasi Data & Role — ✅ SELESAI
+- [x] Migrasi: `bidang` (termasuk `max_active_bookings` default 2), `seksi` (UNIQUE bidang_id+name)
+- [x] Migrasi: `users` (tambah kolom `role`, `phone`, `seksi_id`, soft delete)
+- [x] Migrasi: `vehicles`, `maintenances`, `bookings`, `complaints` + index — *plus `events`, `event_vehicles`, `vehicle_budgets`, `maintenance_costs`, `generated_documents`, `integration_settings`, `integration_logs` (14 migrasi, 22 tabel total)*
+- [x] Model Eloquent + relasi (lihat [tech.md §3](tech.md)) — *13 model; `$table` eksplisit untuk Bidang/Seksi (pluralisasi Eloquent)*
+- [x] Seeder: 5 bidang, contoh seksi, akun admin pertama, contoh mobil (dev) — *nama bidang/seksi placeholder, disesuaikan admin saat rilis*
+- [x] Middleware `EnsureUserHasRole` + alias `role:`
+- [x] Ubah registrasi Breeze: dinonaktifkan (user hanya dibuat admin) — *route/controller/view/test register dihapus; GET /register → 404*
 
 ## Fase 2 — Layout, Autentikasi & Profil
 - [ ] Layout utama `app.blade.php`: sidebar desktop (≥lg) + navbar/drawer/bottom-nav mobile (<lg) sesuai → [feature/ui_responsive.md](feature/ui_responsive.md)

@@ -43,7 +43,7 @@ Bagian **Log Sinkronisasi**:
 - Konfigurasi runtime **seluruhnya di database**; `.env` hanya memuat konfigurasi inti aplikasi (database, `APP_KEY`, `APP_URL`) yang didefinisikan **sekali saat deploy** oleh petugas IT — bukan oleh pengguna aplikasi (admin/pengurus/pegawai tidak pernah membuka file server).
 
 ## Perubahan Skema
-- `integration_settings`: `key` VARCHAR UNIQUE, `value` TEXT NULL (terenkripsi), `timestamps`. Kunci yang dipakai: `google_enabled`, `google_service_account_json`, `google_spreadsheet_id`, `google_sheet_anggaran`, `google_sheet_realisasi`, `google_drive_enabled`, `google_drive_folder_id`, `google_poll_minutes`.
+- `integration_settings`: `setting_key` VARCHAR(100) UNIQUE (kolom `key` tidak dipakai — reserved word MySQL), `value` TEXT NULL (terenkripsi), `timestamps`. Kunci yang dipakai: `google_enabled`, `google_service_account_json`, `google_spreadsheet_id`, `google_sheet_anggaran`, `google_sheet_realisasi`, `google_drive_enabled`, `google_drive_folder_id`, `google_poll_minutes`.
 - `integration_logs`: `id`, `provider` ('google'), `task` ('sheets_sync'/'drive_upload'), `status` ('sukses','gagal'), `message` TEXT NULL, `duration_ms`, `ran_at`. Retensi 90 hari (purge otomatis oleh scheduler mingguan).
 
 ## Endpoint

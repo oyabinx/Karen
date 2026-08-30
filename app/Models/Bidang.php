@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Bidang extends Model
+{
+    // Nama tabel bentuk tunggal (bukan "bidangs" hasil pluralisasi bawaan)
+    protected $table = 'bidang';
+
+    protected $fillable = ['name', 'max_active_bookings'];
+
+    protected function casts(): array
+    {
+        return [
+            'max_active_bookings' => 'integer',
+        ];
+    }
+
+    public function seksi(): HasMany
+    {
+        return $this->hasMany(Seksi::class);
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+}

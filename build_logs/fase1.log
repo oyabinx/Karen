@@ -1,0 +1,193 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 1                      ║
+║                     Fondasi Data & Role (Skema DB)                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 1 — Fondasi Data & Role
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — migrasi 14 tabel, 13 model, middleware
+                role, registrasi nonaktif, seeder OK, 23/23 test HIJAU
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 1 membangun seluruh skema database Karen (tech.md §3 +
+ dokumen fitur), model Eloquent beserta relasinya, middleware
+ otorisasi role, menonaktifkan registrasi mandiri, dan menyiapkan
+ data awal (seeder) — fondasi bagi semua fase fitur berikutnya.
+
+────────────────────────────────────────────────────────────────────
+ 2. MIGRASI (14 file baru, urut eksekusi)
+────────────────────────────────────────────────────────────────────
+
+ No│ File migrasi                              │ Isi penting
+ ──┼────────────────────────────────────────────┼────────────────────
+ 1 │ ..._100001_create_bidang_table             │ name UNIQUE,
+   │                                            │ max_active_bookings
+   │                                            │ default 2 (kuota)
+ 2 │ ..._100002_create_seksi_table              │ FK bidang,
+   │                                            │ UNIQUE(bidang_id,name)
+ 3 │ ..._100003_add_karen_fields_to_users       │ role ENUM
+   │                                            │ (admin/pengurus/
+   │                                            │  pegawai), phone
+   │                                            │ nullable UNIQUE,
+   │                                            │ seksi_id FK,
+   │                                            │ softDeletes
+ 4 │ ..._100004_create_vehicles_table           │ name, plate UNIQUE,
+   │                                            │ year, capacity,
+   │                                            │ status ENUM, condi-
+   │                                            │ tion ENUM, photo,
+   │                                            │ softDeletes
+ 5 │ ..._100005_create_maintenances_table       │ FK vehicle, rentang
+   │                                            │ tanggal, status
+   │                                            │ (terjadwal/selesai),
+   │                                            │ workshop+nota,
+   │                                            │ index rentang
+ 6 │ ..._100006_create_events_table             │ FK bidang + creator,
+   │                                            │ status 3-nilai,
+   │                                            │ index (status,tgl)
+ 7 │ ..._100007_create_event_vehicles_table     │ pivot event↔vehicle,
+   │                                            │ UNIQUE ganda
+ 8 │ ..._100008_create_bookings_table           │ 4 status ENUM,
+   │                                            │ returned_at,
+   │                                            │ auto_returned,
+   │                                            │ original_vehicle_id
+   │                                            │ (audit penggantian),
+   │                                            │ 2 index komposit
+ 9 │ ..._100009_create_complaints_table         │ booking_id UNIQUE
+   │                                            │ cascade, resolved
+10 │ ..._100010_create_vehicle_budgets_table    │ pos ENUM 4 nilai,
+   │                                            │ amount decimal(14,2),
+   │                                            │ UNIQUE(v,post,year)
+11 │ ..._100011_create_maintenance_costs_table  │ raw_amount +
+   │                                            │ taxed_amount (×1,13),
+   │                                            │ UNIQUE(m,post)
+12 │ ..._100012_create_generated_documents      │ type ENUM 3 nilai
+   │                                            │ (bend26/draft_nota/
+   │                                            │ kartu_inventaris),
+   │                                            │ post nullable
+13 │ ..._100013_create_integration_settings     │ setting_key UNIQUE,
+   │                                            │ value text
+14 │ ..._100014_create_integration_logs         │ provider/task/
+   │                                            │ status/duration/ran_at
+
+ Total tabel aplikasi: 22 (14 baru + 8 bawaan Laravel).
+
+────────────────────────────────────────────────────────────────────
+ 3. MODEL ELOQUENT (13)
+────────────────────────────────────────────────────────────────────
+
+ Model                │ Relasi utama
+ ─────────────────────┼──────────────────────────────────────────────
+ User (+soft delete)  │ belongsTo Seksi · hasMany Booking
+                      │ helper: isAdmin/isPengurus/isPegawai/
+                      │ hasAnyRole
+ Bidang  [$table]     │ hasMany Seksi · hasMany Event
+ Seksi   [$table]     │ belongsTo Bidang · hasMany User
+ Vehicle (+soft del.) │ hasMany Booking/Maintenance/Budget ·
+                      │ belongsToMany Event (pivot event_vehicles)
+ Maintenance          │ belongsTo Vehicle · hasMany Cost
+ Event                │ belongsTo Bidang/creator · belongsToMany
+                      │ Vehicle
+ Booking              │ belongsTo User/Vehicle/originalVehicle ·
+                      │ hasOne Complaint · konstanta status
+ Complaint            │ belongsTo Booking
+ VehicleBudget        │ belongsTo Vehicle · konstanta 4 pos
+ MaintenanceCost      │ belongsTo Maintenance
+ GeneratedDocument    │ belongsTo Maintenance/Vehicle · konstanta
+ IntegrationSetting   │ konstanta kunci konfigurasi Google
+ IntegrationLog       │ konstanta task/status
+
+ Catatan penting:
+ • BUG DITEMUKAN & DIPERBAIKI: pluralisasi otomatis Eloquent
+   menghasilkan tabel "bidangs"/"seksis" padahal nama tabel
+   sebenarnya bentuk tunggal — diperbaiki dengan $table eksplisit
+   di model Bidang & Seksi. (Bug ini juga membuat seeding pertama
+   gagal senyap; setelah perbaikan, db:seed sukses penuh.)
+ • Kolom `key` reserved word MySQL → dinamai setting_key
+   (docs/feature/integrasi_google.md ikut diselaraskan).
+ • Kolom `condition` reserved word → selalu dibacktick MySQL;
+   Eloquent menangani otomatis.
+
+────────────────────────────────────────────────────────────────────
+ 4. MIDDLEWARE ROLE
+────────────────────────────────────────────────────────────────────
+
+ • app/Http/Middleware/EnsureUserHasRole.php
+   - Pemakaian: role:admin | role:pegawai|pengurus | role:admin,pengurus
+   - Pemisah "|" dan "," keduanya didukung; 403 bila tidak sesuai.
+ • Alias 'role' terdaftar di bootstrap/app.php (withMiddleware).
+
+────────────────────────────────────────────────────────────────────
+ 5. REGISTRASI DINONAKTIFKAN
+────────────────────────────────────────────────────────────────────
+
+ • Route register (GET+POST) dihapus dari routes/auth.php
+ • Controller RegisteredUserController.php DIHAPUS
+ • View auth/register.blade.php DIHAPUS
+ • tests/Feature/Auth/RegistrationTest.php DIHAPUS
+ • Link register di welcome.blade.php otomatis hilang (terproteksi
+   @if(Route::has('register')))
+ • Verifikasi: GET /register → 404 ✅
+
+────────────────────────────────────────────────────────────────────
+ 6. SEEDER
+────────────────────────────────────────────────────────────────────
+
+ • BidangSeeder : 5 bidang (Pemerintahan, Perekonomian,
+   Pembangunan, Kesejahteraan, Umum) — Kesejahteraan diset kuota 3
+   (bidang khusus), lainnya 2. NAMA PLACEHOLDER — disesuaikan
+   admin saat rilis.
+ • SeksiSeeder  : 2 seksi per bidang (10 total, placeholder).
+ • AdminSeeder  : admin@karen.test / password (WAJIB DIGANTI),
+   pengurus@karen.test + pegawai@karen.test (contoh, terhubung
+   seksi → bidang).
+ • VehicleSeeder: 4 unit contoh (tahun 2015–2022, kapasitas 5–12).
+ • DatabaseSeeder: urutan bidang→seksi→user→vehicle.
+
+────────────────────────────────────────────────────────────────────
+ 7. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ migrate:fresh --seed — 17 file migrasi DONE (3 bawaan + 14 baru)
+ ✓ 22 tabel terbentuk di MySQL karen
+ ✓ Data seeder terverifikasi via tinker:
+     - 5 bidang dengan kuota benar (4×2, 1×3)
+     - 10 seksi; relasi user→seksi→bidang bekerja
+     - 3 user (admin/pengurus/pegawai) dengan role & seksi benar
+     - 4 kendaraan dengan status/kondisi awal benar
+ ✓ Test suite: 23 PASSED / 57 assertions (0 gagal)
+     - 1 test Breeze disesuaikan: penghapusan akun kini
+       assertSoftDeleted (konsekuensi SoftDeletes di User —
+       riwayat peminjaman tetap tersimpan, sesuai docs)
+ ✓ HTTP smoke: / → 200, /login → 200, /register → 404, /up → 200
+
+────────────────────────────────────────────────────────────────────
+ 8. CATATAN TEKNIS UNTUK FASE BERIKUTNYA
+────────────────────────────────────────────────────────────────────
+
+ • Hapus-akun bawaan Breeze di halaman profil akan DIRETAS di
+   Fase 2 (docs: pegawai tidak menghapus akun sendiri; hanya
+   admin yang menonaktifkan via soft delete).
+ • scripts/fase1_verify.sh (helper verifikasi DB) tersimpan —
+   pola "newgrp docker bash script" dipakai karena shell login
+   laptop memakai fish (heredoc bash tidak kompatibel).
+ • Konstanta status/pos di model akan dipakai Service Fase 4–5.
+
+────────────────────────────────────────────────────────────────────
+ 9. KONSUMSI FASE BERIKUTNYA (Fase 2 — Layout, Auth UI & Profil)
+────────────────────────────────────────────────────────────────────
+
+   • Layout utama responsive (sidebar desktop ≥lg, drawer +
+     bottom-nav mobile <lg) → docs/feature/ui_responsive.md
+   • Router dashboard per role (admin/pengurus/pegawai)
+   • Halaman login berbahasa Indonesia
+   • Ubah profil: nama, email, nomor HP WAJIB (regex Indonesia)
+   • Ganti password; retas ulang halaman profil Breeze
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 1 —
+════════════════════════════════════════════════════════════════════
