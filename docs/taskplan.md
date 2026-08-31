@@ -67,16 +67,16 @@
 - [x] Generate PDF bend26 + draft nota per pos + kartu inventaris pemeliharaan (`DocumentService`, dompdf) + halaman unduh — *versioned + arsip versi lama; halaman `/pengurus/documents`; arsip Drive opsional*
 - [x] Integrasi Google Sheets API v4 via Service Account (outbound): halaman konfigurasi admin (`IntegrationController`, upload kunci terenkripsi, test koneksi, log sync — lihat [feature/integrasi_google.md](feature/integrasi_google.md)), `SheetsBudgetSync`, task `budgets:sync-sheets` sesuai interval (default 15 menit) — *kunci terenkripsi di database; scheduler tiap 5 menit memeriksa interval sendiri*
 
-## Fase 5 — Pegawai & Pengurus: Peminjaman (Inti)
-- [ ] Halaman cari mobil: input tanggal mulai & selesai → [feature/peminjaman.md](feature/peminjaman.md)
-- [ ] `AvailabilityService`: mobil tanpa booking overlap & tanpa maintenance overlap & status `bisa_dipinjam` & kondisi `baik`
-- [ ] Validasi durasi: maks 3 hari kalender, `start_date >= today`, hari penuh 00:00–24:00
-- [ ] **Validasi kuota bidang** (maks mobil bersamaan per bidang; default 2, satu bidang 3) → [feature/kuota_bidang.md](feature/kuota_bidang.md)
-- [ ] Form booking: pilih mobil, alamat tujuan, keperluan
-- [ ] `BookingService`: transaksi DB + `lockForUpdate` (cegah double-booking bersamaan)
-- [ ] Validasi: 1 peminjaman aktif per pegawai
-- [ ] **Route peminjaman dibuka untuk pengurus** (`role:pegawai|pengurus`) — pengurus dapat meminjam mobil seperti pegawai
-- [ ] Riwayat peminjaman pribadi (status badge, penanda pengembalian otomatis & penggantian mobil)
+## Fase 5 — Pegawai & Pengurus: Peminjaman (Inti) — ✅ SELESAI
+- [x] Halaman cari mobil: input tanggal mulai & selesai → [feature/peminjaman.md](feature/peminjaman.md) — *form sticky mobile, date picker native; hasil grid kartu*
+- [x] `AvailabilityService`: mobil tanpa booking overlap & tanpa maintenance overlap & status `bisa_dipinjam` & kondisi `baik` — *tersedia sejak Fase 4; dipakai ulang di sini*
+- [x] Validasi durasi: maks 3 hari kalender, `start_date >= today`, hari penuh 00:00–24:00 — *`BookingService::rangeErrors` sumber tunggal (halaman, request, service)*
+- [x] **Validasi kuota bidang** (maks mobil bersamaan per bidang; default 2, satu bidang 3) → [feature/kuota_bidang.md](feature/kuota_bidang.md) — *booking mendatang mengunci jatah; event otomatis dikecualikan; kartu kuota di pencarian & dashboard*
+- [x] Form booking: pilih mobil, alamat tujuan, keperluan
+- [x] `BookingService`: transaksi DB + `lockForUpdate` (cegah double-booking bersamaan) — *lock baris kendaraan + booking user; cek ulang ketersediaan dalam transaksi*
+- [x] Validasi: 1 peminjaman aktif per pegawai — *berlaku juga untuk pengurus*
+- [x] **Route peminjaman dibuka untuk pengurus** (`role:pegawai|pengurus`) — pengurus dapat meminjam mobil seperti pegawai — *teruji: pengurus meminjam & terkena kuota bidangnya*
+- [x] Riwayat peminjaman pribadi (status badge, penanda pengembalian otomatis & penggantian mobil) — *+ slot tombol Kembalikan untuk Fase 6; bottom-nav mobile 4 slot (Beranda/Cari/Pinjaman/Profil)*
 
 ## Fase 6 — Pengembalian & Keluhan
 - [ ] Tombol "Kembalikan" pada peminjaman aktif → [feature/pengembalian.md](feature/pengembalian.md)

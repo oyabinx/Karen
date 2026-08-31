@@ -114,20 +114,32 @@
         </div>
 
         {{-- BOTTOM NAVIGATION MOBILE — aksi utama (docs/feature/ui_responsive.md) --}}
-        <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 grid grid-cols-3">
+        @php($canBook = auth()->user()->hasAnyRole('pegawai', 'pengurus'))
+        <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 grid {{ $canBook && Route::has('pegawai.search.index') ? 'grid-cols-4' : 'grid-cols-3' }}">
             <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center py-2 min-h-[56px] text-xs {{ request()->routeIs('dashboard') ? 'text-indigo-600 font-semibold' : 'text-gray-500' }}">
                 <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/></svg>
                 Beranda
             </a>
-            {{-- Slot "Cari Mobil" & "Peminjaman Aktif" untuk pegawai/pengurus ditambahkan di Fase 5 --}}
+            @if ($canBook && Route::has('pegawai.search.index'))
+                <a href="{{ route('pegawai.search.index') }}" class="flex flex-col items-center justify-center py-2 min-h-[56px] text-xs {{ request()->routeIs('pegawai.search.*') ? 'text-indigo-600 font-semibold' : 'text-gray-500' }}">
+                    <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    Cari Mobil
+                </a>
+                <a href="{{ route('pegawai.bookings.index') }}" class="flex flex-col items-center justify-center py-2 min-h-[56px] text-xs {{ request()->routeIs('pegawai.bookings.*') ? 'text-indigo-600 font-semibold' : 'text-gray-500' }}">
+                    <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8l2 5H6l2-5zM4 12h16v5h-2a2 2 0 11-4 0h-4a2 2 0 11-4 0H4v-5z"/></svg>
+                    Pinjaman
+                </a>
+            @endif
             <a href="{{ route('profile.edit') }}" class="flex flex-col items-center justify-center py-2 min-h-[56px] text-xs {{ request()->routeIs('profile.edit') ? 'text-indigo-600 font-semibold' : 'text-gray-500' }}">
                 <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 Profil
             </a>
-            <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-karen').requestSubmit();" class="flex flex-col items-center justify-center py-2 min-h-[56px] text-xs text-gray-500">
-                <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                Keluar
-            </a>
+            @unless ($canBook)
+                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-karen').requestSubmit();" class="flex flex-col items-center justify-center py-2 min-h-[56px] text-xs text-gray-500">
+                    <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Keluar
+                </a>
+            @endunless
         </nav>
 
         {{-- Form logout global (dipakai bottom-nav) --}}

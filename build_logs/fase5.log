@@ -1,0 +1,132 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 5                      ║
+║              Peminjaman Inti (Pegawai & Pengurus)                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 5 — Peminjaman (Inti)
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — cari mobil + form booking + riwayat
+                untuk pegawai & pengurus, BookingService (durasi ≤3
+                hari, hari penuh, 1 booking aktif, KUOTA BIDANG,
+                transaksi+lock), 138/138 test HIJAU
+
+  Aturan proses: bug → periksa markdown. Hasil §5.
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 5 adalah fitur inti self-service: pegawai (dan pengurus —
+ sejatinya user pegawai juga) mencari mobil tersedia pada rentang
+ tanggal, memesan dengan alamat & keperluan, langsung terkonfirmasi
+ tanpa approval, dan melihat riwayat lengkap dengan badge status.
+
+────────────────────────────────────────────────────────────────────
+ 2. BookingService (aturan bisnis satu sumber)
+────────────────────────────────────────────────────────────────────
+
+ • rangeErrors(start, end) — sumber tunggal validasi rentang:
+   - end >= start;
+   - start >= hari ini (masa lalu ditolak);
+   - durasi inklusif maks 3 hari kalender TERMASUK Sabtu-Minggu
+     (1–3 Feb = 3 hari; 1–4 Feb = 4 hari → ditolak).
+   Dipakai oleh halaman pencarian (inline), FormRequest, dan
+   service — tidak ada dobel definisi.
+ • Hari penuh 00:00–24:00: booking disimpan sebagai DATE; booking
+   hari-H tercatat mulai 00:00 hari itu (bukan jam submit) — tes
+   khusus memastikan start_date = tanggal hari ini.
+ • quotaInfo(user) / quotaUsed(user):
+   - menghitung booking dipinjam + menunggu_penggantian milik
+     SELURUH anggota bidang (via user.seksi.bidang — sesuai rumus
+     docs/tech.md §4.2b); booking mendatang ikut mengunci jatah;
+     dibatalkan/dikembalikan melepas;
+   - EVENT TIDAK dihitung (bukan booking — pengecualian kuota
+     docs/feature/event_bidang.md tercapai lewat desain);
+   - user tanpa seksi → ditolak dengan pesan jelas (kuota tak
+     terdefinisi).
+ • create(user, vehicle, start, end, address, purpose):
+   seluruh validasi DALAM DB::transaction + lockForUpdate pada
+   baris kendaraan DAN baris booking user (anti race-condition):
+   1 booking aktif per user → kuota bidang → ketersediaan ulang
+   (AvailabilityService) → simpan status dipinjam. Kegagalan
+   melempar DomainException berpesan Indonesia.
+
+────────────────────────────────────────────────────────────────────
+ 3. ROUTE, CONTROLLER, UI
+────────────────────────────────────────────────────────────────────
+
+ Route /pegawai — middleware role:pegawai|pengurus (admin 403;
+ docs: pengurus adalah user pegawai juga):
+   GET  /pegawai/search?start_date&end_date   (search.index)
+   GET  /pegawai/bookings                     (riwayat, paginate 10)
+   GET  /pegawai/bookings/create?vehicle_id&start&end (ringkasan+form)
+   POST /pegawai/bookings                     (store via service)
+
+ • Halaman cari: form tanggal sticky saat scroll di mobile (input
+   date native — ui_responsive.md); KARTU KUOTA BIDANG (terpakai X
+   dari Y, sisa) merah bila habis; grid kartu mobil (foto/plat/
+   tahun/kapasitas); tombol "Pinjam Mobil Ini" DISABLED + alasan
+   bila kuota habis atau user masih punya booking aktif.
+ • Form booking: ringkasan mobil+rentang (jumlah hari, catatan
+   "booking hari-H mulai 00:00"), field alamat & keperluan.
+ • Riwayat: kartu per peminjaman — badge status 4 warna, penanda
+   "Dikembalikan otomatis oleh sistem" & "Diganti dari {unit}"
+   (original_vehicle_id) & waktu returned_at; tombol "Kembalikan"
+   masih slot Fase 6.
+ • BOTTOM-NAV MOBILE kini 4 slot untuk pegawai/pengurus: Beranda ·
+   Cari Mobil · Pinjaman · Profil (Keluar tetap via drawer/sidebar;
+   admin tetap 3 slot dengan Keluar) — sesuai ui_responsive.md.
+ • Dashboard pegawai: KARTU KUOTA (sisa X dari Y + pintasan cari
+   mobil) + kartu peminjaman aktif.
+ • Menu sidebar "Peminjaman" (Cari Mobil Tersedia, Peminjaman Saya)
+   otomatis muncul untuk pegawai & pengurus (KarenMenu).
+
+────────────────────────────────────────────────────────────────────
+ 4. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ sail test → 138 PASSED (400 assertions), +12 baru
+   (BookingFlowTest): cari menampilkan/menyembunyikan benar; durasi
+   4 hari ditolak vs Sabtu–Senin (3 hari) diterima; masa lalu
+   ditolak; booking hari-H tercatat mulai 00:00; 1 booking aktif
+   per user; kuota default 2 penuh → ditolak → lepas setelah
+   dikembalikan; kuota khusus 3 → 3 anggota bisa; pengurus bisa
+   meminjam DAN terkena kuota bidangnya; double-booking bersamaan
+   ditahan transaksi (DomainException, 1 baris tersimpan); user
+   tanpa seksi ditolak dengan pesan; riwayat badge + penanda;
+   admin 403.
+ ✓ Smoke HTTP (login nyata): search 200 (pegawai & pengurus) &
+   dengan tanggal 200, bookings 200, form create 200, admin 403.
+
+────────────────────────────────────────────────────────────────────
+ 5. BUG → PERIKSA MARKDOWN
+────────────────────────────────────────────────────────────────────
+
+ 1) ParseError Blade `} }` (spasi dalam penutup {{ }}) pada kartu
+    kuota → halaman 500. Murni typo implementasi; docs tidak
+    terkait. Satu test ikut gagal berantai ("pengurus juga bisa")
+    dan hijau setelah perbaikan — bukti diagnosis akar tunggal.
+ 2) Helper test mengembalikan Collection padahal deklarasi array
+    (TypeError) → cast ->all(). Murni impl.
+ 3) Kontainer Sail sempat berhenti (environment, bukan kode) —
+    dijalankan ulang; pengingat prosedur: tunggu mysql healthy
+    sebelum test (pelajaran Fase 0 masih relevan).
+ 4) DOCS dicek: seluruh aturan docs terpenuhi tanpa celah baru —
+    rumus kuota persis tech.md §4.2b; peminjaman.md & kuota_bidang.
+    md konsisten dengan implementasi; tidak ada perubahan docs
+    diperlukan fase ini (pertama kalinya bersih sepenuhnya).
+
+────────────────────────────────────────────────────────────────────
+ 6. KONSUMSI FASE BERIKUTNYA (Fase 6 — Pengembalian & Keluhan)
+────────────────────────────────────────────────────────────────────
+
+   • ReturnService: tombol "Kembalikan" (aktifkan slot riwayat &
+     dashboard), form keluhan opsional, kondisi perlu_diperiksa
+   • Daftar keluhan pengurus + tandai selesai (resolved)
+   • Penanda mobil pengganti pada keluhan (docs pengembalian.md)
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 5 —
+════════════════════════════════════════════════════════════════════

@@ -9,6 +9,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Pengurus\BudgetController;
 use App\Http\Controllers\Pengurus\DocumentController;
 use App\Http\Controllers\Pengurus\EventController;
+use App\Http\Controllers\Pegawai\BookingController as PegawaiBookingController;
+use App\Http\Controllers\Pegawai\SearchController;
 use App\Http\Controllers\Pengurus\MaintenanceController;
 use App\Http\Controllers\Pengurus\ReplacementController;
 use App\Http\Controllers\Pengurus\VehicleController;
@@ -118,6 +120,17 @@ Route::middleware(['auth', 'role:admin|pengurus'])
         Route::patch('/{event}/conflicts/{booking}/cancel', [EventController::class, 'cancelBooking'])->name('conflicts.cancel');
         Route::patch('/{event}/confirm', [EventController::class, 'confirm'])->name('confirm');
         Route::patch('/{event}/cancel', [EventController::class, 'cancel'])->name('cancel');
+    });
+
+// ── PEMINJAMAN (pegawai DAN pengurus) — docs/feature/peminjaman.md ──
+Route::middleware(['auth', 'role:pegawai|pengurus'])
+    ->prefix('pegawai')
+    ->name('pegawai.')
+    ->group(function () {
+        Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+        Route::get('/bookings', [PegawaiBookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/create', [PegawaiBookingController::class, 'create'])->name('bookings.create');
+        Route::post('/bookings', [PegawaiBookingController::class, 'store'])->name('bookings.store');
     });
 
 require __DIR__.'/auth.php';
