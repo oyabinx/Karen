@@ -47,8 +47,7 @@
 
                 @if ($b->status === 'dipinjam')
                     <div class="mt-3 pt-3 border-t border-gray-100">
-                        {{-- Tombol "Kembalikan" diaktifkan di Fase 6 (alur keluhan) --}}
-                        <span class="inline-block px-4 py-2 rounded-lg bg-gray-100 text-gray-400 text-sm font-medium">Tombol “Kembalikan” — segera (Fase 6)</span>
+                        @include('partials.finish-booking-modal', ['booking' => $b])
                     </div>
                 @endif
             </div>

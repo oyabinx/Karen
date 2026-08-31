@@ -10,8 +10,8 @@ Pengurus mengelola data mobil dinas: menambah/mengubah unit, mengatur apakah uni
 - CRUD lengkap; hapus = soft delete (riwayat booking tetap utuh).
 
 ### Status Kendaraan
-- `bisa_dipinjam` / `tidak_bisa_dipinjam` — toggle oleh pengurus (misal mobil rusak atau dipakai keperluan kantor).
-- Kondisi: `baik` / `perlu_diperiksa` — otomatis menjadi `perlu_diperiksa` saat pegawai mengajukan keluhan; pengurus mengembalikan ke `baik` setelah diperiksa.
+- `bisa_dipinjam` / `tidak_bisa_dipinjam` — toggle oleh pengurus (misal mobil dipakai keperluan kantor).
+- Kondisi: `baik` / `perlu_diperiksa` — **dua-duanya hanya diatur MANUAL oleh pengurus** (tombol "Tandai perlu diperiksa" / "Set kondisi baik"). Keluhan pengembalian pegawai TIDAK otomatis mengubah kondisi (keluhan bersifat catatan — lihat [pengembalian.md](pengembalian.md)); unit `perlu_diperiksa` tidak muncul di pencarian sampai dikembalikan ke `baik`.
 
 ### Jadwal Maintenance
 - Field: kendaraan, tanggal mulai, tanggal selesai, catatan. Status maintenance: `terjadwal` → `selesai` (input nota bengkel & anggaran saat selesai — lihat [anggaran_maintenance.md](anggaran_maintenance.md)).

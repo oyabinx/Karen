@@ -28,10 +28,10 @@
     </div>
 
     @if ($activeBooking)
-        <div class="bg-white rounded-xl border-2 border-indigo-200 p-6 mb-8">
+        <div class="bg-white rounded-xl border-2 border-emerald-200 p-6 mb-8">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 mb-1">Peminjaman Aktif</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-1">Peminjaman Aktif</p>
                     <p class="text-lg font-semibold">{{ $activeBooking->vehicle->name }}</p>
                     <p class="text-sm text-gray-500">
                         {{ $activeBooking->start_date->translatedFormat('d M Y') }} — {{ $activeBooking->end_date->translatedFormat('d M Y') }}
@@ -41,8 +41,11 @@
                     </p>
                     <p class="text-sm text-gray-500 mt-1">Tujuan: {{ $activeBooking->address }}</p>
                 </div>
-                {{-- Tombol "Kembalikan" diaktifkan di Fase 6 (alur keluhan) --}}
-                <span class="px-4 py-2 rounded-lg bg-gray-100 text-gray-400 text-sm font-medium">Tombol "Kembalikan" — Fase 6</span>
+                @if ($activeBooking->status === 'dipinjam')
+                    @include('partials.finish-booking-modal', ['booking' => $activeBooking])
+                @else
+                    <span class="px-4 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm font-medium">Menunggu mobil pengganti…</span>
+                @endif
             </div>
         </div>
     @endif

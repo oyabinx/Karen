@@ -176,7 +176,7 @@ Mobil **tersedia** pada rentang [mulai, akhir] jika **TIDAK** ada:
 - jadwal maintenance **berstatus `terjadwal`** yang overlap dengan rentang (yang sudah `selesai` TIDAK memblokir — ketersediaan berbasis tanggal & status);
 - event berstatus `terjadwal` yang rentangnya overlap (mobil termasuk armada event);
 - mobil berstatus `tidak_bisa_dipinjam`;
-- mobil bercondition `perlu_diperiksa`.
+- mobil bercondition `perlu_diperiksa` — **hanya diatur manual oleh pengurus** (keluhan pengembalian TIDAK mengubah condition; lihat [feature/pengembalian.md](feature/pengembalian.md)).
 
 Query (Eloquent, via `whereDoesntHave` / `whereNotExists`):
 

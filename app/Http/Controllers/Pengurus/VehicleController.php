@@ -79,6 +79,18 @@ class VehicleController extends Controller
     }
 
     /**
+     * Tandai kondisi perlu diperiksa — MANUAL saja oleh pengurus
+     * (keluhan pengembalian TIDAK mengubah kondisi; kesepakatan
+     * docs/feature/pengembalian.md).
+     */
+    public function needsInspection(Vehicle $vehicle): RedirectResponse
+    {
+        $vehicle->update(['condition' => 'perlu_diperiksa']);
+
+        return back()->with('success', 'Unit ditandai perlu diperiksa — tidak bisa dipinjam sementara.');
+    }
+
+    /**
      * Set kondisi kembali baik setelah selesai diperiksa pengurus.
      */
     public function markGood(Vehicle $vehicle): RedirectResponse

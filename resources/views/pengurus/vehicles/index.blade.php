@@ -62,7 +62,12 @@
                         @if ($v->condition === 'perlu_diperiksa')
                             <form method="POST" action="{{ route('pengurus.vehicles.condition', $v) }}">
                                 @csrf @method('PATCH')
-                                <button class="text-green-600 hover:underline" onclick="return confirm('Tandai kondisi kembali baik?')">Set kondisi baik</button>
+                                <button class="text-green-600 hover:underline">Set kondisi baik</button>
+                            </form>
+                        @else
+                            <form method="POST" action="{{ route('pengurus.vehicles.needsInspection', $v) }}" onsubmit="return confirm('Tandai unit perlu diperiksa? Unit tidak bisa dipinjam sampai dikembalikan ke baik.')">
+                                @csrf @method('PATCH')
+                                <button class="text-amber-600 hover:underline">Tandai perlu diperiksa</button>
                             </form>
                         @endif
                     </div>

@@ -30,7 +30,7 @@ Karen adalah **satu codebase web responsive** (tidak ada aplikasi mobile terpisa
 
 ### Halaman Khusus
 - **Cari mobil (pegawai)**: form tanggal sticky di atas hasil saat scroll di mobile; kartu mobil menampilkan foto, plat, kapasitas + tombol "Pilih" yang langsung terlihat tanpa scroll.
-- **Tombol "Kembalikan"**: selalu tampak menonjol (warna aksen) di dashboard mobile — ini aksi lapangan paling penting.
+- **Tombol "Selesai"** (penyelesaian peminjaman + pop-up keluhan opsional): selalu tampak menonjol (warna aksen) di dashboard mobile — ini aksi lapangan paling penting.
 - **Form keluhan**: textarea lebar penuh, mudah diisi satu tangan.
 - **PDF dokumen (bend26/nota/kartu inventaris)**: mobile menampilkan tombol unduh (bukan preview inline); desktop boleh preview iframe.
 

@@ -52,11 +52,10 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 5. Mobil otomatis dianggap tidak tersedia bagi pegawai lain pada rentang tanggal tersebut.
 
 ### 4.2 Alur Pengembalian Manual
-1. Setelah selesai menggunakan mobil, pegawai membuka aplikasi dan menekan tombol **"Kembalikan"** pada peminjaman aktifnya.
-2. Sistem menampilkan **form keluhan**: *"Apakah ada keluhan terkait unit yang dipinjam?"*
-3. Pegawai dapat mengisi keluhan (opsional) atau melewatkannya.
-4. Setelah submit, status peminjaman berubah menjadi `dikembalikan` dan mobil kembali **tersedia** untuk dipinjam.
-   - Jika ada keluhan, mobil ditandai `perlu_diperiksa` dan keluhan muncul di daftar pengurus.
+1. Setelah selesai menggunakan mobil, pegawai membuka aplikasi dan menekan tombol **"Selesai"** pada peminjaman aktifnya.
+2. Sistem membuka **pop-up** dengan **textbox keluhan opsional** (*"Apakah ada keluhan terkait unit yang dipinjam?"*) — boleh dikosongkan.
+3. Setelah submit, status peminjaman berubah menjadi `dikembalikan` dan mobil **segera tersedia** untuk dipinjam.
+4. Bila keluhan diisi, keluhan **hanya tercatat** pada daftar Keluhan Unit pengurus untuk ditindaklanjuti manual — mobil **tidak otomatis** disisihkan/dijadwalkan maintenance; bila perlu perbaikan, pengurus membuat jadwal maintenance secara manual (alur 4.1 penggantian berlaku bila menabrak booking).
 
 ### 4.3 Alur Pengembalian Otomatis
 1. Jika masa pinjam telah berakhir (melewati `end_date`) dan pegawai **tidak** menekan tombol kembalikan, sistem secara otomatis:
@@ -81,6 +80,7 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 | 10 | Setiap bidang memiliki **jatah maksimal mobil yang dipinjam bersamaan**: default **2 mobil**, dengan **satu bidang khusus maksimal 3 mobil** — kuota dikonfigurasi oleh admin. Booking mendatang yang sudah terkonfirmasi turut mengunci jatah. |
 | 11 | Pengurus dapat **membuat peminjaman mobil** seperti pegawai — selama kuota bidang masih tersisa — dan peminjamannya dihitung pada kuota bidang tempat **seksi** pengurus terdaftar (seksi wajib diisi untuk pegawai dan pengurus). |
 | 12 | Mobil yang dijadwalkan **maintenance** padahal sudah memiliki booking: sistem mencarikan **mobil pengganti yang tersedia** dan pengurus mengonfirmasi penggantinya; bila tidak ada pengganti, booking dibatalkan dan jatah kuota dilepas. |
+| 12b | Keluhan pada saat pengembalian bersifat **catatan saja** — mobil tetap bisa dipinjam dan tidak otomatis menjadi maintenance/`perlu_diperiksa`; kondisi `perlu_diperiksa` hanya diatur **manual** oleh pengurus. |
 | 13 | Anggaran maintenance terbagi **4 pos** (servis, suku cadang, AC, pelumas) dengan total **berbeda per mobil sesuai tahun pembuatan**, dikelola pengurus. |
 | 14 | Realisasi nota bengkel dipilah pengurus ke 4 pos, dikalikan **koefisien 1,13** (pajak), dan menghasilkan dokumen **bukti pengeluaran bendahara (bend26)** serta **draft nota per pos** (1 nota bengkel dipecah menjadi maksimal 4 draft). |
 | 15 | Aplikasi berjalan di **intranet**; pertukaran data anggaran dengan Google dilakukan via **sinkronisasi Google Sheets API (outbound dari server)** — tidak ada akses inbound dari internet. |

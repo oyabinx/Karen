@@ -1,0 +1,120 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 6                      ║
+║           Pengembalian & Keluhan (Aturan Hasil Kesepakatan)        ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 6 — Pengembalian & Keluhan
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — tombol "Selesai" + pop-up keluhan opsional;
+                KELUHAN = CATATAN SAHAJA (mobil tetap bisa dipinjam,
+                tidak otomatis maintenance); daftar keluhan pengurus;
+                kondisi perlu_diperiksa manual-only; 147/147 test HIJAU
+
+────────────────────────────────────────────────────────────────────
+ 1. KESEPAKATAN REVISI (verifikasi user sebelum eksekusi)
+────────────────────────────────────────────────────────────────────
+
+ User memverifikasi alur penyelesaian peminjaman dan menetapkan
+ tiga keputusan yang MENGUBAH docs lama:
+
+ ┌────────────────────────┬────────────────────────────────────────┐
+ │ Aspek                  │ Kesepakatan                             │
+ ├────────────────────────┼────────────────────────────────────────┤
+ │ Efek keluhan           │ CATATAN SAHAJA: tidak otomatis         │
+ │                        │ menyisihkan mobil / mengubah kondisi   │
+ │                        │ / menjadwalkan maintenance. Mobil      │
+ │                        │ tetap bisa dipinjam. Tindak lanjut     │
+ │                        │ diputuskan MANUAL pengurus (jadwalkan  │
+ │                        │ maintenance bila perlu — alur Fase 4). │
+ │ Kondisi perlu_diperiksa│ MANUAL-ONLY: tombol "Tandai perlu      │
+ │                        │ diperiksa"/"Set kondisi baik" milik    │
+ │                        │ pengurus; keluhan pegawai TIDAK        │
+ │                        │ menyentuhnya.                          │
+ │ Istilah tombol & UI    │ "Selesai" + POP-UP modal berisi        │
+ │                        │ TEXTBOX keluhan OPSIONAL (boleh        │
+ │                        │ kosong) — bukan halaman terpisah.      │
+ └────────────────────────┴────────────────────────────────────────┘
+
+ Docs lama (keluhan → otomatis perlu_diperiksa → mobil diblokir)
+ diganti di SEMUA titik: pengembalian.md (tulis ulang), product.md
+ (alur 4.2 + aturan baru 12b), tech.md §4.1 (condition manual-only),
+ manajemen_kendaraan.md, dashboard.md, peminjaman.md, ui_responsive.md.
+
+────────────────────────────────────────────────────────────────────
+ 2. IMPLEMENTASI
+────────────────────────────────────────────────────────────────────
+
+ • ReturnService::manualReturn(booking, complaint?) — validasi
+   status dipinjam; transaksi: set dikembalikan + returned_at;
+   keluhan terisi → Complaint::create (resolved=false) TANPA
+   menyentuh kendaraan. Pengembalian dini diperbolehkan.
+ • ReturnController (Pegawai): POST /pegawai/returns/{booking}
+   (route pegawai.returns.store, grup role:pegawai|pengurus);
+   guard milik-sendiri (403 bila bukan booking user).
+ • Modal "Selesai" (partials/finish-booking-modal, Alpine):
+   tombol aksen emerald + ringkasan booking + textbox keluhan
+   opsional (maks 1000 kar., placeholder "boleh dikosongkan") +
+   keterangan "keluhan tercatat, mobil tetap tersedia". Dipasang
+   di dashboard pegawai (kartu peminjaman aktif) & Peminjaman Saya;
+   status menunggu_penggantian menampilkan "Menunggu mobil
+   pengganti…" (tidak bisa diselesaikan sendiri).
+ • ComplaintController (Pengurus): daftar keluhan (tab belum/
+   selesai, paginasi) berisi unit, pelapor + bidang, isi, waktu;
+   tombol Tandai selesai / Buka kembali; pintasan "Jadwalkan
+   maintenance (manual)". Dashboard pengurus: kartu keluhan belum
+   selesai (amber bila ada). Menu sidebar "Keluhan Unit" muncul
+   otomatis (KarenMenu).
+ • VehicleController: + PATCH needs-inspection (tandai
+   perlu_diperiksa MANUAL); kartu kendaraan kini dua arah
+   (Tandai perlu diperiksa ⇄ Set kondisi baik).
+ • Keluhan tercatat pada mobil pengganti bila booking pernah
+   diganti (mengikuti vehicle_id booking — tes khusus).
+
+────────────────────────────────────────────────────────────────────
+ 3. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ sail test → 147 PASSED (432 assertions), +9 ReturnFlowTest:
+   selesai tanpa keluhan → mobil LANGSUNG tersedia;
+   ★ keluhan "ban depan aus" → keluhan tersimpan, namun mobil
+     tetap kondisi BAIK, status bisa_dipinjam, TANPA jadwal
+     maintenance, dan tetap bisa dipinjam orang lain (inti
+     kesepakatan); keluhan tampil di daftar pengurus + resolve;
+   submit ganda & status bukan dipinjam ditolak; booking orang
+   lain 403; pengurus bisa menyelesaikan peminjamannya sendiri;
+   kondisi perlu_diperiksa hanya manual (blokir → baik pulih);
+   keluhan menempel di mobil pengganti; pegawai 403 di keluhan.
+   (138 test fase sebelumnya tetap hijau — tidak ada yang
+   bergantung pada perilaku lama.)
+ ✓ Smoke HTTP: modal "Selesai — Kembalikan Mobil" tampil di
+   Peminjaman Saya (setelah dibuatkan booking aktif uji);
+   /pengurus/complaints 200 (kedua tab); pegawai 403.
+
+────────────────────────────────────────────────────────────────────
+ 4. BUG → PERIKSA MARKDOWN
+────────────────────────────────────────────────────────────────────
+
+ Tidak ada bug implementasi fase ini (suite hijau pada run
+ pertama setelah implementasi). Perubahan besar justru DI MUKA:
+ verifikasi user menemukan docs lama BERTENTANGAN dengan
+ kebutuhan nyata (keluhan otomatis menyisihkan mobil) →
+ diperbaiki docs-nya dulu, baru kode mengikuti. Catatan proses:
+ smoke "modal TIDAK ADA" pertama bukan bug — user uji memang
+ belum punya booking aktif (modal hanya muncul untuk status
+ dipinjam); dibuatkan booking uji lalu hijau.
+
+────────────────────────────────────────────────────────────────────
+ 5. KONSUMSI FASE BERIKUTNYA (Fase 7 — Pengembalian Otomatis)
+────────────────────────────────────────────────────────────────────
+
+   • ReturnService::autoReturn() + jadwal dailyAt('00:01'):
+     booking dipinjam lewat end_date → dikembalikan (auto_returned)
+   • Pembatalan otomatis booking menunggu_penggantian lewat tempo
+   • EventService::autoFinish sudah terpasang (Fase 4c)
+   • Cron pemicu scheduler — dokumentasi & verifikasi lokal
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 6 —
+════════════════════════════════════════════════════════════════════

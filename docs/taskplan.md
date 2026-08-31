@@ -78,12 +78,13 @@
 - [x] **Route peminjaman dibuka untuk pengurus** (`role:pegawai|pengurus`) — pengurus dapat meminjam mobil seperti pegawai — *teruji: pengurus meminjam & terkena kuota bidangnya*
 - [x] Riwayat peminjaman pribadi (status badge, penanda pengembalian otomatis & penggantian mobil) — *+ slot tombol Kembalikan untuk Fase 6; bottom-nav mobile 4 slot (Beranda/Cari/Pinjaman/Profil)*
 
-## Fase 6 — Pengembalian & Keluhan
-- [ ] Tombol "Kembalikan" pada peminjaman aktif → [feature/pengembalian.md](feature/pengembalian.md)
-- [ ] Form keluhan opsional saat pengembalian ("Apakah ada keluhan terkait unit?")
-- [ ] Jika ada keluhan → simpan `complaints`, tandai mobil `perlu_diperiksa`
-- [ ] Status booking → `dikembalikan`, mobil tersedia kembali
-- [ ] Daftar keluhan untuk pengurus + tombol "selesai ditindaklanjuti" (resolved)
+## Fase 6 — Pengembalian & Keluhan — ✅ SELESAI *(aturan revisi: keluhan = catatan saja)*
+- [x] Tombol **"Selesai"** pada peminjaman aktif → [feature/pengembalian.md](feature/pengembalian.md) — *modal pop-up di dashboard & Peminjaman Saya (label "Selesai" sesuai kesepakatan, menggantikan "Kembalikan")*
+- [x] **Pop-up textbox keluhan opsional** ("Apakah ada keluhan terkait unit?" — boleh kosong)
+- [x] Keluhan = **catatan saja**: TIDAK mengubah kondisi/status kendaraan, TIDAK otomatis maintenance, mobil **tetap bisa dipinjam** — tindak lanjut diputuskan manual pengurus
+- [x] Status booking → `dikembalikan`, mobil tersedia kembali segera
+- [x] Daftar keluhan untuk pengurus (tab belum/selesai) + tombol **"Tandai selesai"** (resolved) + pintasan jadwalkan maintenance manual
+- [x] Kondisi `perlu_diperiksa` menjadi **manual-only** (tombol Tandai/Set baik milik pengurus; keluhan pegawai tidak menyentuhnya) — *docs manajemen_kendaraan & tech.md §4.1 diperbarui*
 
 ## Fase 7 — Pengembalian Otomatis (Scheduler)
 - [ ] `ReturnService::autoReturn()` + jadwal `dailyAt('00:01')` → [feature/pengembalian_otomatis.md](feature/pengembalian_otomatis.md)

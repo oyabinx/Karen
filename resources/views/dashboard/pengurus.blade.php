@@ -21,6 +21,11 @@
             <p class="text-sm text-gray-500">Peminjaman Berjalan</p>
             <p class="text-3xl font-semibold mt-1">{{ \App\Models\Booking::where('status', 'dipinjam')->count() }}</p>
         </div>
+        <div class="bg-white rounded-xl border {{ \App\Models\Complaint::where('resolved', false)->exists() ? 'border-amber-300' : 'border-gray-200' }} p-5">
+            <p class="text-sm text-gray-500">Keluhan Belum Selesai</p>
+            <p class="text-3xl font-semibold mt-1">{{ \App\Models\Complaint::where('resolved', false)->count() }}</p>
+            <a href="{{ route('pengurus.complaints.index') }}" class="text-sm text-indigo-600 hover:underline">Lihat keluhan →</a>
+        </div>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-6">

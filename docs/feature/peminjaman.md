@@ -37,7 +37,7 @@ Fitur inti self-service: user memilih rentang tanggal, sistem menampilkan mobil 
 
 ### 4. Riwayat Peminjaman
 - Daftar peminjaman pribadi: mobil, tanggal, alamat, keperluan, status.
-- Peminjaman aktif menampilkan tombol **"Kembalikan"** (lihat [pengembalian.md](pengembalian.md)).
+- Peminjaman aktif menampilkan tombol **"Selesai"** (pop-up keluhan opsional — lihat [pengembalian.md](pengembalian.md)).
 - Pengembalian otomatis diberi penanda "dikembalikan otomatis".
 
 ## Endpoint

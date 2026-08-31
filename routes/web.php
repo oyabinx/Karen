@@ -10,7 +10,9 @@ use App\Http\Controllers\Pengurus\BudgetController;
 use App\Http\Controllers\Pengurus\DocumentController;
 use App\Http\Controllers\Pengurus\EventController;
 use App\Http\Controllers\Pegawai\BookingController as PegawaiBookingController;
+use App\Http\Controllers\Pegawai\ReturnController;
 use App\Http\Controllers\Pegawai\SearchController;
+use App\Http\Controllers\Pengurus\ComplaintController;
 use App\Http\Controllers\Pengurus\MaintenanceController;
 use App\Http\Controllers\Pengurus\ReplacementController;
 use App\Http\Controllers\Pengurus\VehicleController;
@@ -80,6 +82,12 @@ Route::middleware(['auth', 'role:pengurus'])
         Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
         Route::patch('/vehicles/{vehicle}/status', [VehicleController::class, 'toggleStatus'])->name('vehicles.status');
         Route::patch('/vehicles/{vehicle}/condition', [VehicleController::class, 'markGood'])->name('vehicles.condition');
+        Route::patch('/vehicles/{vehicle}/needs-inspection', [VehicleController::class, 'needsInspection'])->name('vehicles.needsInspection');
+
+        // Keluhan unit (dari form pengembalian)
+        Route::get('/complaints', [ComplaintController::class, 'index'])->name('complaints.index');
+        Route::patch('/complaints/{complaint}/resolve', [ComplaintController::class, 'resolve'])->name('complaints.resolve');
+        Route::patch('/complaints/{complaint}/reopen', [ComplaintController::class, 'reopen'])->name('complaints.reopen');
 
         Route::get('/maintenances', [MaintenanceController::class, 'index'])->name('maintenances.index');
         Route::post('/maintenances', [MaintenanceController::class, 'store'])->name('maintenances.store');
@@ -131,6 +139,7 @@ Route::middleware(['auth', 'role:pegawai|pengurus'])
         Route::get('/bookings', [PegawaiBookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/create', [PegawaiBookingController::class, 'create'])->name('bookings.create');
         Route::post('/bookings', [PegawaiBookingController::class, 'store'])->name('bookings.store');
+        Route::post('/returns/{booking}', [ReturnController::class, 'store'])->name('returns.store');
     });
 
 require __DIR__.'/auth.php';
