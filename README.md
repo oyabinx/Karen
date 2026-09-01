@@ -1,58 +1,58 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Karen — Sistem Peminjaman Kendaraan Dinas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web intranet self-service untuk peminjaman mobil dinas kantor: pegawai mencari mobil tersedia pada rentang tanggal, memesan dengan alamat & keperluan (maks **3 hari**, termasuk Sabtu–Minggu), dan menyelesaikan peminjaman dengan tombol **"Selesai"** + keluhan opsional. Pengelolaan kendaraan, jadwal maintenance, **anggaran 4 pos (×1,13) + dokumen bend26/draft nota/kartu inventaris**, **event armada bidang di atas kuota**, dan **sinkronisasi Google Sheets** tersedia untuk pengurus/admin.
 
-## About Laravel
+Dokumentasi perencanaan lengkap: folder [`docs/`](docs/) — log implementasi per fase: folder [`build_logs/`](build_logs/).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Kebutuhan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Docker** + Docker Compose (pengembangan memakai [Laravel Sail](https://laravel.com/docs/sail))
+- Git
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Setup Pengembangan (laptop, via Sail)
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone git@github.com:oyabinx/Karen.git && cd Karen
+cp .env.example .env          # sesuaikan bila perlu (default sudah untuk Sail)
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/app -w /app composer install
+./vendor/bin/sail up -d       # tunggu mysql healthy: ./vendor/bin/sail ps
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate --seed
+./vendor/bin/sail npm install && ./vendor/bin/sail npm run dev
+# buka http://localhost
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Akun bawaan (seeder, **ganti password setelah login pertama**):
 
-## Contributing
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@karen.test` | `password` | admin |
+| `pengurus@karen.test` | `password` | pengurus |
+| `pegawai@karen.test` | `password` | pegawai |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Perintah Sail harian: `sail up -d`, `sail down`, `sail ps`, `sail logs -f`, `sail artisan …`, `sail composer …`, `sail npm …`, `sail test`.
 
-## Code of Conduct
+## ⚠️ Scheduler WAJIB dipasang (satu kali oleh petugas IT)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Aplikasi tidak bisa membangunkan dirinya sendiri (intranet tanpa trafik tengah malam). Tiga tugas terjadwal — **pengembalian otomatis peminjaman (00:01)**, penutupan event armada (00:02), dan **sinkronisasi Google Sheets** (tiap 5 menit, interval dalamnya diatur admin) — bergantung pada pemicu eksternal:
 
-## Security Vulnerabilities
+```bash
+# Linux (cron) — jalankan sekali:
+(umask 077 ; crontab -l 2>/dev/null; echo "* * * * * cd /path/karen && php artisan schedule:run >> /dev/null 2>&1") | crontab -
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Alternatif Linux tanpa cron: systemd unit long-running `php artisan schedule:work` (`Restart=always`). Verifikasi: `php artisan schedule:list`, lalu cek `storage/logs/laravel.log` setelah tengah malam. Detail: [`docs/tech.md` §7](docs/tech.md).
 
-## License
+## Testing
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+./vendor/bin/sail test
+```
+
+## Integrasi Google (produksi)
+
+Outbound saja (Google Sheets API + Service Account) — tidak ada akses inbound dari internet. Seluruh konfigurasi runtime via UI admin (**Admin → Integrasi Google**): upload kunci JSON (tersimpan terenkripsi di database), URL spreadsheet, tab anggaran/realisasi, arsip Drive opsional, interval polling, **Test Koneksi**, dan log sinkronisasi. Pastikan firewall server mengizinkan outbound HTTPS ke `oauth2.googleapis.com` dan `sheets.googleapis.com`. Panduan lengkap: [`docs/feature/integrasi_google.md`](docs/feature/integrasi_google.md).
+
+## Deployment
+
+Lihat Fase 10 pada [`docs/taskplan.md`](docs/taskplan.md): alur laptop (Sail) → GitHub → server intranet Ubuntu (Nginx + PHP-FPM + MySQL), termasuk checklist integrasi Google di produksi.

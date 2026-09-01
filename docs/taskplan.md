@@ -86,12 +86,12 @@
 - [x] Daftar keluhan untuk pengurus (tab belum/selesai) + tombol **"Tandai selesai"** (resolved) + pintasan jadwalkan maintenance manual
 - [x] Kondisi `perlu_diperiksa` menjadi **manual-only** (tombol Tandai/Set baik milik pengurus; keluhan pegawai tidak menyentuhnya) — *docs manajemen_kendaraan & tech.md §4.1 diperbarui*
 
-## Fase 7 — Pengembalian Otomatis (Scheduler)
-- [ ] `ReturnService::autoReturn()` + jadwal `dailyAt('00:01')` → [feature/pengembalian_otomatis.md](feature/pengembalian_otomatis.md)
-- [ ] Penanda `auto_returned = true` pada booking terlambat
-- [ ] Pembatalan otomatis booking `menunggu_penggantian` yang lewat `end_date` tanpa keputusan pengurus (kuota bidang lepas)
-- [ ] `EventService::autoFinish()` (00:02): event lewat `end_date` → `selesai` (idempoten)
-- [ ] Cron server untuk `schedule:run` (dokumentasikan di README)
+## Fase 7 — Pengembalian Otomatis (Scheduler) — ✅ SELESAI
+- [x] `ReturnService::autoReturn()` + jadwal `dailyAt('00:01')` → [feature/pengembalian_otomatis.md](feature/pengembalian_otomatis.md) — *task `bookings:auto-return` terdaftar di schedule:list*
+- [x] Penanda `auto_returned = true` pada booking terlambat — *+ `returned_at`; end_date hari ini tidak disentuh; tanpa keluhan di jalur otomatis*
+- [x] Pembatalan otomatis booking `menunggu_penggantian` yang lewat `end_date` tanpa keputusan pengurus (kuota bidang lepas) — *teruji: user bisa booking baru setelahnya*
+- [x] `EventService::autoFinish()` (00:02): event lewat `end_date` → `selesai` (idempoten) — *terpasang sejak Fase 4c; duplikat pendaftaran sisa edit ditemukan & dihapus (schedule:list bersih 4 task)*
+- [x] Cron server untuk `schedule:run` (dokumentasikan di README) — *README baru: bagian "Scheduler WAJIB dipasang" + baris cron siap-tempel + alternatif systemd + verifikasi*
 
 ## Fase 8 — Dashboard & Laporan
 - [ ] Dashboard admin: ringkasan jumlah user per role, per bidang → [feature/dashboard.md](feature/dashboard.md)

@@ -1,0 +1,109 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 7                      ║
+║            Pengembalian Otomatis & Scheduler Terpadu               ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 7 — Pengembalian Otomatis (Scheduler)
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — autoReturn harian (dikembalikan +
+                pembatalan menunggu_penggantian), 4 task scheduler
+                terverifikasi, README + dokumentasi cron, 154/154
+                test HIJAU
+
+────────────────────────────────────────────────────────────────────
+ 1. RINGKASAN EKSEKUSI
+────────────────────────────────────────────────────────────────────
+
+ Fase 7 menutup siklus peminjaman secara otomatis: booking yang
+ lewat jatuh tempo tanpa tombol "Selesai" ditutup sistem; booking
+ menunggu_penggantian yang tak putuskan pengurus dibatalkan (kuota
+ lepas). EventService::autoFinish (Fase 4c) kini satu keluarga
+ scheduler lengkap + README resmi memandu pemasangan pemicu.
+
+────────────────────────────────────────────────────────────────────
+ 2. ReturnService::autoReturn() — docs/feature/pengembalian_otomatis.md
+────────────────────────────────────────────────────────────────────
+
+ • Booking `dipinjam` + end_date < HARI INI →
+   `dikembalikan` + auto_returned=true + returned_at=now.
+ • Booking `menunggu_penggantian` + end_date < HARI INI →
+   `dibatalkan` + auto_returned=true — mencegah kuota bidang
+   terkunci selamanya & mobil lama terblokir tanpa batas
+   (review pasca-Fase 4; kini terImplementasi scheduler-nya).
+ • end_date HARI INI tidak disentuh (masih berlaku hingga 24:00).
+ • TANPA keluhan dicatat pada jalur otomatis (docs).
+ • Mass-update → idempoten secara alami (eksekusi ulang = 0).
+ • Live smoke di DB dev: {"dikembalikan":0,"dibatalkan":0} —
+   bersih (tidak ada booking lewat tempo).
+
+────────────────────────────────────────────────────────────────────
+ 3. SCHEDULER LENGKAP (routes/console.php) — schedule:list
+────────────────────────────────────────────────────────────────────
+
+   1  0 * * *   bookings:auto-return      (00:01 — Fase 7)
+   2  0 * * *   events:auto-finish        (00:02 — Fase 4c)
+   */5 * * * *  budgets:sync-sheets       (interval dalamnya via UI admin — Fase 4b)
+   0  0 * * 0   integration-logs:purge    (retensi 90 hari — Fase 4b)
+
+ Ditemukan & diperbaiki saat verifikasi: events:auto-finish sempat
+ TERDAFTAR DOBEL (sisa edit Fase 4c) → duplikat dihapus;
+ schedule:list kini bersih 4 entri.
+
+────────────────────────────────────────────────────────────────────
+ 4. README.md (baru — menggantikan boilerplate Laravel)
+────────────────────────────────────────────────────────────────────
+
+ • Deskripsi produk + ringkasan aturan (3 hari, kuota, anggaran
+   ×1,13, event, Google Sheets).
+ • Setup pengembangan Sail langkah demi langkah + akun seeder
+   (dengan peringatan ganti password) + perintah harian.
+ • ★ Bagian "Scheduler WAJIB dipasang": penjelasan mengapa aplikasi
+   tidak bisa membangunkan dirinya (intranet tanpa trafik malam),
+   baris cron siap-tempel, alternatif systemd schedule:work,
+   verifikasi via schedule:list + log.
+ • Testing, integrasi Google produksi (outbound + firewall), dan
+   tautan deploy (taskplan Fase 10).
+
+────────────────────────────────────────────────────────────────────
+ 5. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ sail test → 154 PASSED (448 assertions), +7 AutoReturnTest:
+   lewat tempo → dikembalikan otomatis; end_date hari ini tak
+   disentuh; sudah manual tak tersentuh (auto_returned tetap
+   false); idempoten dua eksekusi; menunggu_penggantian lewat
+   tempo → dibatalkan + KUOTA LEPAS (user bisa booking baru via
+   BookingService); tanpa keluhan otomatis; riwayat menampilkan
+   badge "Dikembalikan otomatis oleh sistem".
+ ✓ schedule:list: 4 task, next-due benar.
+ ✓ Tinker live: autoReturn berjalan bersih di DB dev.
+
+────────────────────────────────────────────────────────────────────
+ 6. BUG → PERIKSA MARKDOWN
+────────────────────────────────────────────────────────────────────
+
+ 1) events:auto-finish dobel di console.php (sisa edit fase
+    sebelumnya) → ketahuan lewat schedule:list saat smoke; bukan
+    salah docs (docs hanya mendefinisikan satu jadwal) — catatan
+    impl: verifikasi schedule:list masuk checklist tiap fase yang
+    menambah scheduler.
+ 2) Test gagal karena user uji tanpa seksi (guard kuota Fase 5
+    bekerja BENAR) → test diberi seksi. Bukan bug; justru bukti
+    guard aktif. Typo kecil nama test diperbaiki.
+ Docs tidak perlu perubahan — pengembalian_otomatis.md & tech.md
+ §4.3 sudah persis dengan implementasi.
+
+────────────────────────────────────────────────────────────────────
+ 7. KONSUMSI FASE BERIKUTNYA (Fase 8 — Dashboard & Laporan)
+────────────────────────────────────────────────────────────────────
+
+   • Dashboard admin: user per role/bidang; pengurus: keluhan &
+     anggaran ringkas; pegawai: sudah lengkap (kuota + aktif)
+   • Monitoring seluruh peminjaman (filter tanggal/mobil/bidang)
+   • Laporan penggunaan + realisasi anggaran per pos + export CSV
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 7 —
+════════════════════════════════════════════════════════════════════
