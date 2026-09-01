@@ -154,8 +154,16 @@ class EventService
      */
     public function autoFinish(): int
     {
-        return Event::where('status', 'terjadwal')
+        $selesai = Event::where('status', 'terjadwal')
             ->whereDate('end_date', '<', today())
             ->update(['status' => 'selesai']);
+
+        // Jejak kesehatan scheduler (dibaca dashboard admin)
+        \App\Models\IntegrationSetting::updateOrCreate(
+            ['setting_key' => 'system_last_auto_finish'],
+            ['value' => now()->toDateTimeString()],
+        );
+
+        return $selesai;
     }
 }

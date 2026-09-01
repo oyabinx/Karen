@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Pengurus\BudgetController;
+use App\Http\Controllers\Pengurus\BookingMonitorController;
 use App\Http\Controllers\Pengurus\DocumentController;
 use App\Http\Controllers\Pengurus\EventController;
 use App\Http\Controllers\Pegawai\BookingController as PegawaiBookingController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Pegawai\SearchController;
 use App\Http\Controllers\Pengurus\ComplaintController;
 use App\Http\Controllers\Pengurus\MaintenanceController;
 use App\Http\Controllers\Pengurus\ReplacementController;
+use App\Http\Controllers\Pengurus\ReportController;
 use App\Http\Controllers\Pengurus\VehicleController;
 use Illuminate\Support\Facades\Route;
 
@@ -88,6 +90,10 @@ Route::middleware(['auth', 'role:pengurus'])
         Route::get('/complaints', [ComplaintController::class, 'index'])->name('complaints.index');
         Route::patch('/complaints/{complaint}/resolve', [ComplaintController::class, 'resolve'])->name('complaints.resolve');
         Route::patch('/complaints/{complaint}/reopen', [ComplaintController::class, 'reopen'])->name('complaints.reopen');
+
+        // Monitoring & laporan
+        Route::get('/bookings', [BookingMonitorController::class, 'index'])->name('bookings.index');
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
         Route::get('/maintenances', [MaintenanceController::class, 'index'])->name('maintenances.index');
         Route::post('/maintenances', [MaintenanceController::class, 'store'])->name('maintenances.store');

@@ -1,0 +1,123 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 8                      ║
+║              Dashboard, Monitoring & Laporan                       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 8 — Dashboard & Laporan
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — dashboard 3 role ditingkatkan (tanpa
+                pekerjaan ganda), monitoring peminjaman berfilter,
+                laporan + export CSV + rekap anggaran per pos,
+                kesehatan scheduler; 162/162 test HIJAU
+
+────────────────────────────────────────────────────────────────────
+ 1. KROSCEK PRA-FASE (instruksi user — hindari double pengerjaan)
+────────────────────────────────────────────────────────────────────
+
+ Diperiksa silang taskplan Fase 8 vs fase2.log & fase6.log:
+ • Kerangka 3 dashboard (Fase 2) TIDAK dibangun ulang — hanya
+   ditingkatkan. Kartu keluhan pengurus (Fase 6), kuota+tombol
+   Selesai pegawai (Fase 5-6) SUDAH ADA dan tidak disentuh.
+ • Item "dashboard pegawai + tombol kembalikan" taskplan
+   praktis sudah selesai di fase sebelumnya — Fase 8 hanya
+   menambah riwayat 5 terakhir (tuntutan dashboard.md).
+ • Ditemukan HUTANG tersembunyi: teks placeholder "segera hadir
+   (Fase X)" di dashboard admin/pengurus/pegawai SUDAH BASI
+   (semua fitur hidup) → diganti konten/link nyata.
+ • Item Fase 10.3 (kartu kesehatan scheduler) dikerjakan di sini
+   karena dashboard sedang dibangun — di-cross-check ke
+   taskplan Fase 10 agar tidak dikerjakan dua kali nanti.
+
+────────────────────────────────────────────────────────────────────
+ 2. DASHBOARD
+────────────────────────────────────────────────────────────────────
+
+ ADMIN — rincian + kesehatan sistem:
+ • Kartu total (user/bidang/seksi/armada) + chip rincian USER
+   PER ROLE + tabel PER BIDANG (kuota, jumlah seksi, jumlah
+   anggota — relasi hasManyThrough Bidang→Seksi→User).
+ • KARtu KESEHATAN SCHEDULER: waktu eksekusi terakhir
+   auto-return / auto-finish / sync Sheets; badge merah
+   "⚠ Pemicu kemungkinan mati" bila tugas harian bolong >36 jam
+   DAN environment production (dev tanpa cron tidak false-alarm).
+   Sumber jejak: autoReturn()/autoFinish() kini menulis
+   integration_settings system_last_* (Fase 7 services).
+ • Pintasan nyata menggantikan daftar tugas basi.
+
+ PENGURUS — dari angka ke daftar:
+ • 5 kartu (armada, siap dipinjam, maintenance aktif, MENUNGGU
+   PENGGANTI +link, keluhan belum +link).
+ • DAFTAR peminjaman berjalan hari ini (unit, peminjam+bidang,
+   batas, tujuan) + link monitoring.
+ • Ringkasan anggaran tahun berjalan per pos (anggaran vs
+   realisasi ×1,13 vs sisa, merah bila minus) + event terjadwal.
+
+ PEGAWAI — tambah RIWAYAT TERAKHIR (5) dengan badge status +
+ penanda "(otomatis)"; bagian aturan diganti tautan nyata.
+
+────────────────────────────────────────────────────────────────────
+ 3. MONITORING & LAPORAN (baru — docs/feature/laporan.md)
+────────────────────────────────────────────────────────────────────
+
+ • /pengurus/bookings (BookingMonitorController): seluruh
+   peminjaman; filter nama peminjam, mobil, bidang, status,
+   rentang tanggal (overlap "menyentuh"); badge status + penanda
+   Ditutup otomatis / Diganti dari unit / keluhan (belum|selesai).
+ • /pengurus/reports (ReportController, default bulan berjalan):
+   - totals: jumlah peminjaman, TOTAL HARI PAKAI, keluhan
+     (rentang + belum selesai), tertutup otomatis, dibatalkan
+     sistem;
+   - REKAP PER MOBIL (jumlah + hari pakai, terurut);
+   - REALISASI ANGGARAN PER POS (tahun berjalan, seluruh unit);
+   - EXPORT CSV (tombol, dengan/ tanpa bagian anggaran): BOM
+     UTF-8 + pemisah ";" (Excel Indonesia) — 11 kolom termasuk
+     dikembalikan_otomatis & diganti_dari_unit.
+ • Route pengurus.bookings.index & pengurus.reports.index →
+   menu sidebar Monitoring muncul otomatis (KarenMenu).
+
+────────────────────────────────────────────────────────────────────
+ 4. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ sail test → 162 PASSED (484 assertions), +8 MonitoringReportTest:
+   monitoring filter bidang+rentang benar & penanda tampil;
+   laporan rekap (3 hari pakai terhitung); export CSV berisi
+   header+baris+rekap anggaran; laporan menampilkan anggaran
+   1.000.000 / realisasi 565.000 / sisa 435.000; dashboard admin
+   (rincian + kesehatan + jejak autoReturn tertulis); dashboard
+   pengurus (daftar hari ini + anggaran); dashboard pegawai
+   (riwayat singkat); 403 non-pengurus.
+ ✓ Smoke HTTP: admin dashboard tampilkan "Kesehatan Scheduler";
+   monitoring 200; laporan 200; export CSV 200 dengan header
+   benar (BOM+";"); pegawai 403.
+
+────────────────────────────────────────────────────────────────────
+ 5. BUG → PERIKSA MARKDOWN
+────────────────────────────────────────────────────────────────────
+
+ 1) ReportController TypeError (return type View tanpa import
+    Illuminate\View\View) → human error; docs tak terkait.
+ 2) Dua asersi test salah alamat ("Ditutup otomatis" diharapkan
+    di halaman laporan padahal milik monitoring; "&" literal vs
+    escaping assertSee) → test diperbaiki; murni kesalahan
+    penulisan test, bukan docs/kode.
+ DOCS: dashboard.md & laporan.md sudah sesuai implementasi —
+ tanpa perubahan. Satu penyesuaian taskplan: item "dashboard
+ pegawai + tombol kembalikan" ditandai selesai-sejak-Fase-6,
+ item Fase 10.3 kartu scheduler ditandai tercapai-lebih-awal.
+
+────────────────────────────────────────────────────────────────────
+ 6. KONSUMSI FASE BERIKUTNYA (Fase 9 — Pengujian & Persiapan Rilis)
+────────────────────────────────────────────────────────────────────
+
+   • Unit/feature test melengkapi celah (uji manual lintas role)
+   • Uji sinkronisasi Sheets staging (butuh spreadsheet uji &
+     kredensial — koordinasi user)
+   • Penyempurnaan README (sudah terbentuk di Fase 7 — tinggal
+     review) & Fase 10 deployment
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 8 —
+════════════════════════════════════════════════════════════════════

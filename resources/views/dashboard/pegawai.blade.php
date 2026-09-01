@@ -51,11 +51,23 @@
     @endif
 
     <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 class="font-semibold mb-3">Peminjaman Kendaraan</h2>
-        <ul class="text-sm text-gray-600 space-y-2 list-disc list-inside">
-            <li>Cari mobil tersedia pada rentang tanggal lalu booking dengan alamat & keperluan — <span class="text-gray-400">segera hadir (Fase 5)</span></li>
-            <li>Kembalikan mobil sendiri lewat aplikasi (dengan form keluhan opsional) — <span class="text-gray-400">segera hadir (Fase 6)</span></li>
-            <li>Maksimal 3 hari termasuk Sabtu–Minggu; maksimal sesuai kuota bidang Anda.</li>
-        </ul>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="font-semibold">Riwayat Terakhir</h2>
+            <a href="{{ route('pegawai.bookings.index') }}" class="text-sm text-indigo-600 hover:underline">Semua riwayat →</a>
+        </div>
+        <div class="space-y-2">
+            @forelse ($data['riwayatSingkat'] as $b)
+                <div class="flex items-center justify-between gap-3 text-sm">
+                    <span class="truncate">{{ $b->vehicle->name }} <span class="text-gray-400">{{ $b->start_date->translatedFormat('d M Y') }}</span></span>
+                    <span class="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium {{
+                        $b->status === 'dipinjam' ? 'bg-indigo-100 text-indigo-700' :
+                        ($b->status === 'menunggu_penggantian' ? 'bg-amber-100 text-amber-700' :
+                        ($b->status === 'dikembalikan' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'))
+                    }}">{{ ucfirst(str_replace('_', ' ', $b->status)) }}{{ $b->auto_returned ? ' (otomatis)' : '' }}</span>
+                </div>
+            @empty
+                <p class="text-sm text-gray-400">Belum ada peminjaman. <a href="{{ route('pegawai.search.index') }}" class="text-indigo-600 underline">Cari mobil</a> untuk mulai.</p>
+            @endforelse
+        </div>
     </div>
 </x-app-layout>

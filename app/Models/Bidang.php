@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Bidang extends Model
 {
@@ -25,6 +26,15 @@ class Bidang extends Model
     public function seksi(): HasMany
     {
         return $this->hasMany(Seksi::class);
+    }
+
+    /**
+     * Anggota bidang = user pada seluruh sekinya (dipakai rincian
+     * dashboard admin & perhitungan kuota).
+     */
+    public function users(): HasManyThrough
+    {
+        return $this->hasManyThrough(User::class, Seksi::class);
     }
 
     public function events(): HasMany

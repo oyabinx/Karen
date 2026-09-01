@@ -82,6 +82,13 @@ class ReturnService
                 'auto_returned' => true,
             ]);
 
+        // Jejak kesehatan scheduler — dibaca kartu di dashboard admin
+        // (deteksi pemicu cron mati; lihat docs/taskplan Fase 10.3)
+        \App\Models\IntegrationSetting::updateOrCreate(
+            ['setting_key' => 'system_last_auto_return'],
+            ['value' => now()->toDateTimeString()],
+        );
+
         return ['dikembalikan' => $dikembalikan, 'dibatalkan' => $dibatalkan];
     }
 }

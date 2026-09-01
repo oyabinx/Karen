@@ -93,11 +93,11 @@
 - [x] `EventService::autoFinish()` (00:02): event lewat `end_date` → `selesai` (idempoten) — *terpasang sejak Fase 4c; duplikat pendaftaran sisa edit ditemukan & dihapus (schedule:list bersih 4 task)*
 - [x] Cron server untuk `schedule:run` (dokumentasikan di README) — *README baru: bagian "Scheduler WAJIB dipasang" + baris cron siap-tempel + alternatif systemd + verifikasi*
 
-## Fase 8 — Dashboard & Laporan
-- [ ] Dashboard admin: ringkasan jumlah user per role, per bidang → [feature/dashboard.md](feature/dashboard.md)
-- [ ] Dashboard pengurus: mobil tersedia/dipinjam/maintenance, keluhan belum selesai
-- [ ] Dashboard pegawai: peminjaman aktif + tombol kembalikan, riwayat singkat
-- [ ] Laporan penggunaan kendaraan (filter rentang tanggal, mobil, bidang) + export CSV → [feature/laporan.md](feature/laporan.md)
+## Fase 8 — Dashboard & Laporan — ✅ SELESAI *(kroscek fase2/fase6 — tanpa pekerjaan ganda)*
+- [x] Dashboard admin: ringkasan jumlah user per role, per bidang → [feature/dashboard.md](feature/dashboard.md) — *+ kartu kesehatan scheduler (item Fase 10.3 dikerjakan lebih awal) + pintasan nyata menggantikan placeholder basi*
+- [x] Dashboard pengurus: mobil tersedia/dipinjam/maintenance, keluhan belum selesai — *kartu keluhan sejak Fase 6 dipertahankan; Fase 8 menambah daftar peminjaman berjalan hari ini, ringkasan anggaran per pos, event terjadwal*
+- [x] Dashboard pegawai: peminjaman aktif + tombol kembalikan, riwayat singkat — *kuota & tombol Selesai sudah dari Fase 5–6; Fase 8 menambah riwayat 5 terakhir*
+- [x] Laporan penggunaan kendaraan (filter rentang tanggal, mobil, bidang) + export CSV → [feature/laporan.md](feature/laporan.md) — *+ monitoring seluruh peminjaman berfilter, rekap per mobil (hari pakai), realisasi anggaran per pos, CSV BOM+";"*
 
 ## Fase 9 — Pengujian & Persiapan Rilis
 - [ ] Unit test: `AvailabilityService` (overlap, maintenance, status, **event armada**), validasi durasi 3 hari, hitung kuota bidang (termasuk pengecualian event)
