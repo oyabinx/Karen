@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
  * (kesepakatan revisi) — tidak mengubah kondisi/status kendaraan;
  * mobil langsung tersedia kembali. Tindak lanjut keluhan diputuskan
  * manual oleh pengurus (jadwalkan maintenance bila perlu).
- * Pengembalian otomatis (scheduler) menyusul di Fase 7.
+ * Pengembalian otomatis (autoReturn) dijalankan scheduler 00:01.
  */
 class ReturnService
 {

@@ -4,6 +4,14 @@
     <h1 class="text-2xl font-semibold mb-1">Selamat datang, {{ $user->name }}</h1>
     <p class="text-gray-500 mb-6">Dashboard <span class="font-medium">Pengurus</span> — kendaraan, maintenance, monitoring & anggaran.</p>
 
+    {{-- Kuota peminjaman pribadi — pengurus juga peminjam (docs kuota_bidang.md) --}}
+    <div class="mb-6 rounded-xl border {{ $data['kuota']['remaining'] > 0 ? 'border-indigo-200 bg-indigo-50/50' : 'border-red-200 bg-red-50' }} px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+        <p class="text-sm {{ $data['kuota']['remaining'] > 0 ? 'text-indigo-900' : 'text-red-700' }}">
+            <strong>Kuota Peminjaman {{ $data['kuota']['bidang'] }} Anda</strong> — terpakai {{ $data['kuota']['used'] }} dari {{ $data['kuota']['limit'] }} mobil
+        </p>
+        <a href="{{ route('pegawai.search.index') }}" class="text-sm font-medium {{ $data['kuota']['remaining'] > 0 ? 'text-indigo-700 hover:underline' : 'text-red-700' }}">Cari mobil tersedia →</a>
+    </div>
+
     {{-- Kartu ringkasan --}}
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <div class="bg-white rounded-xl border border-gray-200 p-5">

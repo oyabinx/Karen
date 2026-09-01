@@ -36,6 +36,14 @@ Bagian **Log Sinkronisasi**:
 2. Buat spreadsheet anggaran → bagikan ke email service account (Editor).
 3. Di Karen: upload kunci → paste URL spreadsheet → set nama tab → **Test Koneksi** sampai semua ✅ → aktifkan integrasi → **Sinkron Sekarang**.
 
+### Uji dengan Spreadsheet STAGING (sebelum produksi)
+1. Buat spreadsheet uji terpisah (JANGAN spreadsheet produksi) dengan dua tab bernama sesuai konfigurasi (mis. `Anggaran`, `Realisasi`).
+2. Bagikan ke email service account staging.
+3. Tab `Anggaran` isi contoh baris mulai sel A2: `plat;pos;nominal;tahun` — nilai dipisah **titik koma**? TIDAK — Sheets API membaca per sel: isi `B 1234 XYZ` | `servis` | `5000000` | `2026` pada kolom A–D.
+4. Di Karen (masih environment dev/staging): simpan konfigurasi → **Test Koneksi** (5 langkah hijau) → **Sinkron Sekarang** → periksa: anggaran masuk halaman Anggaran kendaraan; tab `Realisasi` terisi baris kontrak (plat, id maintenance, bengkel, nota, tanggal, pos, raw, ×1,13).
+5. Ubah satu nilai di tab `Anggaran` → tunggu interval (atau klik Sinkron Sekarang) → nilai di Karen ikut berubah; log Sinkronisasi mencatat `sukses`.
+6. Setelah lulus semua: ganti konfigurasi ke spreadsheet produksi (URL baru → Test Koneksi ulang).
+
 ### Keamanan
 - Halaman & endpoint hanya untuk role **admin** (middleware `role:admin`); pengurus hanya melihat status/log hasil.
 - Nilai sensitif (kunci JSON, token) dienkripsi saat disimpan; log sinkronisasi **tidak boleh** mencatat isi kunci/token.

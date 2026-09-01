@@ -95,8 +95,8 @@ class ReplacementService
     }
 
     /**
-     * Batalkan booking tanpa pengganti — kuota bidang lepas
-     * (pengecekan kuota sendiri diimplementasikan Fase 5).
+     * Batalkan booking tanpa pengganti — kuota bidang otomatis lepas
+     * karena kuota menghitung booking aktif (BookingService::quotaUsed).
      */
     public function cancel(Booking $booking): Booking
     {

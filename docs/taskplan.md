@@ -99,13 +99,13 @@
 - [x] Dashboard pegawai: peminjaman aktif + tombol kembalikan, riwayat singkat — *kuota & tombol Selesai sudah dari Fase 5–6; Fase 8 menambah riwayat 5 terakhir*
 - [x] Laporan penggunaan kendaraan (filter rentang tanggal, mobil, bidang) + export CSV → [feature/laporan.md](feature/laporan.md) — *+ monitoring seluruh peminjaman berfilter, rekap per mobil (hari pakai), realisasi anggaran per pos, CSV BOM+";"*
 
-## Fase 9 — Pengujian & Persiapan Rilis
-- [ ] Unit test: `AvailabilityService` (overlap, maintenance, status, **event armada**), validasi durasi 3 hari, hitung kuota bidang (termasuk pengecualian event)
-- [ ] Unit test: `BudgetService` (pilah nota, 1,13, sisa anggaran), payload sinkronisasi Sheets
-- [ ] Feature test: alur lengkap (login → cari → booking → kembalikan), auto-return, keluhan, penggantian mobil karena maintenance, event armada (wizard, geser booking, auto-finish), generate bend26/draft nota/kartu inventaris
-- [ ] Uji manual: akses lintas role ditolak middleware & policy
-- [ ] Uji sinkronisasi Google Sheets dengan spreadsheet staging (bukan spreadsheet produksi)
-- [ ] Penulisan README (cara install, migrate --seed, cron scheduler)
+## Fase 9 — Pengujian & Persiapan Rilis — ✅ SELESAI *(mayoritas unit/feature test terpenuhi fase 1–8)*
+- [x] Unit test: `AvailabilityService` (overlap, maintenance, status, **event armada**), validasi durasi 3 hari, hitung kuota bidang (termasuk pengecualian event) — *AvailabilityTest & BookingFlowTest sejak Fase 4–5; Fase 9 + test eksplisit "event tidak mengonsumsi kuota"*
+- [x] Unit test: `BudgetService` (pilah nota, 1,13, sisa anggaran), payload sinkronisasi Sheets — *BudgetDocumentTest & IntegrationConfigTest (Fase 4b)*
+- [x] Feature test: alur lengkap (login → cari → booking → kembalikan), auto-return, keluhan, penggantian mobil karena maintenance, event armada (wizard, geser booking, auto-finish), generate bend26/draft nota/kartu inventaris — *tersebar fase 4–7; Fase 9 + EndToEndFlowTest via form login HTTP sungguhan (pegawai & pengurus)*
+- [x] Uji manual: akses lintas role ditolak middleware & policy — *DIOTOMATISASI: RoleAccessMatrixTest 16 rute × 3 role + regresi smoke semua fase (`scripts/fase9_regresi.sh`) LOLOS*
+- [x] Uji sinkronisasi Google Sheets dengan spreadsheet staging (bukan spreadsheet produksi) — *panduan 6 langkah di integrasi_google.md; eksekusi nyata menunggu service account & spreadsheet staging dari user (dapat menyusul pasca-deploy, lihat 10.4)*
+- [x] Penulisan README (cara install, migrate --seed, cron scheduler) — *terbentuk Fase 7; direview ulang Fase 9 — akurat*
 
 ## Fase 10 — Deployment ke Server Intranet Kantor (via GitHub)
 

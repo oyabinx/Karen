@@ -1,0 +1,111 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    KAREN — BUILD LOG · FASE 9                      ║
+║              Pengujian & Persiapan Rilis                           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Proyek      : Karen — Sistem Peminjaman Kendaraan Dinas
+  Fase        : 9 — Pengujian & Persiapan Rilis
+  Environment : Development (laptop, Docker/Sail, Laravel 13.29)
+  Tanggal     : 2026-08-30
+  Status      : ✅ SELESAI — 181/181 test HIJAU; regresi penuh semua
+                smoke fase LOLOS; 1 pelanggaran docs ditemukan &
+                diperbaiki (kartu kuota dashboard pengurus);
+                panduan uji Sheets staging siap (menunggu kredensial
+                user untuk eksekusi nyata)
+
+────────────────────────────────────────────────────────────────────
+ 1. KROSCEK ITEM TASKPLAN vs REALITAS (hindari double pengerjaan)
+────────────────────────────────────────────────────────────────────
+
+ • "Unit test AvailabilityService / durasi / kuota" → SUDAH ADA
+   sejak Fase 4-5 (AvailabilityTest 7, BookingFlowTest 12) —
+   termasuk event armada & pengecualian (kini +1 test eksplisit).
+ • "Unit test BudgetService + payload Sheets" → SUDAH (Fase 4b:
+   BudgetDocumentTest 11, IntegrationConfigTest 10).
+ • "Feature test alur lengkap / auto-return / keluhan /
+   penggantian / event / dokumen" → SUDAH tersebar (ReturnFlow,
+   AutoReturn, Maintenance/Replacement, EventArmada,
+   BudgetDocument) — Fase 9 menambah END-TO-END SUNGGUHAN via
+   form login HTTP (bukan actingAs) + MATRIKS AKSES ROLE.
+ • "Uji manual lintas role" → diotomatisasi penuh lewat
+   RoleAccessMatrixTest (16 kasus × 3 role).
+ • "Penulisan README" → SEJAK FASE 7 (review ulang: masih akurat).
+
+────────────────────────────────────────────────────────────────────
+ 2. PEKERJAAN BARU FASE INI
+────────────────────────────────────────────────────────────────────
+
+ A. EndToEndFlowTest (3): alur lengkap nyata — POST /login form →
+    dashboard (kartu kuota) → cari mobil → form booking → simpan →
+    riwayat + tombol Selesai → selesaikan DENGAN keluhan →
+    verifikasi (dikembalikan, keluhan tercatat, mobil TETAP baik
+    & bisa_dipinjam — kesepakatan Fase 6) → logout. Dijalankan
+    untuk PEGAWAI dan PENGURUS. + Test eksplisit: event 3 unit
+    TIDAK mengonsumsi kuota bidang (used & remaining tak berubah).
+
+ B. RoleAccessMatrixTest (16 kasus × 3 role = 48 kombinasi):
+    matriks sistematis rute perwakilan seluruh kelompok fitur
+    (umum/admin/pengurus/event/peminjaman/berparameter) —
+    menggantikan "uji manual" dengan aset otomatis permanen.
+
+ C. Pembersihan: 2 komentar kode "menyusul di Fase X" yang basi
+    (ReplacementService, ReturnService) diperbarui.
+
+────────────────────────────────────────────────────────────────────
+ 3. TEMUAN: PELANGGARAN DOCS (aturan user — bug ⇒ cek markdown)
+────────────────────────────────────────────────────────────────────
+
+ ★ Dashboard PENGURUS tidak menampilkan kartu KUOTA PEMINJAMAN,
+   padahal kuota_bidang.md Transparansi UI mensyaratkan
+   "Dashboard pegawai/pengurus: kartu Sisa kuota bidang" dan
+   pengurus adalah peminjam juga. Ketahuan justru oleh test E2E
+   pengurus baru. → KODE diperbaiki mengikuti docs: pengurusData
+   menerima $user, kartu kuota + pintasan cari mobil ditambahkan
+   ke dashboard pengurus. DOCS BENAR — tidak diubah.
+ (Bug test sesi ini: PHPUnit modern memakai atribut
+ #[DataProvider] bukan docblock; salah ketik penutup match `]`
+ vs `}`; keduanya human error murni.)
+
+────────────────────────────────────────────────────────────────────
+ 4. HASIL VERIFIKASI
+────────────────────────────────────────────────────────────────────
+
+ ✓ sail test → 181 PASSED (581 assertions):
+   162 fase sebelumnya tetap hijau + 19 baru (3 E2E + 16 matriks).
+ ✓ REGRESI PENUH: seluruh smoke script fase (3,4,4b,4c,5,6,8)
+   dijalankan berurutan — SEMUA hijau (200/403 sesuai harapan,
+   modal Selesai ADA, CSV header benar). Script agregat:
+   scripts/fase9_regresi.sh.
+ ✓ README direview ulang — akurat (setup Sail, akun seeder,
+   scheduler WAJIB, testing, integrasi, deploy).
+
+────────────────────────────────────────────────────────────────────
+ 5. UJI SINKRONISASI SHEETS STAGING (item menunggu user)
+────────────────────────────────────────────────────────────────────
+
+ Yang SUDAH siap & teruji tanpa jaringan: konfigurasi via UI,
+ kunci terenkripsi, Test Koneksi 5 langkah, payload kontrak,
+ penanganan gagal (log), task scheduler interval.
+ Yang MENUNGGU USER (butuh kredensial nyata): panduan 6 langkah
+ ditambahkan ke docs/feature/integrasi_google.md — buat
+ spreadsheet staging, share ke service account, isi tab Anggaran,
+ Test Koneksi → Sinkron Sekarang, verifikasi tarik & dorong,
+ barulah ganti ke spreadsheet produksi. Eksekusi nyata menunggu
+ service account + spreadsheet staging dari user (aman dilakukan
+ kapan pun, termasuk setelah deploy — Fase 10.4).
+
+────────────────────────────────────────────────────────────────────
+ 6. KONSUMSI FASE BERIKUTNYA (Fase 10 — Deployment Produksi)
+────────────────────────────────────────────────────────────────────
+
+   10.1 persiapan laptop (commit/push/tag, bersihkan cache,
+       pastikan .env tak tercommit)
+   10.2 setup server Ubuntu (git clone, paket, Nginx, .env inti)
+   10.3 rilis perdana (migrate --seed, storage:link, CRON —
+       kartu kesehatan scheduler SUDAH siap memverifikasi)
+   10.4 integrasi Google produksi (+ eksekusi uji staging di atas)
+   10.5 prosedur update rutin laptop → GitHub → server
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR FASE 9 —
+════════════════════════════════════════════════════════════════════

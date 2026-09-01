@@ -30,7 +30,7 @@ class DashboardController extends Controller
             'user' => $user,
             'data' => match ($user->role) {
                 'admin' => $this->adminData(),
-                'pengurus' => $this->pengurusData(),
+                'pengurus' => $this->pengurusData($user),
                 'pegawai' => $this->pegawaiData($user),
             },
         ]);
@@ -59,7 +59,7 @@ class DashboardController extends Controller
         ];
     }
 
-    private function pengurusData(): array
+    private function pengurusData(User $user): array
     {
         $year = now()->year;
 
@@ -93,6 +93,9 @@ class DashboardController extends Controller
                 ->where('status', 'terjadwal')->orderBy('start_date')->limit(3)->get(),
             'anggaran' => $summaryAnggaran,
             'tahunAnggaran' => $year,
+            // Pengurus juga peminjam — kartu kuota bidangnya sendiri
+            // (docs/feature/kuota_bidang.md Transparansi UI)
+            'kuota' => app(\App\Services\BookingService::class)->quotaInfo($user),
         ];
     }
 
