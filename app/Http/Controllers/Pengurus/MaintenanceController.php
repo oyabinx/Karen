@@ -48,14 +48,18 @@ class MaintenanceController extends Controller
     {
         $maintenance = Maintenance::create($request->validated());
 
-        $terdampak = $this->replacements->flagConflictingBookings($maintenance);
+        $terdampak = count($this->replacements->flagConflictingBookings($maintenance));
 
-        $pesan = 'Jadwal maintenance tersimpan.';
-        if (count($terdampak) > 0) {
-            $pesan .= ' '.count($terdampak).' peminjaman terdampak — menunggu pengaturan mobil pengganti.';
+        // PERINGATAN KUAT (UAT F2): bila jadwal menabrak peminjaman aktif,
+        // LANGSUNG arahkan ke halaman penggantian mobil — tidak lagi
+        // hanya pesan sukses kecil yang mudah terlewat.
+        if ($terdampak > 0) {
+            return redirect()
+                ->route('pengurus.replacements.index')
+                ->with('warning', "⚠ Jadwal menabrak {$terdampak} peminjaman aktif! Pilih mobil pengganti (atau batalkan peminjaman) sekarang.");
         }
 
-        return back()->with('success', $pesan);
+        return back()->with('success', 'Jadwal maintenance tersimpan.');
     }
 
     public function update(MaintenanceRequest $request, Maintenance $maintenance): RedirectResponse
@@ -65,14 +69,15 @@ class MaintenanceController extends Controller
         // Dua arah: booking yang TIDAK lagi tertabrak dan belum diganti
         // kembali ke dipinjam; yang masih tertabrak ditandai ulang.
         $this->replacements->revertPendingForVehicle($maintenance->vehicle);
-        $terdampak = $this->replacements->flagConflictingBookings($maintenance);
+        $terdampak = count($this->replacements->flagConflictingBookings($maintenance));
 
-        $pesan = 'Jadwal maintenance diperbarui.';
-        if (count($terdampak) > 0) {
-            $pesan .= ' '.count($terdampak).' peminjaman terdampak.';
+        if ($terdampak > 0) {
+            return redirect()
+                ->route('pengurus.replacements.index')
+                ->with('warning', "⚠ Perubahan jadwal menabrak {$terdampak} peminjaman aktif — atur mobil penggantinya.");
         }
 
-        return back()->with('success', $pesan);
+        return back()->with('success', 'Jadwal maintenance diperbarui.');
     }
 
     /**

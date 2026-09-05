@@ -11,8 +11,8 @@ Setiap user (admin, pengurus, pegawai) dapat mengubah profilnya sendiri. **Nomor
 
 ### Nomor HP
 - Wajib (`required`) — profil tidak dapat disimpan tanpa nomor HP.
-- Format nomor Indonesia: `^(\+62|62|0)8[1-9][0-9]{6,10}$` (08xx / 62xxx / +62xxx).
-- Unique antar user.
+- Format nomor Indonesia: `08xx / 62xxx / +62xxx` — **dinormalisasi ke bentuk baku `62xxxxxxxxxx`** sebelum disimpan & diperiksa duplikat, sehingga `0812…`, `62812…`, dan `+62812…` dianggap nomor yang SAMA (temuan UAT: duplikat lintas format harus tetap tertolak).
+- Unique antar user (membandingkan bentuk baku).
 - Kegunaan: kontak darurat saat koordinasi penggunaan kendaraan.
 
 ### Pengingat

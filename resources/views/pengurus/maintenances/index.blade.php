@@ -7,6 +7,19 @@
     @if (session('success'))
         <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
     @endif
+    @if (session('warning'))
+        <div class="mb-4 rounded-lg bg-amber-100 border-2 border-amber-400 px-4 py-3 text-sm text-amber-900 font-medium">{{ session('warning') }}</div>
+    @endif
+
+    {{-- Banner penggantian menunggu keputusan (UAT F2 — tetap terlihat) --}}
+    @php($menunggu = App\Models\Booking::where('status', App\Models\Booking::STATUS_MENUNGGU_PENGGANTIAN)->count())
+    @if ($menunggu > 0)
+        <a href="{{ route('pengurus.replacements.index') }}"
+           class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-3 hover:bg-amber-100 transition-colors">
+            <span class="text-sm font-semibold text-amber-900">⚠ {{ $menunggu }} peminjaman menunggu mobil pengganti (karena maintenance/event)</span>
+            <span class="text-sm font-medium text-amber-700 underline">Atur pengganti sekarang →</span>
+        </a>
+    @endif
 
     <div class="mb-6">
         <a href="{{ route('pengurus.replacements.index') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 min-h-[44px]">

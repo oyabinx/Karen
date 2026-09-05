@@ -9,6 +9,16 @@ use Illuminate\Validation\Rule;
 
 class UserUpdateRequest extends FormRequest
 {
+    /**
+     * Nomor HP dinormalisasi ke bentuk baku sebelum validasi (UAT B4).
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('phone')) {
+            $this->merge(['phone' => User::canonicalPhone($this->input('phone'))]);
+        }
+    }
+
     public function rules(): array
     {
         $user = $this->route('user');
@@ -22,7 +32,7 @@ class UserUpdateRequest extends FormRequest
             'role' => ['required', Rule::in(['admin', 'pengurus', 'pegawai'])],
             'phone' => [
                 'nullable',
-                'regex:/^(\+62|62|0)8[1-9][0-9]{6,10}$/',
+                'regex:/^62[8][1-9][0-9]{6,10}$/',
                 Rule::unique(User::class)->ignore($user->id),
             ],
             'seksi_id' => [

@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);
+
+        // Halaman terproteksi tidak boleh tersimpan di cache browser —
+        // tombol back pasca-logout mengarah ke login (UAT A5)
+        $middleware->web(append: [
+            \App\Http\Middleware\NoCacheHeaders::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

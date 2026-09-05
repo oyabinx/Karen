@@ -41,7 +41,8 @@ class ProfileTest extends TestCase
 
         $this->assertSame('Nama Baru', $user->name);
         $this->assertSame('baru@karen.test', $user->email);
-        $this->assertSame('081298765432', $user->phone);
+        // Nomor HP tersimpan dalam bentuk baku 62… (normalisasi UAT B4)
+        $this->assertSame('6281298765432', $user->phone);
         $this->assertNull($user->email_verified_at);
     }
 
@@ -58,7 +59,7 @@ class ProfileTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors('phone');
-        $this->assertSame('081234567890', $user->refresh()->phone);
+        $this->assertSame('6281234567890', $user->refresh()->phone); // baku 62…
     }
 
     public function test_nomor_hp_format_tidak_valid_ditolak(): void

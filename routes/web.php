@@ -20,9 +20,11 @@ use App\Http\Controllers\Pengurus\ReportController;
 use App\Http\Controllers\Pengurus\VehicleController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Root langsung mengarahkan: guest → login, sesi aktif → dashboard
+// (temuan UAT A1 — tidak lagi menampilkan halaman sambutan Laravel)
+Route::get('/', function (\Illuminate\Http\Request $request) {
+    return redirect($request->user() ? 'dashboard' : 'login');
+})->name('home');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])

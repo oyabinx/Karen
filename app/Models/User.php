@@ -51,6 +51,36 @@ class User extends Authenticatable
     }
 
     /**
+     * Normalisasi nomor HP ke bentuk baku 62xxxxxxxxxx SEBELUM disimpan
+     * (temuan UAT B4): 0812…, 62812…, +62812… adalah nomor yang sama —
+     * tanpa normalisasi, duplikat lolos cek unique karena string berbeda.
+     * Pengecekan unique di validasi tetap membandingkan nilai baku.
+     */
+    public function setPhoneAttribute(?string $value): void
+    {
+        $this->attributes['phone'] = self::canonicalPhone($value);
+    }
+
+    /**
+     * Bentuk baku nomor HP: hanya digit, diawali 62
+     * (0812… / 62812… / +62812… → 62812…).
+     */
+    public static function canonicalPhone(?string $value): ?string
+    {
+        $digit = preg_replace('/\D+/', '', (string) $value);
+
+        if ($digit === '') {
+            return null;
+        }
+
+        if (str_starts_with($digit, '0')) {
+            $digit = '62'.substr($digit, 1);
+        }
+
+        return $digit;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

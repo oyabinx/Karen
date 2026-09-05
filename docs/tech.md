@@ -300,6 +300,7 @@ Pembuatan booking dibungkus `DB::transaction()` + **lock** (`lockForUpdate` pada
 ## 7. Environment & Deploy (ringkas)
 
 **Pemisahan konfigurasi (prinsip intranet kantor):**
+- **Zona waktu**: `APP_TIMEZONE=Asia/Jakarta` (**satu sumber kebenaran waktu** — seluruh `now()`/`today()` dan tampilan datetime backend-front konsisten WIB; pendekatan epoch-millis ditolak karena menambah kompleksitas tanpa keuntungan pada aplikasi server-rendered satu zona waktu — temuan UAT F1). `APP_LOCALE=id` + `APP_FAKER_LOCALE=id_ID`.
 - **Saat deploy (sekali, oleh petugas IT)**: `.env` hanya berisi konfigurasi inti — `APP_ENV=production`, `APP_URL`, koneksi database, `APP_KEY`. Tidak ada kredensial Google di `.env`.
 - **Runtime (via UI Karen, kapan pun oleh admin)**: seluruh konfigurasi operasional — integrasi Google (kunci service account terenkripsi, spreadsheet, Drive, interval sync — lihat [feature/integrasi_google.md](feature/integrasi_google.md)), kuota bidang, struktur organisasi, user. Pengguna aplikasi tidak pernah mengedit file di server.
 - `php artisan migrate --seed` saat setup awal (seeder: 5 bidang + admin pertama).

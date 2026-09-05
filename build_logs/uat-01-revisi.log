@@ -1,0 +1,66 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                KAREN — BUILD LOG · REVISI UAT SKENARIO 01          ║
+║      (tindak lanjut UAT/01-inti-login-profil-peminjaman.md)        ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal     : 2026-08-30
+  Sumber      : hasil UAT manual user (24 ok, 6 revisi)
+  Status      : ✅ 5 revisi SELESAI + 1 penjelasan desain (A6);
+                187/187 test HIJAU (+6 test revisi)
+
+────────────────────────────────────────────────────────────────────
+ RINCIAN TEMUAN → TINDAKAN
+────────────────────────────────────────────────────────────────────
+
+ A1 Root menampilkan welcome Laravel → route / kini redirect:
+     tamu → /login, sesi aktif → /dashboard; welcome.blade.php
+     dihapus. (test: root_redirect_tamu_ke_login_user_ke_dashboard)
+
+ A5 Back pasca-logout masih menampilkan dashboard (bfcache) →
+     middleware NoCacheHeaders (Cache-Control no-store) di-append
+     grup web — browser tak bisa menghidupkan halaman dari cache;
+     back memicu request ulang → auth menolak → diarahkan login.
+     Bug proses perbaikan sempat merusak seluruh suite (return void
+     headers->set) → diperbaiki; asersi header dilonggarkan karena
+     framework menormalkan urutan direktif.
+
+ A6 "Kenapa admin tidak bisa search?" → TIDAK ADA PERUBAHAN —
+     sesuai desain docs: fitur peminjaman untuk pegawai & pengurus
+     (admin tidak tercatat pada seksi/bidang → kuota tidak
+     terdefinisi; product.md memisahkan fungsi admin). Penjelasan
+     lengkap disampaikan ke user; bila kantor ingin admin ikut
+     meminjam, itu perubahan kebijakan (admin wajib diberi seksi).
+
+ B4 Duplikat HP lintas format lolos (0812… vs +62812…) → akar:
+     string beda padahal nomor sama. FIX: canonicalPhone() di model
+     User + prepareForValidation di 3 FormRequest (profil, admin
+     store/update) → semua input dinormalisasi ke 62xxxxxxxxxx
+     SEBELUM validasi & penyimpanan; regex disesuaikan bentuk baku.
+     DOCS profil.md diperbarui (aturan normalisasi). (2 test baru:
+     profil & admin, termasuk format sendiri tetap boleh)
+
+ F1 Selisih jam pengembalian (WIB vs UTC) → JALAN TENGAH yang
+     diambil: MENOLAK epoch-millis; cukup APP_TIMEZONE=Asia/Jakarta
+     sebagai satu sumber waktu (aplikasi server-rendered satu zona
+     — epoch menambah kompleksitas tanpa manfaat). Implementasi:
+     .env & .env.example & phpunit.xml + config/app.php kini
+     env-driven (temuan: L13 hardcode UTC!). DOCS tech.md §7
+     mencatat keputusan & alasan. Note: data dev lama tampil
+     bergeser 7 jam sekali ini (timestamp tersimpan UTC era lama).
+
+ F2 "Maintenance menabrak booking tanpa peringatan" → dipertajam
+     dua lapis: (1) store/update kini LANGSUNG redirect ke halaman
+     Penggantian Mobil + flash warning besar saat menabrak (bukan
+     lagi pesan sukses kecil); (2) banner permanen "N peminjaman
+     menunggu mobil pengganti → Atur sekarang" di halaman Jadwal
+     Maintenance. Flagging status booking sendiri terbukti benar
+     via test; yang kurang adalah keterlihatannya.
+     (Bug proses: flagConflictingBookian mengembalikan array —
+     count() kembali dipasang setelah sempat hilang.)
+
+ Catatan: ExampleTest & ProfileTest disesuaikan (root redirect;
+ format HP baku). Suite: 187 PASSED (607 assertions).
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR REVISI UAT-01 —
+════════════════════════════════════════════════════════════════════
