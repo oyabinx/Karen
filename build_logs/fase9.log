@@ -106,6 +106,32 @@
    10.4 integrasi Google produksi (+ eksekusi uji staging di atas)
    10.5 prosedur update rutin laptop → GitHub → server
 
+────────────────────────────────────────────────────────────────────
+ 7. TEMUAN UAT PERTAMA (user): "TAMPILAN TANPA STYLE"
+────────────────────────────────────────────────────────────────────
+
+ GEJALA: halaman tampak polos saat UAT manual.
+ DIAGNOSIS bertingkat:
+  1) Dugaan awal: bundel CSS basi (build terakhir sebelum banyak
+     view dibuat) — REBUILD tetap menghasilkan CSS IDENTIK
+     (hash & 21,67 kB sama, nol utility proyek).
+  2) AKAR SEBENARNYA: plugin @tailwindcss/vite TIDAK DIDAFTARKAN
+     di vite.config.js — sisa insiden migrasi v3→v4 Fase 0 yang
+     belum tuntas (config v3 dihapus, tetapi plugin v4 lupa
+     dipasang). CSS hanya berisi reset + forms → semua halaman
+     tampak tanpa style SEJAK AWAL (fase mana pun; smoke hanya
+     memeriksa teks/HTTP, bukan visual — celah proses).
+ PERBAIKAN: tailwindcss() didaftarkan di vite.config.js → build
+  ulang: 62,46 kB (gzip 13 kB), hash baru, utility proyek hadir
+  (bg-indigo-600/emerald/amber/grid-cols-4), HTTP 200 terverifikasi.
+ Pencegahan proses: (a) verifikasi visual masuk checklist UAT
+ (skenario 07); (b) catatan UAT/README — jalankan
+ `sail npm run build` setelah perubahan tampilan, atau pakai
+ `sail npm run dev` saat sesi UAT; (c) fase yang mengubah UI wajib
+ build ulang — ditambahkan ke Definition of Done taskplan.
+ DOCS: tidak terkait (murni konfigurasi impl); tema visual baru
+ dibahas terpisah dengan user.
+
 ════════════════════════════════════════════════════════════════════
                           — AKHIR FASE 9 —
 ════════════════════════════════════════════════════════════════════
