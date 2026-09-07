@@ -8,7 +8,7 @@ Setiap bidang memiliki **jatah maksimal mobil yang dapat dipinjam secara bersama
 ### Pengaturan Kuota
 - Halaman kelola bidang (admin) menambahkan field **"Kuota Peminjaman Maksimal"** per bidang.
 - Nilai default: `2`; bidang khusus diset `3` (nama bidang khusus disesuaikan kantor saat setup).
-- Batas nilai yang dapat diisi admin: 1–5.
+- Batas nilai yang dapat diisi admin: **1–9** *(direvisi dari 1–5 — kesepakatan UAT C2)*.
 
 ### Definisi "Bersamaan" (Cara Hitung Kuota)
 - Yang dihitung adalah booking dengan status `dipinjam` (atau `menunggu_penggantian`) milik **semua user yang terdaftar pada seksi di bawah bidang tersebut** — **termasuk booking untuk tanggal mendatang** yang sudah dikonfirmasi (booking langsung terkonfirmasi tanpa approval, sehingga booking mendatang sudah mengunci jatah).

@@ -275,7 +275,7 @@ Pembuatan booking dibungkus `DB::transaction()` + **lock** (`lockForUpdate` pada
 
 | Aspek | Kebijakan |
 |-------|-----------|
-| Password | Hash bcrypt (bawaan Laravel), minimal 8 karakter |
+| Password | Hash bcrypt (bawaan Laravel), minimal 8 karakter, **tanpa spasi** |
 | Session | Driver database/cookie bawaan Breeze, logout mengakhiri sesi |
 | Authorization | Middleware `role:` pada semua route; pegawai hanya boleh melihat/mengubah booking miliknya sendiri (policy) |
 | Mass assignment | `$fillable` whitelist di semua model |
@@ -295,7 +295,7 @@ Pembuatan booking dibungkus `DB::transaction()` + **lock** (`lockForUpdate` pada
 | Email | format email, unique (kecuali user sendiri) |
 | Seksi user | wajib untuk role pegawai & pengurus (dasar hitung kuota bidang); opsional untuk admin |
 | Plat nomor | required, unique, maks 15 karakter |
-| Kuota bidang | `max_active_bookings` required, angka 1–5 |
+| Kuota bidang | `max_active_bookings` required, angka 1–9 *(direvisi dari 1–5 — UAT C2)* |
 
 ## 7. Environment & Deploy (ringkas)
 

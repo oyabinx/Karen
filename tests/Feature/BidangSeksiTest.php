@@ -40,9 +40,9 @@ class BidangSeksiTest extends TestCase
         $this->assertDatabaseHas('bidang', ['name' => 'Bidang Baru', 'max_active_bookings' => 3]);
     }
 
-    public function test_kuota_bidang_validasi_1_sampai_5(): void
+    public function test_kuota_bidang_validasi_1_sampai_9(): void
     {
-        foreach ([0, 6] as $invalid) {
+        foreach ([0, 10] as $invalid) {
             $this->actingAs($this->admin)
                 ->post('/admin/bidang', ['name' => 'Bidang X', 'max_active_bookings' => $invalid])
                 ->assertSessionHasErrors('max_active_bookings');

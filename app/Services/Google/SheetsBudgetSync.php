@@ -184,9 +184,14 @@ class SheetsBudgetSync
     {
         $steps = [];
 
-        // 1. Kunci terbaca & valid
+        // 1. Kunci terbaca & valid — aman terhadap kunci NULL (UAT D4:
+        // akses $key['type'] pada null melempar error sebelumnya)
         $key = $this->settings->getServiceAccountKey();
-        $steps[] = ['langkah' => 'Kunci service account terbaca & valid', 'ok' => (bool) ($key['type'] === 'service_account' ?? false), 'pesan' => $key ? ($key['client_email'] ?? 'format tidak dikenali') : 'belum diunggah'];
+        $steps[] = [
+            'langkah' => 'Kunci service account terbaca & valid',
+            'ok' => is_array($key) && ($key['type'] ?? null) === 'service_account',
+            'pesan' => is_array($key) ? ($key['client_email'] ?? 'format tidak dikenali') : 'belum diunggah',
+        ];
 
         if (! $key) {
             return $this->finishTest($steps);

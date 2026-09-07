@@ -48,8 +48,16 @@
             @endif
 
             <x-input-label for="key_file" value="Unggah / ganti kunci JSON (maks 50 KB)" />
-            <input id="key_file" name="key_file" type="file" accept=".json,application/json"
-                   class="block mt-1 w-full text-sm rounded-lg border-gray-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700">
+            {{-- Tombol pilih file mencolok + nama file terpilih tampil jelas (UAT B1) --}}
+            <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center mt-1">
+                <label class="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[44px] shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                    Pilih File Kunci
+                    <input id="key_file" name="key_file" type="file" accept=".json,application/json" class="hidden"
+                           onchange="document.getElementById('file-kunci-terpilih').textContent = this.files[0] ? this.files[0].name : ''; document.getElementById('file-kunci-terpilih').classList.toggle('text-gray-800', !!this.files[0]);">
+                </label>
+                <span id="file-kunci-terpilih" class="flex-1 px-4 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-400 min-h-[44px] flex items-center truncate">belum memilih file…</span>
+            </div>
             <x-input-error :messages="$errors->get('key_file')" class="mt-2" />
         </section>
 

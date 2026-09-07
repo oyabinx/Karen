@@ -31,8 +31,9 @@ class UserStoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
-            // Password awal — user ganti sendiri saat login pertama
-            'password' => ['required', 'string', 'min:8'],
+            // Password awal — user ganti sendiri saat login pertama;
+            // tanpa spasi (UAT B3)
+            'password' => ['required', 'string', 'min:8', 'not_regex:/[\s]/'],
             'role' => ['required', Rule::in(['admin', 'pengurus', 'pegawai'])],
             'phone' => [
                 'nullable',
@@ -48,6 +49,11 @@ class UserStoreRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['name' => 'nama', 'phone' => 'nomor HP', 'seksi_id' => 'seksi'];
+        return ['name' => 'nama', 'phone' => 'nomor HP', 'seksi_id' => 'seksi', 'password' => 'kata sandi'];
+    }
+
+    public function messages(): array
+    {
+        return ['password.not_regex' => 'Kata sandi tidak boleh mengandung spasi.'];
     }
 }

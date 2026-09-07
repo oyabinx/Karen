@@ -1,0 +1,52 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                KAREN — BUILD LOG · REVISI UAT SKENARIO 02          ║
+║           (tindak lanjut UAT/02-admin-manajemen.md)                ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal     : 2026-08-30
+  Sumber      : hasil UAT manual user (22 ok, 5 revisi)
+  Status      : ✅ 5 revisi SELESAI; 192/192 test HIJAU (+5 test baru)
+
+────────────────────────────────────────────────────────────────────
+ RINCIAN TEMUAN → TINDAKAN
+────────────────────────────────────────────────────────────────────
+
+ B1 "Choose File" tak tampak seperti tombol; nama file tak terlihat
+     jelas → tombol label mencolok **"📎 Pilih File CSV"** (indigo,
+     min 44px) dengan input tersembunyi + **area nama file terpilih**
+     berlatar abu terang ("belum memilih file…" → nama file setelah
+     dipilih, teks menggelap). Pola sama diterapkan pada unggah
+     **kunci service account** di halaman Integrasi Google.
+
+ B3 Password dengan spasi masih diterima (dan bisa login) →
+     pengaman `not_regex:/[\s]/` + pesan Indonesia di SEMUA jalur:
+     (1) admin tambah user, (2) admin ubah user, (3) ganti sandi
+     profil (/password), (4) impor CSV (alasan per baris).
+     Test mencakup 4 jalur + kontrol positif tanpa spasi tetap OK.
+
+ C1 Menu Bidang & Seksi: bidang teratas ter-expand → default
+     **COLLAPSE semua** — 5 nama bidang terlihat sekaligus tanpa
+     scroll panjang.
+
+ C2 KEBIJAKAN KUOTA BERUBAH (kesepakatan user): rentang maks kuota
+     bidang 1–5 → **1–9**. Diubah di: BidangRequest (max:9),
+     tampilan form bidang (max="9" dua tempat),
+     BidangSeksiTest (0 & 10 ditolak), docs kuota_bidang.md +
+     tech.md §6 (tercatat sebagai revisi UAT C2).
+
+ D4 Test Koneksi tanpa kunci → 500 "Trying to access array offset
+     on null" (SheetsBudgetSync:189) → akses `$key['type']` pada
+     null tidak lagi dievaluasi: `is_array($key) && ($key['type']
+     ?? null) === 'service_account'` — kini langkah 1 gagal anggun
+     dengan pesan "belum diunggah", hasil per langkah tampil.
+     (murni bug impl; docs sesuai)
+
+ Verifikasi:
+ ✓ sail test 192 PASSED (633 assertions) — termasuk
+   UatSkenario02RevisiTest (5) + BidangSeksiTest kuota 1–9 disesuaikan
+ ✓ Smoke: tombol "Pilih File CSV" ADA; bidang open=0;
+   POST test koneksi → 302 (bukan 500)
+
+════════════════════════════════════════════════════════════════════
+                          — AKHIR REVISI UAT-02 —
+════════════════════════════════════════════════════════════════════

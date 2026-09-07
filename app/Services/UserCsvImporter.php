@@ -181,6 +181,9 @@ class UserCsvImporter
         }
         if ($data['password'] === null || strlen($data['password']) < 8) {
             $errors[] = 'Password minimal 8 karakter.';
+        } elseif (preg_match('/\s/', $data['password'])) {
+            // Pengaman spasi (UAT B3)
+            $errors[] = 'Password tidak boleh mengandung spasi.';
         }
         if (! in_array($role, ['admin', 'pengurus', 'pegawai'], true)) {
             $errors[] = 'Role harus admin/pengurus/pegawai (atau kosong untuk pegawai).';

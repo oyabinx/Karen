@@ -13,7 +13,8 @@
 
     <div class="space-y-4">
         @foreach ($bidangList as $b)
-            <details class="bg-white rounded-xl border border-gray-200 overflow-hidden" {{ $loop->first ? 'open' : '' }}>
+            {{-- Default COLLAPSE semua (UAT C1) — daftar ringkas 5 bidang tanpa scroll panjang --}}
+            <details class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <summary class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 cursor-pointer select-none hover:bg-gray-50">
                     <div class="flex items-center gap-3">
                         <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
@@ -32,7 +33,7 @@
                         <input type="text" name="name" value="{{ $b->name }}" required class="rounded-lg border-gray-300 text-sm flex-1 min-h-[44px]">
                         <label class="flex items-center gap-2 text-sm text-gray-500">
                             Kuota
-                            <input type="number" name="max_active_bookings" value="{{ $b->max_active_bookings }}" min="1" max="5" required class="rounded-lg border-gray-300 w-20 min-h-[44px]">
+                            <input type="number" name="max_active_bookings" value="{{ $b->max_active_bookings }}" min="1" max="9" required class="rounded-lg border-gray-300 w-20 min-h-[44px]">
                         </label>
                         <button class="px-4 rounded-lg bg-gray-800 text-white text-sm font-medium min-h-[44px]">Simpan</button>
                     </form>
@@ -86,7 +87,7 @@
             <input type="text" name="name" placeholder="Nama bidang…" required class="flex-1 rounded-lg border-gray-300 text-sm min-h-[44px]">
             <label class="flex items-center gap-2 text-sm text-gray-500">
                 Kuota
-                <input type="number" name="max_active_bookings" value="2" min="1" max="5" required class="rounded-lg border-gray-300 w-20 min-h-[44px]">
+                <input type="number" name="max_active_bookings" value="2" min="1" max="9" required class="rounded-lg border-gray-300 w-20 min-h-[44px]">
             </label>
             <button class="px-4 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px]">+ Bidang</button>
         </form>

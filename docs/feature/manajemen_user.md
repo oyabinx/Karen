@@ -10,7 +10,7 @@ Admin mengelola akun pengguna sistem: membuat, melihat, mengubah, menonaktifkan,
 - Pencarian nama/email; filter per role dan per bidang.
 
 ### Tambah User
-- Field: nama, email, password (awal), role, seksi (**wajib untuk pegawai dan pengurus**; hanya admin yang boleh tanpa seksi), no. HP (opsional saat pembuatan — **wajib diisi user saat edit profil**).
+- Field: nama, email, password (awal, min 8 karakter **tanpa spasi**), role, seksi (**wajib untuk pegawai dan pengurus**; hanya admin yang boleh tanpa seksi), no. HP (opsional saat pembuatan — **wajib diisi user saat edit profil**).
 - Password awal di-hash; admin bisa mencentang "wajib ganti password saat login pertama" (opsional).
 
 ### Ubah User
@@ -30,7 +30,7 @@ Supaya admin tidak menginput pegawai satu per satu:
   Budi Santoso;budi@kantor.go.id;Password123;Bidang Umum;Seksi Kepegawaian;pegawai
   ```
   (kolom `role` opsional — kosong = `pegawai`; template berisi 1 baris contoh + komentar header yang diabaikan sistem)
-- **Unggah CSV** → sistem menampilkan **pratinjau (dry-run)**: seluruh baris divalidasi tanpa menulis ke database; baris valid ditandai ✅, baris bermasalah ditandai ❌ beserta alasannya per baris (email duplikat di file/database, seksi tidak ditemukan di bawah bidang tersebut, password < 8 karakter, format email salah, nama kosong).
+- **Unggah CSV** → sistem menampilkan **pratinjau (dry-run)**: seluruh baris divalidasi tanpa menulis ke database; baris valid ditandai ✅, baris bermasalah ditandai ❌ beserta alasannya per baris (email duplikat di file/database, seksi tidak ditemukan di bawah bidang tersebut, password < 8 karakter ATAU mengandung spasi, format email salah, nama kosong).
 - **Konfirmasi Impor** — hanya baris ✅ yang dibuat; ringkasan hasil ditampilkan ("berhasil X, gagal Y"); admin dapat mengunduh laporan baris gagal (CSV) untuk diperbaiki dan diunggah ulang.
 - Aturan: `bidang` + `seksi` harus cocok (seksi terdaftar di bawah bidang); email harus unik di database maupun di dalam file; password default akan di-hash; pegawai hasil impor tetap wajib melengkapi nomor HP saat edit profil.
 
@@ -50,7 +50,7 @@ Supaya admin tidak menginput pegawai satu per satu:
 ## Aturan Validasi
 - Nama: wajib, maks 255.
 - Email: wajib, format email, unique.
-- Password: minimal 8 karakter (saat tambah wajib; saat ubah opsional = tidak diganti).
+- Password: minimal 8 karakter TANPA SPASI (saat tambah wajib; saat ubah opsional = tidak diganti).
 - Role: salah satu dari `admin`, `pengurus`, `pegawai`.
 - Seksi: **wajib untuk role `pegawai` dan `pengurus`** (kuota peminjaman dihitung pada bidang tempat seksi terdaftar); opsional hanya untuk `admin`.
 

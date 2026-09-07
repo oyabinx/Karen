@@ -24,12 +24,19 @@
             <a href="{{ route('admin.users.template') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50 min-h-[44px]">⬇ Unduh Template CSV</a>
         </div>
 
-        <form method="POST" action="{{ route('admin.users.import.post') }}" enctype="multipart/form-data" class="mt-4 flex flex-col sm:flex-row gap-3">
+        <form method="POST" action="{{ route('admin.users.import.post') }}" enctype="multipart/form-data" class="mt-4">
             @csrf
-            <input type="file" name="file" accept=".csv,text/csv,text/plain" required
-                   class="text-sm rounded-lg border-gray-300 flex-1 min-h-[44px]">
-            <x-input-error :messages="$errors->get('file')" class="sm:hidden" />
-            <x-primary-button>Pratinjau Validasi</x-primary-button>
+            {{-- Tombol pilih file mencolok + nama file terpilih tampil jelas (UAT B1) --}}
+            <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                <label class="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[44px] shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                    Pilih File CSV
+                    <input type="file" name="file" accept=".csv,text/csv,text/plain" required class="hidden"
+                           onchange="document.getElementById('file-csv-terpilih').textContent = this.files[0] ? this.files[0].name : ''; document.getElementById('file-csv-terpilih').classList.toggle('text-gray-800', !!this.files[0]);">
+                </label>
+                <span id="file-csv-terpilih" class="flex-1 px-4 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-400 min-h-[44px] flex items-center truncate">belum memilih file…</span>
+                <x-primary-button>Pratinjau Validasi</x-primary-button>
+            </div>
         </form>
         @if ($errors->has('file'))
             <x-input-error :messages="$errors->get('file')" class="mt-2" />

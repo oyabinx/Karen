@@ -27,8 +27,8 @@ class UserUpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
-            // Kosong = password tidak diganti
-            'password' => ['nullable', 'string', 'min:8'],
+            // Kosong = password tidak diganti; tanpa spasi (UAT B3)
+            'password' => ['nullable', 'string', 'min:8', 'not_regex:/[\s]/'],
             'role' => ['required', Rule::in(['admin', 'pengurus', 'pegawai'])],
             'phone' => [
                 'nullable',
@@ -44,6 +44,11 @@ class UserUpdateRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['name' => 'nama', 'phone' => 'nomor HP', 'seksi_id' => 'seksi'];
+        return ['name' => 'nama', 'phone' => 'nomor HP', 'seksi_id' => 'seksi', 'password' => 'kata sandi'];
+    }
+
+    public function messages(): array
+    {
+        return ['password.not_regex' => 'Kata sandi tidak boleh mengandung spasi.'];
     }
 }
