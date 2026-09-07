@@ -4,6 +4,23 @@
     <h1 class="text-2xl font-semibold mb-1">Selamat datang, {{ $user->name }}</h1>
     <p class="text-gray-500 mb-6">Dashboard <span class="font-medium">Pengurus</span> — kendaraan, maintenance, monitoring & anggaran.</p>
 
+    {{-- Notifikasi pajak ≤3 minggu / lewat tempo (UAT 03-A11) --}}
+    @if ($data['pajakNotifs']->isNotEmpty())
+        @php($adaLewat = $data['pajakNotifs']->firstWhere('lewat', true))
+        <div class="mb-5 rounded-xl border-2 {{ $adaLewat ? 'border-red-300 bg-red-50' : 'border-amber-300 bg-amber-50' }} p-4">
+            <p class="text-sm font-bold {{ $adaLewat ? 'text-red-700' : 'text-amber-800' }} mb-2">⚠ Peringatan Pajak Kendaraan{{ $data['pajakNotifs']->count() > 1 ? ' ('.$data['pajakNotifs']->count().')' : '' }}</p>
+            <ul class="space-y-1">
+                @foreach ($data['pajakNotifs']->take(4) as $n)
+                    <li class="text-sm {{ $n['lewat'] ? 'text-red-700' : 'text-amber-800' }}">
+                        <strong>{{ $n['v']->name }}</strong> — {{ $n['jenis'] }} {{ $n['tanggal']->translatedFormat('d M') }}:
+                        @if ($n['lewat']) LEWAT {{ $n['hari'] }} hari @else {{ $n['hari'] }} hari lagi @endif
+                    </li>
+                @endforeach
+            </ul>
+            <a href="{{ route('pengurus.vehicles.index') }}" class="text-xs font-medium text-gray-600 hover:underline mt-2 inline-block">Lihat semua unit →</a>
+        </div>
+    @endif
+
     {{-- Kuota peminjaman pribadi — pengurus juga peminjam (docs kuota_bidang.md) --}}
     <div class="mb-6 rounded-xl border {{ $data['kuota']['remaining'] > 0 ? 'border-indigo-200 bg-indigo-50/50' : 'border-red-200 bg-red-50' }} px-4 py-3 flex flex-wrap items-center justify-between gap-2">
         <p class="text-sm {{ $data['kuota']['remaining'] > 0 ? 'text-indigo-900' : 'text-red-700' }}">

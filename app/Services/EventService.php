@@ -23,10 +23,12 @@ class EventService
 
     /**
      * Opsi armada untuk wizard: kendaraan layak (bisa_dipinjam, baik,
-     * tanpa maintenance overlap, tanpa event lain overlap) dibedakan
-     * bebas (tanpa booking overlap) vs menabrak (ada booking dipinjam).
+     * tanpa event lain overlap) dibedakan bebas (tanpa booking
+     * overlap) vs menabrak (ada booking dipinjam).
+     * Kelompok ketiga (UAT 03-D2): unit dalam maintenance TETAP
+     * ditampilkan nonaktif dengan rentangnya — pengurus tahu alasannya.
      *
-     * @return array{bebas: Collection<int, Vehicle>, menabrak: Collection<int, Vehicle>}
+     * @return array{bebas: Collection<int, Vehicle>, menabrak: Collection<int, Vehicle>, maintenance: Collection<int, Vehicle>}
      */
     public function armadaOptions(Carbon $start, Carbon $end): array
     {
@@ -48,9 +50,33 @@ class EventService
             ->orderBy('name')
             ->get();
 
+        // Unit maintenance overlap — tampil nonaktif + rentangnya
+        $maintenance = Vehicle::query()
+            ->where('status', 'bisa_dipinjam')
+            ->where('condition', 'baik')
+            ->whereDoesntHave('events', fn ($q) => $q
+                ->where('status', 'terjadwal')
+                ->whereDate('start_date', '<=', $end->endOfDay())
+                ->whereDate('end_date', '>=', $start->startOfDay()))
+            ->whereHas('maintenances', fn ($q) => $q
+                ->where('status', 'terjadwal')
+                ->whereDate('start_date', '<=', $end->endOfDay())
+                ->whereDate('end_date', '>=', $start->startOfDay()))
+            ->with(['maintenances' => fn ($q) => $q
+                ->where('status', 'terjadwal')
+                ->whereDate('start_date', '<=', $end->endOfDay())
+                ->whereDate('end_date', '>=', $start->startOfDay())])
+            ->orderBy('name')
+            ->get()
+            ->each(function (Vehicle $v) {
+                $v->blocking_start = $v->maintenances->min('start_date');
+                $v->blocking_end = $v->maintenances->max('end_date');
+            });
+
         return [
             'bebas' => $layak->filter(fn ($v) => $v->conflict_count === 0)->values(),
             'menabrak' => $layak->filter(fn ($v) => $v->conflict_count > 0)->values(),
+            'maintenance' => $maintenance,
         ];
     }
 

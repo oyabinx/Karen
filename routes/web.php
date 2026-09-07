@@ -111,6 +111,7 @@ Route::middleware(['auth', 'role:pengurus'])
         Route::get('/replacements', [ReplacementController::class, 'index'])->name('replacements.index');
         Route::get('/replacements/{booking}', [ReplacementController::class, 'show'])->name('replacements.show');
         Route::patch('/replacements/{booking}/assign', [ReplacementController::class, 'assign'])->name('replacements.assign');
+        Route::patch('/replacements/{booking}/assign-partial', [ReplacementController::class, 'assignPartial'])->name('replacements.assignPartial');
         Route::patch('/replacements/{booking}/cancel', [ReplacementController::class, 'cancel'])->name('replacements.cancel');
 
         // Anggaran 4 pos per kendaraan
@@ -133,6 +134,7 @@ Route::middleware(['auth', 'role:admin|pengurus'])
         Route::post('/', [EventController::class, 'store'])->name('store');
         Route::get('/{event}/conflicts', [EventController::class, 'conflicts'])->name('conflicts');
         Route::patch('/{event}/conflicts/{booking}', [EventController::class, 'assignBooking'])->name('conflicts.assign');
+        Route::patch('/{event}/conflicts/{booking}/partial', [EventController::class, 'assignPartial'])->name('conflicts.assignPartial');
         Route::patch('/{event}/conflicts/{booking}/cancel', [EventController::class, 'cancelBooking'])->name('conflicts.cancel');
         Route::patch('/{event}/confirm', [EventController::class, 'confirm'])->name('confirm');
         Route::patch('/{event}/cancel', [EventController::class, 'cancel'])->name('cancel');

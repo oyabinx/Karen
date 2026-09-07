@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Pengurus\EventStoreRequest;
 use App\Models\Booking;
 use App\Models\Event;
+use App\Services\AvailabilityService;
 use App\Services\EventService;
 use App\Services\ReplacementService;
 use Illuminate\Http\RedirectResponse;
@@ -22,6 +23,7 @@ class EventController extends Controller
     public function __construct(
         private readonly EventService $events,
         private readonly ReplacementService $replacements,
+        private readonly AvailabilityService $availability,
     ) {}
 
     public function index(): View
@@ -92,10 +94,25 @@ class EventController extends Controller
     public function conflicts(Event $event): View
     {
         // Kandidat per booking — otomatis mengecualikan seluruh armada
-        // event (event terjadwal memblokir ketersediaan) + mobil lama
+        // event (event terjadwal memblokir ketersediaan) + mobil lama.
+        // Parsial (UAT 03-B7): bila event hanya menimpa tepi rentang
+        // booking, tawarkan pengganti untuk bagian yang menabrak saja.
         $bookings = $this->events->unresolvedConflicts($event)
-            ->map(function (Booking $booking) {
+            ->map(function (Booking $booking) use ($event) {
                 $booking->candidates = $this->replacements->candidates($booking);
+
+                $bs = Carbon::parse($booking->start_date)->startOfDay();
+                $be = Carbon::parse($booking->end_date)->startOfDay();
+                $os = $bs->max(Carbon::parse($event->start_date)->startOfDay());
+                $oe = $be->min(Carbon::parse($event->end_date)->startOfDay());
+
+                $penuh = $os->equalTo($bs) && $oe->equalTo($be);
+                $tepi = $os->equalTo($bs) || $oe->equalTo($be);
+
+                $booking->partial = (! $penuh && $tepi) ? ['os' => $os, 'oe' => $oe] : null;
+                $booking->partialCandidates = $booking->partial
+                    ? $this->availability->availableBetween($booking->partial['os'], $booking->partial['oe'], $booking->vehicle_id)
+                    : collect();
 
                 return $booking;
             });
@@ -139,6 +156,35 @@ class EventController extends Controller
         $this->replacements->cancel($booking);
 
         return back()->with('success', 'Peminjaman dibatalkan (tanpa pengganti).');
+    }
+
+    /**
+     * Penggantian PARSIAL dari konflik event (UAT 03-B7): pengganti
+     * hanya untuk tanggal yang ditabrak event; sisa tetap mobil lama.
+     */
+    public function assignPartial(Request $request, Event $event, Booking $booking): RedirectResponse
+    {
+        $request->validate(['vehicle_id' => ['required', 'exists:vehicles,id']]);
+
+        if ($booking->status !== Booking::STATUS_MENUNGGU_PENGGANTIAN) {
+            return back()->with('error', 'Peminjaman ini tidak menunggu penggantian.');
+        }
+
+        $bs = Carbon::parse($booking->start_date)->startOfDay();
+        $be = Carbon::parse($booking->end_date)->startOfDay();
+        $os = $bs->max(Carbon::parse($event->start_date)->startOfDay());
+        $oe = $be->min(Carbon::parse($event->end_date)->startOfDay());
+
+        try {
+            $replacement = \App\Models\Vehicle::findOrFail($request->input('vehicle_id'));
+            $result = $this->replacements->assignPartial($booking, $os, $oe, $replacement);
+        } catch (\InvalidArgumentException|\DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        $split = $result['split'];
+
+        return back()->with('success', "Pengganti parsial: {$split->start_date->translatedFormat('d M')}–{$split->end_date->translatedFormat('d M Y')} memakai {$split->vehicle->name}; sisa tanggal tetap mobil semula.");
     }
 
     /**

@@ -82,4 +82,32 @@
             @endforelse
         </div>
     @endif
+
+    {{-- Mobil sedang maintenance — tampil NONAKTIF dengan keterangan (UAT 03-A12) --}}
+    @if ($validRange && $maintenanceBlocked->isNotEmpty())
+        <p class="text-sm text-gray-500 mt-8 mb-3">Sedang Maintenance — tidak dapat dipinjam pada rentang ini:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach ($maintenanceBlocked as $v)
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col opacity-60">
+                    <div class="aspect-video bg-gray-100 flex items-center justify-center">
+                        @if ($v->photo_path)
+                            <img src="{{ Storage::url($v->photo_path) }}" alt="{{ $v->name }}" class="w-full h-full object-cover grayscale">
+                        @else
+                            <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8l2 5H6l2-5zM4 12h16v5h-2a2 2 0 11-4 0h-4a2 2 0 11-4 0H4v-5z"/></svg>
+                        @endif
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col">
+                        <p class="font-semibold text-gray-500">{{ $v->name }}</p>
+                        <p class="text-sm text-gray-400">{{ $v->plate_number }} · {{ $v->capacity }} kursi</p>
+                        <span class="mt-2 px-2.5 py-1 rounded-full bg-gray-200 text-gray-600 text-xs font-semibold w-fit">
+                            🔧 Sedang Maintenance: {{ $v->blocking_start->translatedFormat('d M') }} – {{ $v->blocking_end->translatedFormat('d M Y') }}
+                        </span>
+                        <div class="mt-3 pt-3 border-t border-gray-100 mt-auto">
+                            <span class="block text-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400 text-sm font-medium cursor-not-allowed">Tidak dapat dipilih</span>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
 </x-app-layout>

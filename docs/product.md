@@ -88,6 +88,9 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 | 17 | Mobil untuk event dipilih dari unit yang layak (bisa dipinjam, kondisi baik, tanpa maintenance, tanpa event lain). Mobil yang **menabrak booking** boleh diambil dengan syarat setiap booking terdampak diberi **mobil pengganti** yang dikonfirmasi/dipilih oleh pembuat event; bila tidak ada pengganti, booking dibatalkan atau mobil event diganti. |
 | 18 | Event selesai otomatis setelah rentangnya berakhir (scheduler); pembatalan event meleaskan armada, namun booking yang sudah digeser tetap memakai mobil penggantinya. |
 | 19 | Karen berjalan **sepenuhnya di intranet kantor** (tidak diakses dari internet). Seluruh **konfigurasi runtime** (integrasi Google, kuota bidang, organisasi, user) dilakukan **melalui UI aplikasi** — pengguna (admin/pengurus/pegawai) **tidak pernah mengedit file atau folder di server**; file server hanya disentuh sekali oleh petugas IT saat deploy. |
+| 20 | Kendaraan memiliki **data sekunder opsional** (nomor rangka, nomor mesin, jatuh tempo pajak tahunan & 5 tahunan) yang dilihat lewat tombol **Detail Kendaraan**; pengurus menerima **notifikasi pajak** saat ≤3 minggu sebelum jatuh tempo (atau lewat tempo). *(UAT 03-A11)* |
+| 21 | Pada hasil pencarian mobil pegawai, unit yang **sedang maintenance** pada rentang **tetap tampil nonaktif** dengan keterangan rentangnya — pegawai tahu penyebab tanpa bertanya; unit yang dipinjam pihak lain tetap disembunyikan. *(UAT 03-A12)* |
+| 22 | **Penggantian parsial**: bila maintenance/event hanya menabrak bagian tepi rentang peminjaman, pengurus dapat memberi mobil pengganti **hanya untuk tanggal yang menabrak** — sisa tanggal tetap memakai mobil semula (peminjaman terpecah dua secara otomatis). Fitur penggantian berada di **menu mandiri "Penggantian Mobil"**. *(UAT 03-B7, D3)* |
 
 ## 6. Lingkup Produk (Scope)
 

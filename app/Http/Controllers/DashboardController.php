@@ -63,6 +63,11 @@ class DashboardController extends Controller
     {
         $year = now()->year;
 
+        // Notifikasi pajak seluruh armada (UAT 03-A11)
+        $pajakNotifs = Vehicle::query()->orderBy('name')->get()
+            ->flatMap(fn ($v) => collect($v->pajakWarnings())->map(fn ($w) => ['v' => $v] + $w))
+            ->values();
+
         $summaryAnggaran = collect(VehicleBudget::POSTS)->mapWithKeys(function ($post) use ($year) {
             $rows = VehicleBudget::where('year', $year)->where('post', $post)->get();
 
@@ -96,6 +101,7 @@ class DashboardController extends Controller
             // Pengurus juga peminjam — kartu kuota bidangnya sendiri
             // (docs/feature/kuota_bidang.md Transparansi UI)
             'kuota' => app(\App\Services\BookingService::class)->quotaInfo($user),
+            'pajakNotifs' => $pajakNotifs,
         ];
     }
 

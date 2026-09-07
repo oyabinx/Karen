@@ -1,6 +1,7 @@
-# Fitur: Penggantian Mobil yang Terjadwal Maintenance (Pengurus)
+# Fitur: Penggantian Mobil (Maintenance & Event) — Pengurus
 
 ## Deskripsi
+Mekanisme penggantian mobil saat jadwal **maintenance** atau **event armada** menabrak peminjaman aktif. Fitur ini memiliki **menu mandiri "Penggantian Mobil"** di sidebar (skema baru UAT 03-D3) karena dipakai bersama oleh kedua fitur tersebut.
 Apabila pengurus menjadwalkan maintenance untuk mobil yang **ternyata sudah memiliki booking aktif/mendatang** pada rentang tanggal maintenance, sistem akan:
 1. Menandai booking terdampak sebagai `menunggu_penggantian`,
 2. **Otomatis mencarikan mobil pengganti yang tersedia** pada rentang tanggal yang sama,
@@ -32,6 +33,14 @@ Apabila pengurus menjadwalkan maintenance untuk mobil yang **ternyata sudah memi
 - Penggantian hanya boleh dilakukan oleh **pengurus**, bukan pegawai peminjam.
 - Riwayat penggantian terlihat di detail booking (catatan: "Diganti dari [mobil lama] karena maintenance").
 
+### Penggantian PARSIAL — skema baru (UAT 03-B7)
+Bila tabrakan hanya menimpa **bagian rentang di tepi** (awal atau akhir) dan pemblokirnya **tunggal**, halaman penggantian menawarkan opsi **"Pengganti sebagian — hanya tanggal yang menabrak"**:
+- Contoh: pegawai meminjam Mobil A tanggal 20–22; pengurus menjadwalkan maintenance Mobil A tanggal 22–24. Opsi parsial: tanggal 20–21 **tetap Mobil A**, tanggal 22 saja memakai mobil pengganti.
+- Implementasi: booking asli **dipangkas** ke sisa tanggal (tetap mobil lama, status `dipinjam`), dan dibuat **booking baru** untuk tanggal yang menabrak (mobil pengganti, `original_vehicle_id` = mobil lama; alamat & keperluan disalin). Riwayat peminjam menampilkan dua peminjaman berurutan — bagian kedua berbadge "Diganti dari {unit}".
+- Kandidat pengganti parsial diperiksa ketersediaannya pada **rentang parsial saja** (bisa lebih banyak daripada kandidat penggantian penuh).
+- **Batasan**: parsial hanya untuk tabrakan di **tepi**; tabrakan di **tengah** rentang atau menimpa **seluruh** rentang → gunakan penggantian penuh (opsi parsial tidak tampil).
+- Berlaku untuk pemblokir maintenance **maupun** event (halaman konflik event menawarkan opsi yang sama).
+
 ### Status Booking Baru
 `bookings.status` menjadi ENUM: `dipinjam`, `menunggu_penggantian`, `dikembalikan`, `dibatalkan`.
 
@@ -42,10 +51,12 @@ Apabila pengurus menjadwalkan maintenance untuk mobil yang **ternyata sudah memi
 | Method | Path | Keterangan |
 |--------|------|------------|
 | POST | `/pengurus/maintenances` | Buat jadwal (memicu deteksi booking terdampak) |
-| GET | `/pengurus/replacements` | Daftar booking `menunggu_penggantian` + kandidat pengganti |
-| GET | `/pengurus/replacements/{booking}` | Detail kandidat mobil pengganti |
-| PATCH | `/pengurus/replacements/{booking}/assign` | Konfirmasi pilihan mobil pengganti |
+| GET | `/pengurus/replacements` | Daftar booking `menunggu_penggantian` (menu mandiri "Penggantian Mobil") |
+| GET | `/pengurus/replacements/{booking}` | Detail kandidat pengganti (penuh + parsial bila tersedia) |
+| PATCH | `/pengurus/replacements/{booking}/assign` | Konfirmasi penggantian PENUH |
+| PATCH | `/pengurus/replacements/{booking}/assign-partial` | Penggantian PARSIAL (UAT 03-B7) — split booking |
 | PATCH | `/pengurus/replacements/{booking}/cancel` | Batalkan booking (tanpa pengganti) |
+| PATCH | `/pengurus/events/{event}/conflicts/{booking}/partial` | Parsial dari konflik event (rentang = irisan event × booking) |
 
 ## Skenario Uji
 1. Buat maintenance 10–12 Agustus untuk mobil yang dibooking 10–11 Agustus → booking jadi `menunggu_penggantian`, kandidat pengganti tampil.

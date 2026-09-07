@@ -13,10 +13,11 @@ Langkah 1 — informasi event:
 - **Durasi event fleksibel**: boleh **melebihi 3 hari** untuk kegiatan khusus (misal pelatihan/rapat multi-hari) karena hanya admin dan pengurus yang dapat membuatnya — batas 3 hari hanya berlaku untuk peminjaman biasa pegawai/pengurus. Validasi tetap dijalankan: `end_date >= start_date` dan `start_date >= today`.
 
 Langkah 2 — pemilihan armada:
-- Sistem menampilkan daftar mobil yang memenuhi syarat dasar (status `bisa_dipinjam`, kondisi `baik`, **bukan dalam jadwal maintenance**, **bukan terpakai event lain** pada rentang tersebut) dan menandai dua kelompok:
+- Sistem menampilkan tiga kelompok (*kelompok ketiga baru — UAT 03-D2*):
   - ✅ **Bebas** — tidak ada booking overlap pada rentang event;
-  - ⚠️ **Menabrak** — ada booking aktif overlap (booking inilah yang akan digeser).
-- Pembuat event memilih tepat N mobil (boleh campuran kedua kelompok).
+  - ⚠️ **Menabrak** — ada booking aktif overlap (booking inilah yang akan digeser);
+  - 🔧 **Sedang Maintenance** — unit terjadwal perawatan pada rentang: **TETAP DITAMPILKAN nonaktif** (checkbox tidak bisa diklik) dengan keterangan rentang maintenance-nya — penyebab langsung terlihat.
+- Pembuat event memilih tepat N mobil dari kelompok Bebas/Menabrak (boleh campuran).
 - Mobil yang **sedang dipakai event lain** pada rentang sama **tidak bisa ditabrak** (event tidak boleh menggeser event).
 - Aturan **dua arah**: event menolak kendaraan yang sedang maintenance, dan sebaliknya **pembuatan jadwal maintenance baru ditolak bila menabrak armada event terjadwal** (mobil tidak bisa di bengkel dan dipakai event sekaligus — lihat [manajemen_kendaraan.md](manajemen_kendaraan.md)).
 

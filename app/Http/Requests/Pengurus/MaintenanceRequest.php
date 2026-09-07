@@ -18,7 +18,8 @@ class MaintenanceRequest extends FormRequest
     {
         return [
             'vehicle_id' => ['required', Rule::exists('vehicles', 'id')],
-            'start_date' => ['required', 'date'],
+            // Jadwal tidak boleh dimulai di masa lalu (UAT 03-B4)
+            'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => [
                 'required',
                 'date',

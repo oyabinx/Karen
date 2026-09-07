@@ -50,6 +50,34 @@ class AvailabilityService
     }
 
     /**
+     * Mobil layak namun SEDANG MAINTENANCE pada rentang — ditampilkan
+     * di hasil pencarian pegawai sebagai nonaktif dengan keterangan
+     * tanggal (UAT 03-A12), bukan disembunyikan.
+     *
+     * @return Collection<int, Vehicle> dengan atribut blocking_start/blocking_end
+     */
+    public function maintenanceBlockedBetween(Carbon $start, Carbon $end): Collection
+    {
+        return Vehicle::query()
+            ->where('status', 'bisa_dipinjam')
+            ->where('condition', 'baik')
+            ->whereHas('maintenances', fn ($q) => $q
+                ->where('status', 'terjadwal')
+                ->whereDate('start_date', '<=', $end->endOfDay())
+                ->whereDate('end_date', '>=', $start->startOfDay()))
+            ->with(['maintenances' => fn ($q) => $q
+                ->where('status', 'terjadwal')
+                ->whereDate('start_date', '<=', $end->endOfDay())
+                ->whereDate('end_date', '>=', $start->startOfDay())])
+            ->orderBy('name')
+            ->get()
+            ->each(function (Vehicle $v) {
+                $v->blocking_start = $v->maintenances->min('start_date');
+                $v->blocking_end = $v->maintenances->max('end_date');
+            });
+    }
+
+    /**
      * Apakah mobil bebas pada rentang — mengabaikan SATU booking tertentu
      * (dipakai saat menilai kelayakan revert booking menunggu_penggantian
      * ke mobil semula: booking itu sendiri tidak boleh menghalangi).

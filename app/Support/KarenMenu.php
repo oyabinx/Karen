@@ -39,6 +39,8 @@ class KarenMenu
             $menu['Kendaraan'] = array_filter([
                 Route::has('pengurus.vehicles.index') ? self::item('pengurus.vehicles.index', 'Data Kendaraan', self::icon('car')) : null,
                 Route::has('pengurus.maintenances.index') ? self::item('pengurus.maintenances.index', 'Jadwal Maintenance', self::icon('wrench')) : null,
+                // Menu mandiri — dipakai maintenance & event (UAT 03-D3)
+                Route::has('pengurus.replacements.index') ? self::item('pengurus.replacements.index', 'Penggantian Mobil', self::icon('swap')) : null,
                 Route::has('pengurus.documents.index') ? self::item('pengurus.documents.index', 'Dokumen (bend26/nota)', self::icon('doc')) : null,
                 Route::has('pengurus.events.index') ? self::item('pengurus.events.index', 'Event Armada', self::icon('calendar')) : null,
             ]);
@@ -86,6 +88,7 @@ class KarenMenu
             'chart' => '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6m4 6V9m4 10V5M5 19h16"/></svg>',
             'search' => '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>',
             'doc' => '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 3h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zm7 0v5h5"/></svg>',
+            'swap' => '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h11m0 0l-3-3m3 3l-3 3M16 17H5m0 0l3 3m-3-3l3-3"/></svg>',
             default => '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>',
         };
     }

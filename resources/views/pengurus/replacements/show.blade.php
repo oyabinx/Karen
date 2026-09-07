@@ -42,6 +42,38 @@
         @endforelse
     </div>
 
+    {{-- Penggantian PARSIAL (UAT 03-B7): hanya tanggal yang menabrak --}}
+    @if ($partial)
+        <section class="bg-white rounded-xl border-2 border-sky-200 p-5 mb-8">
+            <h2 class="font-semibold text-sky-800 mb-1">Pengganti sebagian — hanya tanggal yang menabrak</h2>
+            <p class="text-sm text-sky-700 mb-4">
+                {{ $partial['os']->translatedFormat('d M Y') }} s.d. {{ $partial['oe']->translatedFormat('d M Y') }} memakai mobil pengganti —
+                <strong>sisa tanggal tetap {{ $booking->vehicle->name }}</strong> (peminjaman dipecah dua secara otomatis).
+            </p>
+
+            @if ($partialCandidates->isEmpty())
+                <p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">Tidak ada kandidat untuk rentang parsial ini.</p>
+            @else
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    @foreach ($partialCandidates as $v)
+                        <form method="POST" action="{{ route('pengurus.replacements.assignPartial', $booking) }}"
+                              class="rounded-xl border border-sky-200 bg-sky-50/50 p-3 flex items-center justify-between gap-3">
+                            @csrf @method('PATCH')
+                            <input type="hidden" name="vehicle_id" value="{{ $v->id }}">
+                            <div class="min-w-0">
+                                <p class="font-medium text-sm truncate">{{ $v->name }}</p>
+                                <p class="text-xs text-gray-500">{{ $v->plate_number }} · {{ $v->capacity }} kursi</p>
+                            </div>
+                            <button class="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-semibold hover:bg-sky-700 min-h-[44px] shrink-0">
+                                Pakai {{ $partial['os']->translatedFormat('d M') }}–{{ $partial['oe']->translatedFormat('d M') }}
+                            </button>
+                        </form>
+                    @endforeach
+                </div>
+            @endif
+        </section>
+    @endif
+
     {{-- Batalkan bila tidak ada pengganti --}}
     <section class="bg-red-50 rounded-xl border border-red-200 p-5">
         <p class="font-semibold text-red-700 mb-1">Tidak ada pengganti yang cocok?</p>

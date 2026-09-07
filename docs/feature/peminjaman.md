@@ -17,12 +17,10 @@ Fitur inti self-service: user memilih rentang tanggal, sistem menampilkan mobil 
 ### 1. Cari Mobil Tersedia
 - Form: tanggal mulai + tanggal selesai.
 - Validasi rentang sebelum query (lihat atas).
-- Hasil: grid mobil tersedia — foto, nama, plat, kapasitas.
-- Mobil **tidak ditampilkan** bila:
-  - ada booking `dipinjam` yang overlap rentang;
-  - ada jadwal maintenance yang overlap rentang;
-  - status `tidak_bisa_dipinjam`;
-  - kondisi `perlu_diperiksa`.
+- Hasil terbagi dua kelompok — *skema baru UAT 03-A12*:
+  - **Tersedia** — grid mobil dengan foto, nama, plat, kapasitas; tombol "Pinjam Mobil Ini".
+  - **Sedang Maintenance (tidak dapat dipilih)** — mobil yang terjadwal maintenance pada rentang **TETAP DITAMPILKAN** dalam keadaan nonaktif (abu, tombol "Tidak dapat dipilih") beserta keterangan rentang maintenance-nya — pegawai langsung tahu penyebabnya tanpa bertanya pengurus. Mobil yang **dipinjam pihak lain** tetap disembunyikan.
+- Mobil juga tidak ditampilkan bila ada booking `dipinjam`/`menunggu_penggantian` overlap, sedang dipakai event, berstatus `tidak_bisa_dipinjam`, atau berkondisi `perlu_diperiksa`.
 - Overlap ditentukan dengan: `start_date <= akhir AND end_date >= mulai`.
 
 ### 2. Form Booking

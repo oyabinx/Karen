@@ -14,6 +14,26 @@
         <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{{ session('error') }}</div>
     @endif
 
+    {{-- Notifikasi pajak ≤3 minggu / lewat tempo (UAT 03-A11) --}}
+    @if ($pajakNotifs->isNotEmpty())
+        <div class="mb-5 rounded-xl border-2 {{ $pajakNotifs->firstWhere('lewat', true) ? 'border-red-300 bg-red-50' : 'border-amber-300 bg-amber-50' }} p-4">
+            <p class="text-sm font-bold {{ $pajakNotifs->firstWhere('lewat', true) ? 'text-red-700' : 'text-amber-800' }} mb-2">⚠ Peringatan Pajak Kendaraan</p>
+            <ul class="space-y-1">
+                @foreach ($pajakNotifs as $n)
+                    <li class="text-sm {{ $n['lewat'] ? 'text-red-700' : 'text-amber-800' }}">
+                        <strong>{{ $n['v']->name }}</strong> ({{ $n['v']->plate_number }}) — {{ $n['jenis'] }}:
+                        {{ $n['tanggal']->translatedFormat('d M Y') }} ·
+                        @if ($n['lewat'])
+                            <span class="font-semibold">LEWAT {{ $n['hari'] }} hari</span>
+                        @else
+                            {{ $n['hari'] }} hari lagi
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- Tab filter --}}
     <div class="flex flex-wrap gap-2 mb-5 text-sm">
         @foreach (['semua' => 'Semua', 'tersedia' => 'Tersedia', 'tidak_bisa_dipinjam' => 'Tidak Bisa Dipinjam', 'perlu_diperiksa' => 'Perlu Diperiksa'] as $key => $label)
@@ -51,6 +71,8 @@
                     </div>
 
                     <div class="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                        {{-- Detail kendaraan: data sekunder (UAT 03-A11) --}}
+                        <button @click="detail{{ $v->id }} = true" class="text-gray-700 hover:underline font-medium">Detail</button>
                         <a href="{{ route('pengurus.vehicles.edit', $v) }}" class="text-indigo-600 hover:underline">Ubah</a>
                         <a href="{{ route('pengurus.budgets.edit', $v) }}" class="text-indigo-600 hover:underline">Anggaran</a>
                         @if (! $v->trashed())
@@ -70,6 +92,31 @@
                                 <button class="text-amber-600 hover:underline">Tandai perlu diperiksa</button>
                             </form>
                         @endif
+                    </div>
+                </div>
+
+                {{-- Modal Detail Kendaraan --}}
+                <div x-data="{ detail{{ $v->id }}: false }">
+                    <div x-show="detail{{ $v->id }}" x-cloak @click="detail{{ $v->id }} = false" class="fixed inset-0 z-50 bg-black/50" x-transition.opacity></div>
+                    <div x-show="detail{{ $v->id }}" x-cloak x-transition
+                         class="fixed inset-x-4 top-1/2 -translate-y-1/2 sm:inset-x-0 sm:mx-auto sm:max-w-md z-50 bg-white rounded-2xl shadow-xl p-6 max-h-[90vh] overflow-y-auto">
+                        <div class="flex items-start justify-between gap-3 mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold">Detail Kendaraan</h3>
+                                <p class="text-sm text-gray-500">{{ $v->name }} · {{ $v->plate_number }}</p>
+                            </div>
+                            <button @click="detail{{ $v->id }} = false" class="p-2 min-h-[44px] min-w-[44px] text-gray-400 hover:text-gray-600" aria-label="Tutup">✕</button>
+                        </div>
+                        <dl class="text-sm divide-y">
+                            <div class="flex justify-between py-2"><dt class="text-gray-500">Nama / Unit</dt><dd class="font-medium">{{ $v->name }}</dd></div>
+                            <div class="flex justify-between py-2"><dt class="text-gray-500">Plat Nomor</dt><dd class="font-medium">{{ $v->plate_number }}</dd></div>
+                            <div class="flex justify-between py-2"><dt class="text-gray-500">Tahun Pembuatan</dt><dd class="font-medium">{{ $v->year }}</dd></div>
+                            <div class="flex justify-between py-2"><dt class="text-gray-500">Kapasitas</dt><dd class="font-medium">{{ $v->capacity }} kursi</dd></div>
+                            <div class="flex justify-between py-2"><dt class="text-gray-500">Nomor Rangka</dt><dd class="font-medium">{{ $v->nomor_rangka ?? '—' }}</dd></div>
+                            <div class="flex justify-between py-2"><dt class="text-gray-500">Nomor Mesin</dt><dd class="font-medium">{{ $v->nomor_mesin ?? '—' }}</dd></div>
+                            <div class="flex justify-between py-2"><dt class="text-gray-500">Pajak Tahunan</dt><dd class="font-medium {{ $v->pajakWarnings() ? 'text-red-600' : '' }}">{{ $v->pajak_tahunan?->translatedFormat('d M Y') ?? '—' }}</dd></div>
+                            <div class="flex justify-between py-2"><dt class="text-gray-500">Pajak 5 Tahunan</dt><dd class="font-medium {{ $v->pajakWarnings() ? 'text-red-600' : '' }}">{{ $v->pajak_lima_tahunan?->translatedFormat('d M Y') ?? '—' }}</dd></div>
+                        </dl>
                     </div>
                 </div>
             </div>

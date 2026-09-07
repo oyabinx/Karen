@@ -26,9 +26,17 @@ class VehicleController extends Controller
             ->orderBy('name')
             ->get();
 
+        // Notifikasi pajak seluruh armada aktif (bukan hanya tab aktif)
+        $pajakNotifs = Vehicle::query()
+            ->orderBy('name')
+            ->get()
+            ->flatMap(fn ($v) => collect($v->pajakWarnings())->map(fn ($w) => ['v' => $v] + $w))
+            ->values();
+
         return view('pengurus.vehicles.index', [
             'vehicles' => $vehicles,
             'tab' => $request->input('tab', 'semua'),
+            'pajakNotifs' => $pajakNotifs,
         ]);
     }
 

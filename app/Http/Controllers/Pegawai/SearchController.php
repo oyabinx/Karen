@@ -28,14 +28,22 @@ class SearchController extends Controller
         $rangeErrors = ($start || $end) ? $this->bookings->rangeErrors($start, $end) : [];
 
         $vehicles = collect();
+        $maintenanceBlocked = collect();
         $validRange = $start && $end && $rangeErrors === [];
 
         if ($validRange) {
             $vehicles = $this->availability->availableBetween(Carbon::parse($start), Carbon::parse($end));
+
+            // UAT 03-A12: mobil maintenance TETAP tampil (nonaktif) agar
+            // pegawai tahu penyebabnya tanpa bertanya pengurus
+            $maintenanceBlocked = $this->availability->maintenanceBlockedBetween(
+                Carbon::parse($start), Carbon::parse($end)
+            );
         }
 
         return view('pegawai.search.index', [
             'vehicles' => $vehicles,
+            'maintenanceBlocked' => $maintenanceBlocked,
             'start' => $start,
             'end' => $end,
             'rangeErrors' => $rangeErrors,

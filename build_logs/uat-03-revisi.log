@@ -1,0 +1,84 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                KAREN — BUILD LOG · REVISI & SKEMA BARU UAT 03      ║
+║     (tindak lanjut UAT/03-pengurus-kendaraan-maintenance.md)       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal     : 2026-08-31
+  Sumber      : hasil UAT manual user (15 ok, 2 revisi, 3 SKEMA BARU)
+  Status      : ✅ SEMUA selesai; 203/203 test HIJAU (+11 test);
+                migrasi baru; docs 6 file; aset di-build ulang
+
+────────────────────────────────────────────────────────────────────
+ REVISI BIASA
+────────────────────────────────────────────────────────────────────
+
+ A3 Pesan foto "2048 kilobita" → messages() kustom: "Foto maksimal
+    berukuran 2 MB." (Store & Update kendaraan).
+
+ B4 Jadwal maintenance bisa mulai masa lalu → rule baru
+    start_date after_or_equal:today (docs manajemen_kendaraan).
+
+────────────────────────────────────────────────────────────────────
+ SKEMA BARU
+────────────────────────────────────────────────────────────────────
+
+ ★ A11 DATA SEKUNDER KENDARAAN + NOTIFIKASI PAJAK
+   Migrasi +4 kolom: nomor_rangka, nomor_mesin, pajak_tahunan,
+   pajak_lima_tahunan (semua NULL-able). Form kendaraan menambah
+   seksi "Data Sekunder (opsional)" ter-collapse. Tombol **Detail**
+   pada tiap kartu membuka modal berisi data primer+sekunder
+   (tanggal pajak merah bila menunggak). NOTIFIKASI: banner di
+   dashboard pengurus & halaman Data Kendaraan — unit dengan pajak
+   ≤21 hari (amber "n hari lagi") atau lewat tempo (merah "LEWAT n
+   hari"); hitungan per jenis pajak. DOCS: manajemen_kendaraan.md +
+   product.md aturan 20 + tech.md skema.
+
+ ★ A12 MOBIL MAINTENANCE TETAP TAMPIL DI PENCARIAN (nonaktif)
+   AvailabilityService::maintenanceBlockedBetween — hasil pencarian
+   pegawai kini dua seksi: "tersedia" (klikabel) dan "Sedang
+   Maintenance" (kartu abu + grayscale + rentang maintenance +
+   tombol "Tidak dapat dipilih"). Mobil dipinjam pihak lain tetap
+   TERSEMBUNYI (sesuai catatan user). DOCS: peminjaman.md + aturan 21.
+
+ ★ B7 PENGGANTIAN PARSIAL (split booking)
+   ReplacementService::assignPartial + partialRange + singleBlocker:
+   bila pemblokir TUNGGAL menabrak hanya TEPI rentang (awal/akhir),
+   halaman penggantian (maintenance & konflik event) menawarkan seksi
+   biru "Pengganti sebagian — hanya tanggal yang menabrak":
+   booking asli DIPANGKAS ke sisa tanggal (tetap mobil lama) + booking
+   BARU untuk tanggal menabrak (pengganti; original_vehicle_id = lama;
+   alamat/keperluan disalin). Kandidat parsial dicek pada rentang
+   parsial saja. Transaksi + lockForUpdate. Batasan terdokumentasi:
+   tabrakan TENGAH/PLENUH → hanya penggantian penuh (parsial tak
+   tampil & endpoint menolak). Endpoint baru: PATCH
+   /replacements/{b}/assign-partial & PATCH
+   /events/{e}/conflicts/{b}/partial. DOCS: penggantian_mobil.md
+   (bagian baru) + product.md aturan 22.
+
+ ★ D2 WIZARD EVENT — kelompok "🔧 Sedang Maintenance"
+   armadaOptions kini 3 kelompok; unit maintenance TAMPIL nonaktif
+   (checkbox disabled + rentangnya) alih-alih hilang. Submit memilih
+   unit itu tetap ditolak validasi. DOCS: event_bidang.md langkah 2.
+
+ ★ D3 MENU MANDIRI "Penggantian Mobil"
+   KarenMenu: item baru (ikon tukar) di seksi Kendaraan — dipakai
+   bersama alur maintenance & event. Halaman jadwal maintenance
+   tetap menampilkan banner menuju sana.
+
+────────────────────────────────────────────────────────────────────
+ BUG PROSES (dicatat jujur)
+────────────────────────────────────────────────────────────────────
+ - pajakWarnings() array dipakai ->map() → 500; dibungkus collect()
+   di dua controller.
+ - Salah asersi test: "Pajak Aman" wajar hadir sebagai unit grid —
+   diganti "60 hari lagi".
+ DOCS selaras (aturan bug→markdown): 6 file diperbarui; product.md
+ +aturan 20-22.
+
+ Verifikasi: 203 test PASSED (697 asersi); migrasi OK; npm build
+ 634ms; smoke: Detail ADA, menu Penggantian Mobil ADA, label seksi
+ "Sedang Maintenance" ADA di pencarian (setelah data uji dibuat).
+
+════════════════════════════════════════════════════════════════════
+                       — AKHIR REVISI & SKEMA UAT-03 —
+════════════════════════════════════════════════════════════════════

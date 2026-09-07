@@ -73,25 +73,38 @@
                 <p class="text-sm text-gray-500 mb-4">
                     ✅ <strong>Bebas</strong> ({{ $armada['bebas']->count() }}): tanpa peminjaman bertabrakan.
                     ⚠ <strong>Menabrak</strong> ({{ $armada['menabrak']->count() }}): ada peminjaman — akan digeser dengan mobil pengganti pada langkah berikutnya.
+                    🔧 <strong>Maintenance</strong> ({{ $armada['maintenance']->count() }}): sedang terjadwal perawatan — <em>tidak dapat dipilih</em>.
                 </p>
 
-                @foreach (['bebas' => 'Bebas', 'menabrak' => 'Menabrak peminjaman'] as $key => $label)
+                @foreach (['bebas' => 'Bebas', 'menabrak' => 'Menabrak peminjaman', 'maintenance' => 'Sedang Maintenance (tidak dapat dipilih)'] as $key => $label)
                     @if ($armada[$key]->isNotEmpty())
-                        <p class="text-sm font-semibold mt-4 mb-2 {{ $key === 'menabrak' ? 'text-amber-600' : 'text-green-700' }}">{{ $label === 'Bebas' ? '✅' : '⚠' }} {{ $label }}</p>
+                        <p class="text-sm font-semibold mt-4 mb-2 {{ $key === 'menabrak' ? 'text-amber-600' : ($key === 'maintenance' ? 'text-gray-500' : 'text-green-700') }}">{{ $key === 'bebas' ? '✅' : ($key === 'menabrak' ? '⚠' : '🔧') }} {{ $label }}</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             @foreach ($armada[$key] as $v)
-                                <label class="flex items-start gap-3 rounded-xl border {{ in_array($v->id, old('vehicles', $selected ?? [])) ? 'border-indigo-400 bg-indigo-50/50' : 'border-gray-200' }} p-4 cursor-pointer hover:border-indigo-300">
-                                    <input type="checkbox" name="vehicles[]" value="{{ $v->id }}"
-                                           class="mt-0.5 rounded border-gray-300 text-indigo-600 min-h-[44px] min-w-[44px]"
-                                           {{ in_array($v->id, old('vehicles', $selected ?? [])) ? 'checked' : '' }}>
-                                    <span>
-                                        <span class="font-medium block">{{ $v->name }}</span>
-                                        <span class="text-xs text-gray-500">{{ $v->plate_number }} · {{ $v->year }} · {{ $v->capacity }} kursi</span>
-                                        @if ($key === 'menabrak')
-                                            <span class="block text-xs text-amber-600 mt-0.5">{{ $v->conflict_count }} peminjaman ditabrak</span>
-                                        @endif
-                                    </span>
-                                </label>
+                                @if ($key === 'maintenance')
+                                    {{-- UAT 03-D2: tampil tapi nonaktif dengan rentang maintenance --}}
+                                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 opacity-70 flex items-start gap-3 cursor-not-allowed">
+                                        <input type="checkbox" disabled class="mt-0.5 rounded border-gray-300 text-gray-400 min-h-[44px] min-w-[44px]">
+                                        <span>
+                                            <span class="font-medium block text-gray-500">{{ $v->name }}</span>
+                                            <span class="text-xs text-gray-400">{{ $v->plate_number }} · {{ $v->capacity }} kursi</span>
+                                            <span class="block text-xs text-gray-500 mt-0.5">🔧 Maintenance: {{ $v->blocking_start->translatedFormat('d M') }} – {{ $v->blocking_end->translatedFormat('d M Y') }}</span>
+                                        </span>
+                                    </div>
+                                @else
+                                    <label class="flex items-start gap-3 rounded-xl border {{ in_array($v->id, old('vehicles', $selected ?? [])) ? 'border-indigo-400 bg-indigo-50/50' : 'border-gray-200' }} p-4 cursor-pointer hover:border-indigo-300">
+                                        <input type="checkbox" name="vehicles[]" value="{{ $v->id }}"
+                                               class="mt-0.5 rounded border-gray-300 text-indigo-600 min-h-[44px] min-w-[44px]"
+                                               {{ in_array($v->id, old('vehicles', $selected ?? [])) ? 'checked' : '' }}>
+                                        <span>
+                                            <span class="font-medium block">{{ $v->name }}</span>
+                                            <span class="text-xs text-gray-500">{{ $v->plate_number }} · {{ $v->year }} · {{ $v->capacity }} kursi</span>
+                                            @if ($key === 'menabrak')
+                                                <span class="block text-xs text-amber-600 mt-0.5">{{ $v->conflict_count }} peminjaman ditabrak</span>
+                                            @endif
+                                        </span>
+                                    </label>
+                                @endif
                             @endforeach
                         </div>
                     @endif

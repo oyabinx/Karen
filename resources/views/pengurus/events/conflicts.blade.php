@@ -67,6 +67,32 @@
                         Tidak ada kandidat pengganti untuk rentang tanggal ini — batalkan peminjaman, atau ubah pilihan armada event.
                     </p>
                 @endif
+
+                {{-- Parsial (UAT 03-B7): pengganti hanya untuk tanggal yang ditabrak event --}}
+                @if ($b->partial)
+                    <div class="mt-4 rounded-xl border-2 border-sky-200 bg-sky-50/50 p-4">
+                        <p class="text-sm font-semibold text-sky-800 mb-1">Atau pengganti sebagian:</p>
+                        <p class="text-xs text-sky-700 mb-3">
+                            {{ $b->partial['os']->translatedFormat('d M Y') }} s.d. {{ $b->partial['oe']->translatedFormat('d M Y') }} pakai pengganti —
+                            <strong>sisa tanggal tetap {{ $b->vehicle->name }}</strong>.
+                        </p>
+                        @if ($b->partialCandidates->isEmpty())
+                            <p class="text-xs text-red-600">Tidak ada kandidat untuk rentang parsial.</p>
+                        @else
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($b->partialCandidates as $v)
+                                    <form method="POST" action="{{ route('pengurus.events.conflicts.assignPartial', [$event, $b]) }}">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="vehicle_id" value="{{ $v->id }}">
+                                        <button class="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-semibold hover:bg-sky-700 min-h-[44px]">
+                                            {{ $v->name }} → {{ $b->partial['os']->translatedFormat('d M') }}–{{ $b->partial['oe']->translatedFormat('d M') }}
+                                        </button>
+                                    </form>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @endif
             </section>
         @endforeach
     </div>

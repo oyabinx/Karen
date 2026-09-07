@@ -18,7 +18,17 @@ class VehicleUpdateRequest extends FormRequest
             'year' => ['required', 'integer', 'min:1980', 'max:'.(int) now()->year + 1],
             'capacity' => ['required', 'integer', 'min:1', 'max:20'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            // Data sekunder (opsional — UAT 03-A11)
+            'nomor_rangka' => ['nullable', 'string', 'max:50'],
+            'nomor_mesin' => ['nullable', 'string', 'max:50'],
+            'pajak_tahunan' => ['nullable', 'date'],
+            'pajak_lima_tahunan' => ['nullable', 'date'],
         ];
+    }
+
+    public function messages(): array
+    {
+        return ['photo.max' => 'Foto maksimal berukuran 2 MB.'];
     }
 
     public function attributes(): array

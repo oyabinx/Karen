@@ -98,6 +98,8 @@ bookings ──< complaints (1 booking max 1 keluhan saat pengembalian)
 | status | ENUM('bisa_dipinjam','tidak_bisa_dipinjam') | diatur pengurus |
 | condition | ENUM('baik','perlu_diperiksa') | `perlu_diperiksa` saat ada keluhan |
 | photo_path | VARCHAR(255) NULL | |
+| nomor_rangka / nomor_mesin | VARCHAR(50) NULL | data sekunder (UAT 03-A11) |
+| pajak_tahunan / pajak_lima_tahunan | DATE NULL | memicu notifikasi pengurus ≤21 hari sebelum / lewat tempo |
 | timestamps, soft deletes | | |
 
 #### `maintenances`

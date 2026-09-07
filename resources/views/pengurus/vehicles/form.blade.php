@@ -48,6 +48,36 @@
             </div>
         </div>
 
+        {{-- Data sekunder — opsional, dapat dilengkapi kapan pun (UAT 03-A11) --}}
+        <div class="border-t border-gray-100 pt-5 mt-5">
+            <details>
+                <summary class="cursor-pointer select-none text-sm font-semibold text-gray-600 hover:text-gray-800">Data Sekunder (opsional — Nomor Rangka, Nomor Mesin, Pajak)</summary>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
+                    <div>
+                        <x-input-label for="nomor_rangka" value="Nomor Rangka" />
+                        <x-text-input id="nomor_rangka" name="nomor_rangka" type="text" class="block mt-1 w-full" :value="old('nomor_rangka', $vehicle->nomor_rangka)" maxlength="50" placeholder="opsional" />
+                        <x-input-error :messages="$errors->get('nomor_rangka')" class="mt-1" />
+                    </div>
+                    <div>
+                        <x-input-label for="nomor_mesin" value="Nomor Mesin" />
+                        <x-text-input id="nomor_mesin" name="nomor_mesin" type="text" class="block mt-1 w-full" :value="old('nomor_mesin', $vehicle->nomor_mesin)" maxlength="50" placeholder="opsional" />
+                        <x-input-error :messages="$errors->get('nomor_mesin')" class="mt-1" />
+                    </div>
+                    <div>
+                        <x-input-label for="pajak_tahunan" value="Jatuh Tempo Pajak Tahunan" />
+                        <x-text-input id="pajak_tahunan" name="pajak_tahunan" type="date" class="block mt-1 w-full" :value="old('pajak_tahunan', $vehicle->pajak_tahunan?->format('Y-m-d'))" />
+                        <x-input-error :messages="$errors->get('pajak_tahunan')" class="mt-1" />
+                    </div>
+                    <div>
+                        <x-input-label for="pajak_lima_tahunan" value="Jatuh Tempo Pajak 5 Tahunan" />
+                        <x-text-input id="pajak_lima_tahunan" name="pajak_lima_tahunan" type="date" class="block mt-1 w-full" :value="old('pajak_lima_tahunan', $vehicle->pajak_lima_tahunan?->format('Y-m-d'))" />
+                        <x-input-error :messages="$errors->get('pajak_lima_tahunan')" class="mt-1" />
+                        <p class="text-xs text-gray-400 mt-1">Notifikasi muncul otomatis ≤3 minggu sebelum jatuh tempo.</p>
+                    </div>
+                </div>
+            </details>
+        </div>
+
         <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
             <a href="{{ route('pengurus.vehicles.index') }}" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-center hover:bg-gray-50 min-h-[44px] leading-[44px]">Batal</a>
             <x-primary-button>{{ $vehicle->exists ? 'Simpan Perubahan' : 'Tambah Kendaraan' }}</x-primary-button>

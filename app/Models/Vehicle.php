@@ -14,6 +14,7 @@ class Vehicle extends Model
 
     protected $fillable = [
         'name', 'plate_number', 'year', 'capacity', 'status', 'condition', 'photo_path',
+        'nomor_rangka', 'nomor_mesin', 'pajak_tahunan', 'pajak_lima_tahunan',
     ];
 
     protected function casts(): array
@@ -21,7 +22,41 @@ class Vehicle extends Model
         return [
             'year' => 'integer',
             'capacity' => 'integer',
+            'pajak_tahunan' => 'date',
+            'pajak_lima_tahunan' => 'date',
         ];
+    }
+
+    /**
+     * Peringatan pajak untuk pengurus (UAT 03-A11): tanggal pajak
+     * tahunan / 5 tahunan yang jatuh tempo ≤ 21 hari atau sudah lewat.
+     *
+     * @return array<int, array{jenis: string, tanggal: \Illuminate\Support\Carbon, hari: int, lewat: bool}>
+     */
+    public function pajakWarnings(): array
+    {
+        $warnings = [];
+
+        foreach (['pajak_tahunan' => 'Pajak Tahunan', 'pajak_lima_tahunan' => 'Pajak 5 Tahunan'] as $field => $label) {
+            $tanggal = $this->{$field};
+
+            if (! $tanggal) {
+                continue;
+            }
+
+            $hari = round(now()->startOfDay()->diffInDays($tanggal->copy()->startOfDay(), false));
+
+            if ($hari <= 21) {
+                $warnings[] = [
+                    'jenis' => $label,
+                    'tanggal' => $tanggal,
+                    'hari' => abs((int) $hari),
+                    'lewat' => $hari < 0,
+                ];
+            }
+        }
+
+        return $warnings;
     }
 
     public function bookings(): HasMany
