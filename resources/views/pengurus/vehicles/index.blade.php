@@ -45,7 +45,10 @@
     {{-- Grid kartu (desktop 3-4 kolom, mobile 1-2) --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         @forelse ($vehicles as $v)
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col {{ $v->trashed() ? 'opacity-60' : '' }}">
+            {{-- x-data di KONTAINER KARTU: tombol Detail & modal satu lingkup
+                 (perbaikan: sebelumnya tombol di luar scope → klik tidak bereaksi) --}}
+            <div x-data="{ detail{{ $v->id }}: false }" @keydown.escape.window="detail{{ $v->id }} = false"
+                 class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col {{ $v->trashed() ? 'opacity-60' : '' }}">
                 <div class="aspect-video bg-gray-100 flex items-center justify-center">
                     @if ($v->photo_path)
                         <img src="{{ Storage::url($v->photo_path) }}" alt="{{ $v->name }}" class="w-full h-full object-cover">
@@ -95,8 +98,8 @@
                     </div>
                 </div>
 
-                {{-- Modal Detail Kendaraan --}}
-                <div x-data="{ detail{{ $v->id }}: false }">
+                {{-- Modal Detail Kendaraan — dalam lingkup x-data kartu --}}
+                <div>
                     <div x-show="detail{{ $v->id }}" x-cloak @click="detail{{ $v->id }} = false" class="fixed inset-0 z-50 bg-black/50" x-transition.opacity></div>
                     <div x-show="detail{{ $v->id }}" x-cloak x-transition
                          class="fixed inset-x-4 top-1/2 -translate-y-1/2 sm:inset-x-0 sm:mx-auto sm:max-w-md z-50 bg-white rounded-2xl shadow-xl p-6 max-h-[90vh] overflow-y-auto">
