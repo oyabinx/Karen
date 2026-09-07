@@ -79,6 +79,25 @@
  634ms; smoke: Detail ADA, menu Penggantian Mobil ADA, label seksi
  "Sedang Maintenance" ADA di pencarian (setelah data uji dibuat).
 
+────────────────────────────────────────────────────────────────────
+ TINDAK LANJUT 2 (permintaan user, pra-UAT-04)
+────────────────────────────────────────────────────────────────────
+
+ ★ ADMIN DIBERI AKSES 4 MENU ARMADA: Data Kendaraan, Jadwal
+   Maintenance, Penggantian Mobil, Dokumen (+ Anggaran & Detail,
+   karena tombolnya menempel di kartu kendaraan — diberitahukan
+   ke user; Event Armada sudah terbuka sejak Fase 4c).
+   Route grup dipecah: role:admin|pengurus (kendaraan/maintenance/
+   penggantian/anggaran/dokumen) vs role:pengurus (Keluhan Unit,
+   Monitoring, Laporan — tetap khusus pengurus sesuai daftar user).
+   Sidebar admin otomatis menampilkan menu Kendaraan (KarenMenu
+   sudah berbasis Route::has). Matriks akses & 4 test lama
+   diperbarui (admin 200, pegawai tetap 403); DOCS: product.md
+   peran admin & pengurus + judul manajemen_kendaraan.md /
+   penggantian_mobil.md.
+   Verifikasi: 203 test PASSED; smoke admin → 4 menu + events 200,
+   complaints & reports 403.
+
 ════════════════════════════════════════════════════════════════════
                        — AKHIR REVISI & SKEMA UAT-03 —
 ════════════════════════════════════════════════════════════════════

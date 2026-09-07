@@ -197,12 +197,13 @@ class MaintenanceTest extends TestCase
         $this->assertSame(Booking::STATUS_DIPINJAM, $booking->refresh()->status);
     }
 
-    public function test_pegawai_dan_admin_ditolak(): void
+    public function test_pegawai_ditolak_admin_boleh(): void
     {
-        foreach (['admin', 'pegawai'] as $role) {
-            $u = User::factory()->create(['role' => $role]);
+        $pegawai = User::factory()->create(['role' => 'pegawai']);
+        $this->actingAs($pegawai)->get('/pengurus/maintenances')->assertForbidden();
 
-            $this->actingAs($u)->get('/pengurus/maintenances')->assertForbidden();
-        }
+        // Pasca-UAT 03: admin diberi akses menu maintenance
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->get('/pengurus/maintenances')->assertOk();
     }
 }

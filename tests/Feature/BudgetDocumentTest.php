@@ -228,15 +228,17 @@ class BudgetDocumentTest extends TestCase
             ->assertOk();
     }
 
-    public function test_pegawai_dan_admin_ditolak(): void
+    public function test_pegawai_ditolak_admin_boleh(): void
     {
         $v = Vehicle::factory()->create();
 
-        foreach (['admin', 'pegawai'] as $role) {
-            $u = User::factory()->create(['role' => $role]);
+        $pegawai = User::factory()->create(['role' => 'pegawai']);
+        $this->actingAs($pegawai)->get("/pengurus/vehicles/{$v->id}/budgets")->assertForbidden();
+        $this->actingAs($pegawai)->get('/pengurus/documents')->assertForbidden();
 
-            $this->actingAs($u)->get("/pengurus/vehicles/{$v->id}/budgets")->assertForbidden();
-            $this->actingAs($u)->get('/pengurus/documents')->assertForbidden();
-        }
+        // Pasca-UAT 03: admin diberi akses menu Anggaran & Dokumen
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->get("/pengurus/vehicles/{$v->id}/budgets")->assertOk();
+        $this->actingAs($admin)->get('/pengurus/documents')->assertOk();
     }
 }

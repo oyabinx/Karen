@@ -48,10 +48,10 @@ class RoleAccessMatrixTest extends TestCase
             'admin organisasi' => ['/admin/bidang', ['admin' => 200, 'pengurus' => 403, 'pegawai' => 403]],
             'admin integrasi google' => ['/admin/integrasi/google', ['admin' => 200, 'pengurus' => 403, 'pegawai' => 403]],
 
-            'pengurus kendaraan' => ['/pengurus/vehicles', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
-            'pengurus maintenance' => ['/pengurus/maintenances', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
-            'pengurus penggantian' => ['/pengurus/replacements', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
-            'pengurus dokumen' => ['/pengurus/documents', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
+            'pengurus kendaraan (admin+pengurus)' => ['/pengurus/vehicles', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
+            'pengurus maintenance (admin+pengurus)' => ['/pengurus/maintenances', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
+            'pengurus penggantian (admin+pengurus)' => ['/pengurus/replacements', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
+            'pengurus dokumen (admin+pengurus)' => ['/pengurus/documents', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
             'pengurus keluhan' => ['/pengurus/complaints', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
             'pengurus monitoring' => ['/pengurus/bookings', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
             'pengurus laporan' => ['/pengurus/reports', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
@@ -71,7 +71,7 @@ class RoleAccessMatrixTest extends TestCase
         $vehicle = Vehicle::factory()->create();
 
         $kasus = [
-            ["/pengurus/vehicles/{$vehicle->id}/budgets", ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
+            ["/pengurus/vehicles/{$vehicle->id}/budgets", ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
             ["/pegawai/bookings/create?vehicle_id={$vehicle->id}&start_date=".today()->toDateString()."&end_date=".today()->toDateString(), ['admin' => 403, 'pengurus' => 200, 'pegawai' => 200]],
         ];
 

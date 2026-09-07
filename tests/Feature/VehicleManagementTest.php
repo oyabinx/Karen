@@ -106,13 +106,15 @@ class VehicleManagementTest extends TestCase
         $this->assertSoftDeleted($v);
     }
 
-    public function test_admin_dan_pegawai_ditolak(): void
+    public function test_admin_kini_boleh_dan_pegawai_ditolak(): void
     {
-        foreach (['admin', 'pegawai'] as $role) {
-            $u = User::factory()->create(['role' => $role]);
+        // Pasca-UAT 03: admin diberi akses menu kendaraan
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->get('/pengurus/vehicles')->assertOk();
+        $this->actingAs($admin)->post('/pengurus/vehicles', [])->assertRedirect(); // validasi, bukan 403
 
-            $this->actingAs($u)->get('/pengurus/vehicles')->assertForbidden();
-            $this->actingAs($u)->post('/pengurus/vehicles', [])->assertForbidden();
-        }
+        $pegawai = User::factory()->create(['role' => 'pegawai']);
+        $this->actingAs($pegawai)->get('/pengurus/vehicles')->assertForbidden();
+        $this->actingAs($pegawai)->post('/pengurus/vehicles', [])->assertForbidden();
     }
 }

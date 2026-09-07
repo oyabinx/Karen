@@ -18,12 +18,13 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 ### 3.1 Admin
 - Mengelola data **pengguna** (tambah, ubah, nonaktifkan, atur role).
 - Mengelola **struktur organisasi**: 5 bidang yang dibagi menjadi beberapa seksi.
-- Membuat **event armada bidang** (pemakaian banyak mobil sekaligus di atas kuota — bersama pengurus).
+- Mengakses menu **armada bersama pengurus**: Data Kendaraan (+ Detail & Anggaran), Jadwal Maintenance, Penggantian Mobil, Dokumen (bend26/nota/kartu inventaris), dan **Event Armada**.
 - **Mengonfigurasi integrasi Google** (upload kunci service account, URL spreadsheet anggaran & folder Drive, test koneksi, log sinkronisasi) → [integrasi_google.md](feature/integrasi_google.md).
 - Mengelola profil pribadi.
+- **Tidak melakukan peminjaman mobil** (kuota dihitung per bidang berbasis seksi; admin tidak wajib ber-seksi) — *kesepakatan UAT 01*.
 
 ### 3.2 Pengurus
-- Mengelola **data kendaraan** (CRUD mobil, foto, plat nomor, kapasitas).
+- Mengelola **data kendaraan** (CRUD mobil, foto, plat nomor, kapasitas) — bersama admin.
 - Mengatur status kendaraan: **bisa dipinjam / tidak bisa dipinjam**.
 - Mengatur **jadwal maintenance** kendaraan (kendaraan dalam masa maintenance tidak muncul sebagai tersedia).
 - **Mengatur penggantian mobil**: bila mobil yang dijadwalkan maintenance ternyata memiliki booking, sistem mencarikan mobil pengganti yang tersedia dan **pengurus yang mengonfirmasi** pilihan penggantinya.
@@ -34,6 +35,7 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 - **Meminjam mobil seperti pegawai** — sejatinya pengurus adalah user pegawai juga (memiliki fitur cari mobil, booking, pengembalian, dan terkena kuota bidang tempat seksi pengurus terdaftar).
 - Membuat **event armada bidang** (pemakaian banyak mobil sekaligus di atas kuota — bersama admin).
 - Mengelola profil pribadi.
+- *Catatan pembagian menu (pasca-UAT 03)*: Keluhan Unit, Monitoring & Laporan tetap **khusus pengurus**; Data Kendaraan (termasuk Anggaran & Detail), Jadwal Maintenance, Penggantian Mobil, Dokumen, dan Event Armada dibagi **bersama admin**.
 
 ### 3.3 Pegawai
 - **Mencari mobil tersedia** pada rentang tanggal tertentu.

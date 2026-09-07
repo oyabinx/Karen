@@ -143,15 +143,16 @@ class ReplacementTest extends TestCase
         $this->assertSame(Booking::STATUS_DIPINJAM, $booking->status);
     }
 
-    public function test_pegawai_dan_admin_ditolak(): void
+    public function test_pegawai_ditolak_admin_boleh(): void
     {
         $booking = $this->pendingBooking();
 
-        foreach (['admin', 'pegawai'] as $role) {
-            $u = User::factory()->create(['role' => $role]);
+        $pegawai = User::factory()->create(['role' => 'pegawai']);
+        $this->actingAs($pegawai)->get('/pengurus/replacements')->assertForbidden();
+        $this->actingAs($pegawai)->patch("/pengurus/replacements/{$booking->id}/cancel")->assertForbidden();
 
-            $this->actingAs($u)->get('/pengurus/replacements')->assertForbidden();
-            $this->actingAs($u)->patch("/pengurus/replacements/{$booking->id}/cancel")->assertForbidden();
-        }
+        // Pasca-UAT 03: admin diberi akses menu Penggantian Mobil
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->get('/pengurus/replacements')->assertOk();
     }
 }

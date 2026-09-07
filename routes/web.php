@@ -73,8 +73,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/integrasi/google/sync', [IntegrationController::class, 'syncNow'])->name('integrasi.google.sync');
     });
 
-// ── PENGURUS: kendaraan, maintenance, penggantian mobil ──
-Route::middleware(['auth', 'role:pengurus'])
+// ── PENGURUS + ADMIN: kendaraan, maintenance, penggantian mobil,
+//    anggaran & dokumen (permintaan user pasca-UAT 03) ──
+Route::middleware(['auth', 'role:admin|pengurus'])
     ->prefix('pengurus')
     ->name('pengurus.')
     ->group(function () {
@@ -87,15 +88,6 @@ Route::middleware(['auth', 'role:pengurus'])
         Route::patch('/vehicles/{vehicle}/status', [VehicleController::class, 'toggleStatus'])->name('vehicles.status');
         Route::patch('/vehicles/{vehicle}/condition', [VehicleController::class, 'markGood'])->name('vehicles.condition');
         Route::patch('/vehicles/{vehicle}/needs-inspection', [VehicleController::class, 'needsInspection'])->name('vehicles.needsInspection');
-
-        // Keluhan unit (dari form pengembalian)
-        Route::get('/complaints', [ComplaintController::class, 'index'])->name('complaints.index');
-        Route::patch('/complaints/{complaint}/resolve', [ComplaintController::class, 'resolve'])->name('complaints.resolve');
-        Route::patch('/complaints/{complaint}/reopen', [ComplaintController::class, 'reopen'])->name('complaints.reopen');
-
-        // Monitoring & laporan
-        Route::get('/bookings', [BookingMonitorController::class, 'index'])->name('bookings.index');
-        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
         Route::get('/maintenances', [MaintenanceController::class, 'index'])->name('maintenances.index');
         Route::post('/maintenances', [MaintenanceController::class, 'store'])->name('maintenances.store');
@@ -114,7 +106,8 @@ Route::middleware(['auth', 'role:pengurus'])
         Route::patch('/replacements/{booking}/assign-partial', [ReplacementController::class, 'assignPartial'])->name('replacements.assignPartial');
         Route::patch('/replacements/{booking}/cancel', [ReplacementController::class, 'cancel'])->name('replacements.cancel');
 
-        // Anggaran 4 pos per kendaraan
+        // Anggaran 4 pos per kendaraan (tombolnya ada di kartu kendaraan —
+        // ikut dibuka untuk admin agar tidak mati)
         Route::get('/vehicles/{vehicle}/budgets', [BudgetController::class, 'edit'])->name('budgets.edit');
         Route::put('/vehicles/{vehicle}/budgets', [BudgetController::class, 'update'])->name('budgets.update');
 
@@ -122,6 +115,21 @@ Route::middleware(['auth', 'role:pengurus'])
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
         Route::post('/vehicles/{vehicle}/generate-kartu-inventaris', [DocumentController::class, 'kartuInventaris'])->name('documents.kartu');
+    });
+
+// ── PENGURUS SAJA: keluhan unit, monitoring & laporan ──
+Route::middleware(['auth', 'role:pengurus'])
+    ->prefix('pengurus')
+    ->name('pengurus.')
+    ->group(function () {
+        // Keluhan unit (dari form pengembalian)
+        Route::get('/complaints', [ComplaintController::class, 'index'])->name('complaints.index');
+        Route::patch('/complaints/{complaint}/resolve', [ComplaintController::class, 'resolve'])->name('complaints.resolve');
+        Route::patch('/complaints/{complaint}/reopen', [ComplaintController::class, 'reopen'])->name('complaints.reopen');
+
+        // Monitoring & laporan
+        Route::get('/bookings', [BookingMonitorController::class, 'index'])->name('bookings.index');
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     });
 
 // ── EVENT ARMADA BIDANG — pengurus DAN admin (docs/feature/event_bidang.md) ──

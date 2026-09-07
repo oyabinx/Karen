@@ -1,7 +1,7 @@
-# Fitur: Manajemen Kendaraan & Maintenance (Pengurus)
+# Fitur: Manajemen Kendaraan & Maintenance (Pengurus & Admin)
 
 ## Deskripsi
-Pengurus mengelola data mobil dinas: menambah/mengubah unit, mengatur apakah unit boleh dipinjam, menandai kondisi unit, dan menjadwalkan maintenance.
+Pengurus **dan admin** mengelola data mobil dinas: menambah/mengubah unit, mengatur apakah unit boleh dipinjam, menandai kondisi unit, dan menjadwalkan maintenance. *(Akses admin ditambahkan atas permintaan user pasca-UAT 03.)*
 
 ## Spesifikasi
 

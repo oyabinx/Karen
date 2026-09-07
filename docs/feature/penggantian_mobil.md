@@ -1,7 +1,7 @@
-# Fitur: Penggantian Mobil (Maintenance & Event) — Pengurus
+# Fitur: Penggantian Mobil (Maintenance & Event) — Pengurus & Admin
 
 ## Deskripsi
-Mekanisme penggantian mobil saat jadwal **maintenance** atau **event armada** menabrak peminjaman aktif. Fitur ini memiliki **menu mandiri "Penggantian Mobil"** di sidebar (skema baru UAT 03-D3) karena dipakai bersama oleh kedua fitur tersebut.
+Mekanisme penggantian mobil saat jadwal **maintenance** atau **event armada** menabrak peminjaman aktif. Fitur ini memiliki **menu mandiri "Penggantian Mobil"** di sidebar (skema baru UAT 03-D3) karena dipakai bersama oleh kedua fitur tersebut. Diakses oleh **pengurus dan admin**.
 Apabila pengurus menjadwalkan maintenance untuk mobil yang **ternyata sudah memiliki booking aktif/mendatang** pada rentang tanggal maintenance, sistem akan:
 1. Menandai booking terdampak sebagai `menunggu_penggantian`,
 2. **Otomatis mencarikan mobil pengganti yang tersedia** pada rentang tanggal yang sama,
