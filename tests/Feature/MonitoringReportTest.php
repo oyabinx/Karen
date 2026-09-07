@@ -177,13 +177,15 @@ class MonitoringReportTest extends TestCase
             ->assertSee('Brio Riwayat');
     }
 
-    public function test_non_pengurus_ditolak(): void
+    public function test_pegawai_ditolak_admin_boleh(): void
     {
-        foreach (['pegawai', 'admin'] as $role) {
-            $u = User::factory()->create(['role' => $role]);
+        $pegawai = User::factory()->create(['role' => 'pegawai']);
+        $this->actingAs($pegawai)->get('/pengurus/bookings')->assertForbidden();
+        $this->actingAs($pegawai)->get('/pengurus/reports')->assertForbidden();
 
-            $this->actingAs($u)->get('/pengurus/bookings')->assertForbidden();
-            $this->actingAs($u)->get('/pengurus/reports')->assertForbidden();
-        }
+        // Pasca-UAT 03 (tindak lanjut): admin diberi akses monitoring & laporan
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->get('/pengurus/bookings')->assertOk();
+        $this->actingAs($admin)->get('/pengurus/reports')->assertOk();
     }
 }

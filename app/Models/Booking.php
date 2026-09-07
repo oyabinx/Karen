@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivity;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
+    use LogsActivity;
+
     public const STATUS_DIPINJAM = 'dipinjam';
     public const STATUS_MENUNGGU_PENGGANTIAN = 'menunggu_penggantian';
     public const STATUS_DIKEMBALIKAN = 'dikembalikan';

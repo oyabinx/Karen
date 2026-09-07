@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivity;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GeneratedDocument extends Model
 {
+    use LogsActivity;
+
     public const TYPE_BEND26 = 'bend26';
     public const TYPE_DRAFT_NOTA = 'draft_nota';
     public const TYPE_KARTU_INVENTARIS = 'kartu_inventaris';

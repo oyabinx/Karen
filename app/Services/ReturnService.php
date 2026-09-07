@@ -89,6 +89,13 @@ class ReturnService
             ['value' => now()->toDateTimeString()],
         );
 
+        // Log aktivitas ringkasan (mass-update tidak memicu event model)
+        \App\Models\ActivityLog::create([
+            'user_id' => null,
+            'action' => \App\Models\ActivityLog::ACTION_SYSTEM,
+            'description' => "Sistem: pengembalian otomatis — {$dikembalikan} peminjaman dikembalikan, {$dibatalkan} dibatalkan (menunggu pengganti lewat tempo).",
+        ]);
+
         return ['dikembalikan' => $dikembalikan, 'dibatalkan' => $dibatalkan];
     }
 }

@@ -1,0 +1,68 @@
+╔══════════════════════════════════════════════════════════════════╗
+║        KAREN — TINDAK LANJUT PASCA-UAT 03 (2 KEPUTUSAN USER)       ║
+║      (1) Admin buka Keluhan/Monitoring/Laporan  (2) Log Aktivitas  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal     : 2026-08-31
+  Sumber      : sesi tanya-jawab & keputusan user
+  Status      : ✅ 2 keputusan tereksekusi; 210/210 test HIJAU (+7);
+                migrasi activity_logs; UAT baru 09 + catatan 03/04/06
+
+────────────────────────────────────────────────────────────────────
+ 1. ADMIN MEMBUKA KELUHAN / MONITORING / LAPORAN
+────────────────────────────────────────────────────────────────────
+ Grup route ketiga diubah role:pengurus → role:admin|pengurus.
+ Dengan ini SELURUH menu sisi pengurus terbuka untuk admin
+ (dokumentasi: product.md aturan 24 + peran admin/pengurus
+ diperbarui). Peminjaman tetap tertutup bagi admin (aturan 11).
+ Sidebar admin otomatis menampilkan seksi Monitoring (KarenMenu).
+
+────────────────────────────────────────────────────────────────────
+ 2. LOG AKTIVITAS — siapa mengubah apa, kapan
+────────────────────────────────────────────────────────────────────
+ SKEMA BARU (docs/feature/log_aktivitas.md):
+ • Tabel activity_logs + trait App\Models\Concerns\LogsActivity
+   dipasang di 12 model (Kendaraan, Jadwal Maintenance,
+   Peminjaman, Event, Anggaran, Biaya, Keluhan, Pengguna, Bidang,
+   Seksi, Konfigurasi Integrasi, Dokumen).
+ • Aksi: Menambah / Mengubah (nilai lama→baru per kolom) /
+   Menghapus / aktifkan-kembali (via perubahan deleted_at).
+ • Scheduler menulis ringkasan manual (mass-update tanpa event):
+   autoReturn & autoFinish → pelaku "Sistem (otomatis)".
+ • KEAMANAN: password/remember_token/kunci Google (kolom value)
+   TIDAK PERNAH dicatat; perubahan murni field-tersembunyi
+   di-skip (anti-noise).
+ • UI admin (menu "Log Aktivitas"): filter pelaku/aksi/objek/
+   pencarian/rentang tanggal; "Detail perubahan" tabel lama-baru.
+
+ BUG PROSES (bernilai pelajaran):
+ • one-liner perl pertama gagal escaping → 10 model kehilangan
+   import trait (terdeteksi: 204 test merah "Trait not found");
+   disisipkan ulang via sed baris-namespace.
+ • static::restored(...) BUKAN event sihir di Laravel 13 —
+   __callStatic meng-instansiasi model SAAT boot dirinya →
+   reentransi LogicException; ditemukan via stack-trace script
+   debug. FIX: listener restored dihapus; restore tercatat lewat
+   event updated (deleted_at dikeluarkan dari daftar tersembunyi).
+ • Test sensitif diperbaiki: ubah "hanya password" memang tak
+   menghasilkan log (by design) → ubah nama+password bersamaan.
+
+ VERIFIKASI:
+ ✓ 210 test PASSED (748 assertions) — termasuk
+   AdminAccessDanLogAktivitasTest (6): akses admin 3 menu; siapa-
+   mengubah-apa-kapan (2 pelaku); filter; field sensitif aman
+   (password & kunci Google); log sistem; tanpa rekursi.
+ ✓ npm build 434ms (view baru).
+ ✓ Smoke: admin 200 di complaints/bookings/reports/activity-logs;
+   log menampilkan pelaku; pegawai 403.
+
+ REVISI UAT (permintaan user):
+ • BARU: UAT/09-admin-log-aktivitas.md (P1) — akses admin penuh +
+   log aktivitas + keamanan log.
+ • README daftar skenario + baris 09.
+ • Catatan pembaruan di UAT 03/04/06 (skenario kini bisa dengan
+   akun admin).
+
+════════════════════════════════════════════════════════════════════
+                    — AKHIR TINDAK LANJUT —
+════════════════════════════════════════════════════════════════════

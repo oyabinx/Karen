@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivity;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MaintenanceCost extends Model
 {
+    use LogsActivity;
+
     protected $fillable = ['maintenance_id', 'post', 'raw_amount', 'taxed_amount'];
 
     protected function casts(): array

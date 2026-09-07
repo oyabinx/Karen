@@ -190,6 +190,13 @@ class EventService
             ['value' => now()->toDateTimeString()],
         );
 
+        // Log aktivitas ringkasan (mass-update tidak memicu event model)
+        \App\Models\ActivityLog::create([
+            'user_id' => null,
+            'action' => \App\Models\ActivityLog::ACTION_SYSTEM,
+            'description' => "Sistem: penutupan event otomatis — {$selesai} event diselesaikan (lewat jatuh tempo).",
+        ]);
+
         return $selesai;
     }
 }

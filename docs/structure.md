@@ -12,7 +12,8 @@ karen/
 │   │   │   │   ├── UserController.php
 │   │   │   │   ├── BidangController.php
 │   │   │   │   ├── SeksiController.php
-│   │   │   │   └── IntegrationController.php     # konfigurasi integrasi Google
+│   │   │   │   ├── IntegrationController.php     # konfigurasi integrasi Google
+│   │   │   │   └── ActivityLogController.php    # log aktivitas (siapa-apa-kapan)
 │   │   │   ├── Pengurus/
 │   │   │   │   ├── VehicleController.php
 │   │   │   │   ├── MaintenanceController.php
@@ -39,7 +40,8 @@ karen/
 │   │       ├── MaintenanceStoreRequest.php
 │   │       ├── UserStoreRequest.php
 │   │       └── ...
-│   ├── Models/
+│   ├── Models/                             # + Concerns/LogsActivity.php (trait log aktivitas)
+│   │   └── (semua model penting memakai LogsActivity; ActivityLog.php)
 │   │   ├── User.php
 │   │   ├── Bidang.php
 │   │   ├── Seksi.php
@@ -98,7 +100,8 @@ karen/
 │       │   ├── users/
 │       │   ├── bidang/
 │       │   ├── seksi/
-│       │   └── integrations/             # konfigurasi Google + log sinkronisasi
+│       │   ├── integrations/             # konfigurasi Google + log sinkronisasi
+│       │   └── activity-logs/            # log aktivitas (filter pelaku/aksi/objek/tanggal)
 │       ├── pengurus/
 │       │   ├── vehicles/
 │       │   ├── maintenances/

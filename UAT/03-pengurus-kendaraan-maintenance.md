@@ -3,6 +3,9 @@
 **Akun**: `pengurus@karen.test` / `password` + `pegawai@karen.test`
 untuk membuat booking yang akan ditabrak.
 
+> Pembaruan: skenario ini kini juga dapat dijalankan dengan akun ADMIN
+> (seluruh menu sisi pengurus dibuka untuk admin — lihat skenario 09).
+
 ## A. Data Kendaraan
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |

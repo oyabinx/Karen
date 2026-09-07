@@ -54,6 +54,7 @@ dst. Gunakan tanggal nyata di form.
 | [06-monitoring-laporan-dashboard.md](06-monitoring-laporan-dashboard.md) | Monitoring, laporan + export CSV, dashboard 3 role | P2 |
 | [07-responsive-mobile.md](07-responsive-mobile.md) | Tampilan mobile 360px: drawer, bottom-nav, modal, kartu | P2 |
 | [08-scheduler-otomatis-opsional.md](08-scheduler-otomatis-opsional.md) | Pengembalian otomatis & penutupan event (perlu trik data) | P3 — opsional |
+| [09-admin-log-aktivitas.md](09-admin-log-aktivitas.md) | Admin membuka seluruh menu pengurus + Log Aktivitas (siapa mengubah apa) | **P1** |
 
 ## Tips Mencari Bug
 

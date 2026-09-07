@@ -52,9 +52,10 @@ class RoleAccessMatrixTest extends TestCase
             'pengurus maintenance (admin+pengurus)' => ['/pengurus/maintenances', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
             'pengurus penggantian (admin+pengurus)' => ['/pengurus/replacements', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
             'pengurus dokumen (admin+pengurus)' => ['/pengurus/documents', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
-            'pengurus keluhan' => ['/pengurus/complaints', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
-            'pengurus monitoring' => ['/pengurus/bookings', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
-            'pengurus laporan' => ['/pengurus/reports', ['admin' => 403, 'pengurus' => 200, 'pegawai' => 403]],
+            'keluhan (admin+pengurus)' => ['/pengurus/complaints', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
+            'monitoring (admin+pengurus)' => ['/pengurus/bookings', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
+            'laporan (admin+pengurus)' => ['/pengurus/reports', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
+            'log aktivitas (admin)' => ['/admin/activity-logs', ['admin' => 200, 'pengurus' => 403, 'pegawai' => 403]],
 
             'event armada (admin+pengurus)' => ['/pengurus/events', ['admin' => 200, 'pengurus' => 200, 'pegawai' => 403]],
 

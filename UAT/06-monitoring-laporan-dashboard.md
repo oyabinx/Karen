@@ -1,6 +1,6 @@
 # Skenario 06 — Monitoring, Laporan & Dashboard (P2)
 
-**Akun**: `pengurus@karen.test` (monitoring/laporan),
+**Akun**: `pengurus@karen.test` **atau admin** (monitoring/laporan),
 semua role untuk dashboard.
 
 ## A. Monitoring Semua Peminjaman

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\BidangController;
 use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\SeksiController;
@@ -71,6 +72,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('/integrasi/google/key', [IntegrationController::class, 'destroyKey'])->name('integrasi.google.key.destroy');
         Route::post('/integrasi/google/test', [IntegrationController::class, 'test'])->name('integrasi.google.test');
         Route::post('/integrasi/google/sync', [IntegrationController::class, 'syncNow'])->name('integrasi.google.sync');
+
+        // Log aktivitas "siapa mengubah apa, kapan" (keputusan user pasca-UAT 03)
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     });
 
 // ── PENGURUS + ADMIN: kendaraan, maintenance, penggantian mobil,
@@ -117,17 +121,17 @@ Route::middleware(['auth', 'role:admin|pengurus'])
         Route::post('/vehicles/{vehicle}/generate-kartu-inventaris', [DocumentController::class, 'kartuInventaris'])->name('documents.kartu');
     });
 
-// ── PENGURUS SAJA: keluhan unit, monitoring & laporan ──
-Route::middleware(['auth', 'role:pengurus'])
+// ── PENGURUS + ADMIN: keluhan unit, monitoring & laporan ──
+// (keputusan user: admin harus bisa melihat apa yang dilihat pengurus
+//  saat ada komplain — seluruh menu sisi pengurus kini dibagi admin)
+Route::middleware(['auth', 'role:admin|pengurus'])
     ->prefix('pengurus')
     ->name('pengurus.')
     ->group(function () {
-        // Keluhan unit (dari form pengembalian)
         Route::get('/complaints', [ComplaintController::class, 'index'])->name('complaints.index');
         Route::patch('/complaints/{complaint}/resolve', [ComplaintController::class, 'resolve'])->name('complaints.resolve');
         Route::patch('/complaints/{complaint}/reopen', [ComplaintController::class, 'reopen'])->name('complaints.reopen');
 
-        // Monitoring & laporan
         Route::get('/bookings', [BookingMonitorController::class, 'index'])->name('bookings.index');
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     });

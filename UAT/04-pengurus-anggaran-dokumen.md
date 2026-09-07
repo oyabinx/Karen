@@ -1,6 +1,6 @@
 # Skenario 04 — Pengurus: Anggaran, Nota ×1,13 & Dokumen (P1)
 
-**Akun**: `pengurus@karen.test`.
+**Akun**: `pengurus@karen.test` (atau `admin@karen.test` — kini juga berlaku admin).
 **Prasyarat**: skenario 03 selesai (ada maintenance berstatus
 terjadwal); siapkan kalkulator untuk cek ×1,13.
 

@@ -32,6 +32,7 @@ class KarenMenu
                 Route::has('admin.users.index') ? self::item('admin.users.index', 'Manajemen User', self::icon('users')) : null,
                 Route::has('admin.bidang.index') ? self::item('admin.bidang.index', 'Bidang & Seksi', self::icon('org')) : null,
                 Route::has('admin.integrasi.google') ? self::item('admin.integrasi.google', 'Integrasi Google', self::icon('cloud')) : null,
+                Route::has('admin.activity-logs.index') ? self::item('admin.activity-logs.index', 'Log Aktivitas', self::icon('list')) : null,
             ]);
         }
 

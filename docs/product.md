@@ -18,7 +18,8 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 ### 3.1 Admin
 - Mengelola data **pengguna** (tambah, ubah, nonaktifkan, atur role).
 - Mengelola **struktur organisasi**: 5 bidang yang dibagi menjadi beberapa seksi.
-- Mengakses menu **armada bersama pengurus**: Data Kendaraan (+ Detail & Anggaran), Jadwal Maintenance, Penggantian Mobil, Dokumen (bend26/nota/kartu inventaris), dan **Event Armada**.
+- Mengakses **seluruh menu sisi pengurus** (kendaraan, maintenance, penggantian, anggaran, dokumen, event, keluhan, monitoring, laporan) — agar dapat memverifikasi komplain pengurus dari sudut pandang mereka. **Tidak melakukan peminjaman** (aturan no. 11).
+- Melihat **Log Aktivitas** (siapa mengubah apa, kapan) → [log_aktivitas.md](feature/log_aktivitas.md).
 - **Mengonfigurasi integrasi Google** (upload kunci service account, URL spreadsheet anggaran & folder Drive, test koneksi, log sinkronisasi) → [integrasi_google.md](feature/integrasi_google.md).
 - Mengelola profil pribadi.
 - **Tidak melakukan peminjaman mobil** (kuota dihitung per bidang berbasis seksi; admin tidak wajib ber-seksi) — *kesepakatan UAT 01*.
@@ -35,7 +36,7 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 - **Meminjam mobil seperti pegawai** — sejatinya pengurus adalah user pegawai juga (memiliki fitur cari mobil, booking, pengembalian, dan terkena kuota bidang tempat seksi pengurus terdaftar).
 - Membuat **event armada bidang** (pemakaian banyak mobil sekaligus di atas kuota — bersama admin).
 - Mengelola profil pribadi.
-- *Catatan pembagian menu (pasca-UAT 03)*: Keluhan Unit, Monitoring & Laporan tetap **khusus pengurus**; Data Kendaraan (termasuk Anggaran & Detail), Jadwal Maintenance, Penggantian Mobil, Dokumen, dan Event Armada dibagi **bersama admin**.
+- *Catatan pembagian menu (pasca-UAT 03, diperluas)*: seluruh menu sisi pengurus kini **dibagi dengan admin** (kendaraan, maintenance, penggantian, anggaran, dokumen, event, keluhan, monitoring, laporan) — alasan dukungan komplain; satu-satunya yang tetap tertutup bagi admin adalah **fitur peminjaman**.
 
 ### 3.3 Pegawai
 - **Mencari mobil tersedia** pada rentang tanggal tertentu.
@@ -93,6 +94,8 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 | 20 | Kendaraan memiliki **data sekunder opsional** (nomor rangka, nomor mesin, jatuh tempo pajak tahunan & 5 tahunan) yang dilihat lewat tombol **Detail Kendaraan**; pengurus menerima **notifikasi pajak** saat ≤3 minggu sebelum jatuh tempo (atau lewat tempo). *(UAT 03-A11)* |
 | 21 | Pada hasil pencarian mobil pegawai, unit yang **sedang maintenance** pada rentang **tetap tampil nonaktif** dengan keterangan rentangnya — pegawai tahu penyebab tanpa bertanya; unit yang dipinjam pihak lain tetap disembunyikan. *(UAT 03-A12)* |
 | 22 | **Penggantian parsial**: bila maintenance/event hanya menabrak bagian tepi rentang peminjaman, pengurus dapat memberi mobil pengganti **hanya untuk tanggal yang menabrak** — sisa tanggal tetap memakai mobil semula (peminjaman terpecah dua secara otomatis). Fitur penggantian berada di **menu mandiri "Penggantian Mobil"**. *(UAT 03-B7, D3)* |
+| 23 | **Log aktivitas**: seluruh perubahan data penting (kendaraan, jadwal, anggaran, peminjaman, user, konfigurasi) tercatat **siapa-mengubah-apa-kapan** beserta nilai lama→baru; field sensitif (password, kredensial Google) tidak pernah dicatat isinya; scheduler tercatat sebagai "Sistem (otomatis)". Dilihat **admin**. *(keputusan pasca-UAT 03)* |
+| 24 | **Admin membuka seluruh menu sisi pengurus** (kendaraan, maintenance, penggantian, anggaran, dokumen, event, keluhan, monitoring, laporan) agar dapat memverifikasi komplain pengurus langsung dari sudut pandang mereka — **kecuali peminjaman** (aturan no. 11/kesepakatan UAT 01). *(keputusan pasca-UAT 03)* |
 
 ## 6. Lingkup Produk (Scope)
 

@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivity;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VehicleBudget extends Model
 {
+    use LogsActivity;
+
     public const POST_SERVIS = 'servis';
     public const POST_SUKU_CADANG = 'suku_cadang';
     public const POST_AC = 'ac';
