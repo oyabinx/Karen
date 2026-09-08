@@ -21,12 +21,20 @@ class ReturnService
     /**
      * Pengembalian manual via tombol "Selesai".
      *
-     * @throws \DomainException bila booking tidak berstatus dipinjam
+     * Guard: peminjaman yang BELUM dimulai tidak boleh "dikembalikan"
+     * (mobil belum dipakai) — gunakan cancelByBorrower (usulan user
+     * pasca-UAT 03: tombol adaptif berdasarkan tanggal mulai).
+     *
+     * @throws \DomainException bila booking tidak berstatus dipinjam / belum mulai
      */
     public function manualReturn(Booking $booking, ?string $complaint = null): Booking
     {
         if ($booking->status !== Booking::STATUS_DIPINJAM) {
             throw new \DomainException('Peminjaman ini tidak sedang berstatus dipinjam.');
+        }
+
+        if ($booking->belumMulai()) {
+            throw new \DomainException('Peminjaman belum dimulai — gunakan tombol "Batalkan Peminjaman".');
         }
 
         return DB::transaction(function () use ($booking, $complaint) {
@@ -45,6 +53,34 @@ class ReturnService
                     'message' => $pesan,
                 ]);
             }
+
+            return $booking->refresh();
+        });
+    }
+
+    /**
+     * Pembatalan OLEH PEGAWAI SENDIRI untuk peminjaman yang BELUM
+     * dimulai (hari ini < tanggal mulai) — tombol "Batalkan Peminjaman"
+     * (usulan user pasca-UAT 03). Status → dibatalkan + waktu
+     * pembatalan; kuota bidang lepas; mobil langsung tersedia.
+     *
+     * @throws \DomainException bila sudah dimulai / bukan dipinjam
+     */
+    public function cancelByBorrower(Booking $booking): Booking
+    {
+        if ($booking->status !== Booking::STATUS_DIPINJAM) {
+            throw new \DomainException('Peminjaman ini tidak berstatus dipinjam.');
+        }
+
+        if (! $booking->belumMulai()) {
+            throw new \DomainException('Peminjaman sudah dimulai — gunakan tombol "Selesai — Kembalikan Mobil".');
+        }
+
+        return DB::transaction(function () use ($booking) {
+            $booking->update([
+                'status' => Booking::STATUS_DIBATALKAN,
+                'cancelled_at' => now(),
+            ]);
 
             return $booking->refresh();
         });
@@ -80,6 +116,7 @@ class ReturnService
             ->update([
                 'status' => Booking::STATUS_DIBATALKAN,
                 'auto_returned' => true,
+                'cancelled_at' => now(),
             ]);
 
         // Jejak kesehatan scheduler — dibaca kartu di dashboard admin

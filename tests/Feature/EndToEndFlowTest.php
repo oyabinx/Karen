@@ -57,11 +57,12 @@ class EndToEndFlowTest extends TestCase
             'purpose' => 'Rapat ujung-ke-ujung',
         ])->assertRedirect('/pegawai/bookings');
 
-        // Riwayat menampilkan booking aktif + tombol Selesai
+        // Riwayat menampilkan booking aktif — booking MASA DEPAN
+        // menampilkan tombol Batalkan (tombol adaptif, UAT pasca-03)
         $this->get('/pegawai/bookings')
             ->assertOk()
             ->assertSee('Rapat ujung-ke-ujung')
-            ->assertSee('Selesai — Kembalikan Mobil');
+            ->assertSee('Batalkan Peminjaman');
 
         // Arahkan booking ke hari ini supaya bisa diselesaikan
         $booking = $peminjam->bookings()->first();
@@ -69,6 +70,11 @@ class EndToEndFlowTest extends TestCase
             'start_date' => today()->toDateString(),
             'end_date' => today()->toDateString(),
         ]);
+
+        // Kini tombolnya Selesai — Kembalikan Mobil
+        $this->get('/pegawai/bookings')
+            ->assertOk()
+            ->assertSee('Selesai — Kembalikan Mobil');
 
         // Tombol Selesai + keluhan (sesi HTTP asli)
         $this->post("/pegawai/returns/{$booking->id}", [

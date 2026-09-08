@@ -19,7 +19,7 @@ class Booking extends Model
 
     protected $fillable = [
         'user_id', 'vehicle_id', 'start_date', 'end_date', 'address', 'purpose',
-        'status', 'returned_at', 'auto_returned', 'original_vehicle_id',
+        'status', 'returned_at', 'auto_returned', 'cancelled_at', 'original_vehicle_id',
     ];
 
     protected function casts(): array
@@ -28,8 +28,18 @@ class Booking extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'returned_at' => 'datetime',
+            'cancelled_at' => 'datetime',
             'auto_returned' => 'boolean',
         ];
+    }
+
+    /**
+     * Peminjaman belum dimulai (hari ini < tanggal mulai) — pada kondisi
+     * ini tombol pegawai adalah "Batalkan Peminjaman", bukan "Selesai".
+     */
+    public function belumMulai(): bool
+    {
+        return today()->lt($this->start_date->copy()->startOfDay());
     }
 
     public function user(): BelongsTo

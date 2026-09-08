@@ -97,10 +97,14 @@ class ReplacementService
     /**
      * Batalkan booking tanpa pengganti — kuota bidang otomatis lepas
      * karena kuota menghitung booking aktif (BookingService::quotaUsed).
+     * Waktu pembatalan tercatat di cancelled_at.
      */
     public function cancel(Booking $booking): Booking
     {
-        $booking->update(['status' => Booking::STATUS_DIBATALKAN]);
+        $booking->update([
+            'status' => Booking::STATUS_DIBATALKAN,
+            'cancelled_at' => now(),
+        ]);
 
         return $booking->refresh();
     }

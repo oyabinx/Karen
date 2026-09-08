@@ -59,6 +59,9 @@ dengan keluhan opsional, dan riwayat.
 | D5 | Buat booking baru (H..H) → **Selesai** dengan keluhan: “Ban depan aus” | Sukses + pesan “Keluhan Anda tercatat”; login pengurus → **Keluhan Unit**: keluhan tampil, status **belum selesai** | ok | |
 | D6 | **PENTING** — periksa mobil yang dikeluhkan di Data Kendaraan (pengurus) | Mobil **tetap** berkondisi **baik**, status **bisa dipinjam**, **TIDAK ADA** jadwal maintenance baru; mobil masih bisa dicari & dipinjam | ok | |
 | D7 | Pengurus → Keluhan Unit → **Tandai selesai** | Keluhan pindah ke tab Selesai; bisa dibuka kembali | ok | |
+| D8 | **Baru (pasca-03)**: buat booking MASA DEPAN (mis. H+7..H+8) → lihat kartunya | Tombol yang tampil **"Batalkan Peminjaman"** (merah) — BUKAN Selesai | ⬜ | |
+| D9 | **Baru**: tekan Batalkan Peminjaman → konfirmasi "Ya, Batalkan" | Status **Dibatalkan** + chip **"Dibatalkan {tanggal & jam}"** (bukan dikembalikan); kuota lepas (bisa booking lagi); mobil langsung bisa dipinjam di rentang itu | ⬜ | |
+| D10 | **Baru**: coba tekan Selesai pada booking belum mulai / Batalkan pada booking hari ini | Keduanya **ditolak** dengan pesan penjelas (guard silang) | ⬜ | |
 
 ## E. Pengurus sebagai peminjam
 

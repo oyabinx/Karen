@@ -7,22 +7,28 @@ Setelah selesai menggunakan mobil, pegawai menekan tombol **"Selesai"** pada pem
 
 ## Spesifikasi
 
-### Tombol "Selesai"
-- Tampil pada: dashboard pegawai (kartu peminjaman aktif) dan halaman Peminjaman Saya — menonjol (warna aksen) agar mudah dijangkau di ponsel.
-- Hanya untuk peminjaman berstatus `dipinjam` milik sendiri.
-- Klik → **pop-up (modal)** berisi ringkasan booking (mobil, tanggal, alamat, keperluan).
+### Tombol Aksi Adaptif (usulan user pasca-UAT 03)
+| Kondisi | Tombol | Hasil |
+|---------|--------|-------|
+| hari ini **≥ tanggal mulai** | **Selesai — Kembalikan Mobil** (pop-up keluhan opsional) | status `dikembalikan` + waktu pengembalian |
+| hari ini **< tanggal mulai** | **Batalkan Peminjaman** (pop-up konfirmasi, tanpa keluhan) | status `dibatalkan` + **waktu pembatalan** (`cancelled_at`) — kuota lepas, mobil langsung tersedia |
 
-### Pop-up Keluhan (opsional)
+- Peminjaman yang belum dimulai **tidak bisa** "dikembalikan" (guard menolak) — mobil belum dipakai; pembatalan mandiri adalah jalurnya.
+- Sebaliknya, peminjaman yang sudah dimulai **tidak bisa** dibatalkan sendiri — selesaikan dengan tombol Selesai.
+- Booking `menunggu_penggantian` tidak memiliki tombol aksi (menunggu keputusan pengurus).
+
+### Pop-up Keluhan (opsional — jalur Selesai)
 - Pertanyaan: *"Apakah ada keluhan terkait unit yang dipinjam?"*
 - **Textbox bebas** — boleh dikosongkan (tidak ada keluhan) atau diisi uraian keluhan.
 - Tombol utama: **"Selesai — Kembalikan Mobil"**; tombol batal menutup pop-up tanpa perubahan.
 - Pengembalian dini (sebelum `end_date`) diperbolehkan.
 
 ### Proses (ReturnService)
-1. Validasi: booking milik user yang login dan berstatus `dipinjam`.
+1. Validasi: booking milik user yang login, berstatus `dipinjam`, dan **sudah dimulai** (hari ini ≥ tanggal mulai).
 2. Set `status = dikembalikan`, `returned_at = now()`.
 3. Bila textbox terisi: simpan ke tabel `complaints` (`resolved = false`) — **murni catatan**, tanpa menyentuh kondisi/status kendaraan.
 4. Mobil **langsung tersedia** kembali (ketersediaan berbasis tanggal & booking).
+5. Jalur pembatalan mandiri (`cancelByBorrower`): hanya untuk booking **belum dimulai** → `status = dibatalkan`, `cancelled_at = now()`; kuota bidang lepas.
 
 ### Penindaklanjutan Keluhan (pengurus)
 - Keluhan tampil di daftar **Keluhan Unit** pengurus: unit, pelapor (+ seksi/bidang), isi, tanggal, status `resolved`.
@@ -35,7 +41,8 @@ Setelah selesai menggunakan mobil, pegawai menekan tombol **"Selesai"** pada pem
 ## Endpoint
 | Method | Path | Keterangan |
 |--------|------|------------|
-| POST | `/pegawai/returns/{booking}` | Selesaikan peminjaman (body opsional: `complaint`) |
+| POST | `/pegawai/returns/{booking}` | Selesaikan peminjaman (body opsional: `complaint`) — hanya bila sudah dimulai |
+| POST | `/pegawai/returns/{booking}/cancel` | Batalkan peminjaman sendiri — hanya bila BELUM dimulai |
 
 > Pop-up modal bermuara ke endpoint ini; tidak ada halaman terpisah.
 
@@ -46,8 +53,9 @@ Setelah selesai menggunakan mobil, pegawai menekan tombol **"Selesai"** pada pem
 ## Skenario Uji
 1. Selesai **tanpa** keluhan → status `dikembalikan`, `returned_at` terisi, mobil **langsung** bisa dipinjam orang lain.
 2. Selesai **dengan** keluhan "ban depan aus" → keluhan tersimpan (belum selesai), muncul di daftar pengurus — namun mobil **tetap bisa dipinjam** dan **tetap berkondisi baik** (tidak masuk bengkel/maintenance).
-3. Submit ulang untuk booking yang sudah `dikembalikan` → ditolak.
-4. Mengakses endpoint booking milik pegawai lain → 403.
-5. Booking `menunggu_penggantian` tidak bisa diselesaikan lewat tombol Selesai (tunggu keputusan pengganti).
-6. Pengurus menandai keluhan selesai → keluar dari daftar "belum selesai".
-7. Pengurus menandai unit `perlu_diperiksa` secara **manual** → unit tidak bisa dipinjam; set kembali `baik` → tersedia lagi.
+3. Booking MASA DEPAN → tombol **Batalkan Peminjaman**; konfirmasi → status `dibatalkan` + **waktu pembatalan** (bukan dikembalikan), kuota lepas, mobil bebas.
+4. Submit Selesai pada booking belum mulai → **ditolak**; submit Batalkan pada booking hari ini → **ditolak** (guard silang).
+5. Mengakses endpoint booking milik pegawai lain → 403.
+6. Booking `menunggu_penggantian` tidak bisa diselesaikan/dibatalkan pegawai (tunggu keputusan pengurus).
+7. Pengurus menandai keluhan selesai → keluar dari daftar "belum selesai".
+8. Pengurus menandai unit `perlu_diperiksa` secara **manual** → unit tidak bisa dipinjam; set kembali `baik` → tersedia lagi.

@@ -1,0 +1,53 @@
+╔══════════════════════════════════════════════════════════════════╗
+║      KAREN — TOMBOL ADAPTIF: SELESAI vs BATALKAN PEMINJAMAN        ║
+║                  (usulan user, pasca-UAT 03)                       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal : 2026-08-31
+  Status  : ✅ 221/221 test HIJAU (+7)
+
+────────────────────────────────────────────────────────────────────
+ MASALAH (studi kasus user)
+────────────────────────────────────────────────────────────────────
+ Pegawai A booking 22–24 Sep lalu menekan "Selesai — Kembalikan
+ Mobil" padahal peminjaman BELUM dimulai → riwayat mencatat
+ "dikembalikan + waktu kembali" — menyesatkan: mobil belum pernah
+ dipakai.
+
+────────────────────────────────────────────────────────────────────
+ SKEMA BARU (docs product.md aturan 25)
+────────────────────────────────────────────────────────────────────
+ • Kolom bookings.cancelled_at (migrasi) + guard silang:
+   - manualReturn (Selesai): WAJIB hari ini >= start_date; bila
+     belum mulai → ditolak "gunakan Batalkan Peminjaman".
+   - cancelByBorrower (BARU): hanya untuk belum mulai → status
+     dibatalkan + cancelled_at; kuota lepas; mobil langsung bebas.
+ • Tombol adaptif di modal partial (dashboard + Peminjaman Saya):
+   belum mulai → tombol MERAH "Batalkan Peminjaman" (modal
+   konfirmasi tanpa keluhan); sudah/hari ini → tombol HIJAU
+   "Selesai — Kembalikan Mobil" (keluhan opsional).
+ • menunggu_penggantian: tetap tanpa tombol aksi.
+ • Konsistensi waktu pembatalan di SELURUH jalur: pembatalan
+   pengurus (ReplacementService::cancel) & scheduler (autoReturn
+   mass-cancel) kini juga mengisi cancelled_at.
+ • Chip "Dibatalkan {d M Y H:i}" di riwayat pegawai & monitoring
+   pengurus (chip "Dikembalikan ..." tetap untuk jalur Selesai).
+ • Docs: pengembalian.md (tabel tombol adaptif + endpoint cancel +
+   skenario), tech.md (skema + scheduler), product.md aturan 25.
+ • UAT/01 diberi baris D8–D10 untuk perilaku baru.
+
+────────────────────────────────────────────────────────────────────
+ VERIFIKASI
+────────────────────────────────────────────────────────────────────
+ ✓ BatalkanSebelumMulaiTest (7): tombol adaptif dua arah; studi
+   kasus user (batal → status+waktu, returned_at KOSONG, kuota
+   lepas, mobil bebas); chip waktu di riwayat; guard silang dua
+   arah; 403 milik orang lain; pengurus & scheduler mencatat
+   waktu; menunggu_penggantian tanpa tombol.
+ ✓ EndToEndFlowTest diperbarui ke perilaku baru (booking masa
+   depan → tombol Batalkan; pindah ke hari ini → Selesai).
+ ✓ Suite 221 PASSED (791 assertions); build 340ms.
+
+════════════════════════════════════════════════════════════════════
+                       — AKHIR —
+════════════════════════════════════════════════════════════════════

@@ -96,6 +96,7 @@ Sistem memiliki **3 role**, masing-masing dengan dashboard tersendiri:
 | 22 | **Penggantian parsial**: bila maintenance/event hanya menabrak bagian tepi rentang peminjaman, pengurus dapat memberi mobil pengganti **hanya untuk tanggal yang menabrak** — sisa tanggal tetap memakai mobil semula (peminjaman terpecah dua secara otomatis). Fitur penggantian berada di **menu mandiri "Penggantian Mobil"**. *(UAT 03-B7, D3)* |
 | 23 | **Log aktivitas**: seluruh perubahan data penting (kendaraan, jadwal, anggaran, peminjaman, user, konfigurasi) tercatat **siapa-mengubah-apa-kapan** beserta nilai lama→baru; field sensitif (password, kredensial Google) tidak pernah dicatat isinya; scheduler tercatat sebagai "Sistem (otomatis)". Dilihat **admin**. *(keputusan pasca-UAT 03)* |
 | 24 | **Admin membuka seluruh menu sisi pengurus** (kendaraan, maintenance, penggantian, anggaran, dokumen, event, keluhan, monitoring, laporan) agar dapat memverifikasi komplain pengurus langsung dari sudut pandang mereka — **kecuali peminjaman** (aturan no. 11/kesepakatan UAT 01). *(keputusan pasca-UAT 03)* |
+| 25 | **Tombol aksi peminjaman adaptif**: bila hari ini ≥ tanggal mulai → tombol **"Selesai — Kembalikan Mobil"** (status `dikembalikan` + waktu kembali); bila hari ini < tanggal mulai → tombol **"Batalkan Peminjaman"** (status `dibatalkan` + **waktu pembatalan**, kuota lepas, mobil bebas). Kedua jalur saling mengunci (belum mulai tak bisa "dikembalikan"; sudah mulai tak bisa dibatalkan sendiri). *(usulan user pasca-UAT 03)* |
 
 ## 6. Lingkup Produk (Scope)
 

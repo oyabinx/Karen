@@ -38,4 +38,23 @@ class ReturnController extends Controller
 
         return back()->with('success', $pesan);
     }
+
+    /**
+     * Batalkan peminjaman sendiri yang BELUM dimulai (usulan user
+     * pasca-UAT 03: tombol adaptif — hari ini < tanggal mulai).
+     */
+    public function cancel(Request $request, Booking $booking, ReturnService $returns): RedirectResponse
+    {
+        if ($booking->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        try {
+            $returns->cancelByBorrower($booking);
+        } catch (\DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Peminjaman dibatalkan — kuota bidang Anda dilepas.');
+    }
 }

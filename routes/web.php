@@ -162,6 +162,7 @@ Route::middleware(['auth', 'role:pegawai|pengurus'])
         Route::get('/bookings/create', [PegawaiBookingController::class, 'create'])->name('bookings.create');
         Route::post('/bookings', [PegawaiBookingController::class, 'store'])->name('bookings.store');
         Route::post('/returns/{booking}', [ReturnController::class, 'store'])->name('returns.store');
+        Route::post('/returns/{booking}/cancel', [ReturnController::class, 'cancel'])->name('returns.cancel');
     });
 
 require __DIR__.'/auth.php';

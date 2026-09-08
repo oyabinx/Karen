@@ -151,6 +151,7 @@ bookings ──< complaints (1 booking max 1 keluhan saat pengembalian)
 | original_vehicle_id | BIGINT NULL FK → vehicles | terisi bila mobil diganti karena maintenance (jejak audit) |
 | returned_at | DATETIME NULL | waktu pengembalian manual |
 | auto_returned | BOOLEAN default false | true jika dikembalikan scheduler |
+| cancelled_at | DATETIME NULL | waktu pembatalan (pegawai mandiri belum-mulai / pengurus tanpa pengganti / scheduler) |
 | timestamps | | |
 
 > Index: `(vehicle_id, start_date, end_date)` untuk query ketersediaan; `(user_id, status)` untuk cek satu peminjaman aktif.
@@ -261,7 +262,7 @@ Schedule::call(fn () => app(\App\Services\Google\SheetsBudgetSync::class)->runIf
 
  booking status='menunggu_penggantian' AND end_date < hari_ini
  (pengurus belum memutuskan pengganti):
-   - status → 'dibatalkan'   → kuota bidang lepas, mobil lama terblokir karena maintenance saja
+   - status → 'dibatalkan', cancelled_at → now()  → kuota bidang lepas, mobil lama terblokir karena maintenance saja
 
  event status='terjadwal' AND end_date < hari_ini:
    - status → 'selesai'      → armada event otomatis lepas (ketersediaan berbasis tanggal)

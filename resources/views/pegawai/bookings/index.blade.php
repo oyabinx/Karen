@@ -43,6 +43,9 @@
                     @if ($b->returned_at)
                         <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">Dikembalikan {{ $b->returned_at->translatedFormat('d M Y H:i') }}</span>
                     @endif
+                    @if ($b->status === 'dibatalkan' && $b->cancelled_at)
+                        <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">Dibatalkan {{ $b->cancelled_at->translatedFormat('d M Y H:i') }}</span>
+                    @endif
                 </div>
 
                 @if ($b->status === 'dipinjam')
