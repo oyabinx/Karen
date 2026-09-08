@@ -11,6 +11,7 @@ yang akan ditabrak.
 | A1 | Menu **Event Armada** → **+ Buat Event** | Form info (nama, bidang, tanggal, jumlah mobil N) | ⬜ | |
 | A2 | Isi tanggal **H+15..H+21 (7 hari)** → **Lihat Armada Tersedia** | Pratinjau armada muncul — durasi >3 hari DITERIMA (fleksibel khusus event) | ⬜ | |
 | A3 | Perhatikan pengelompokan | ✅ **Bebas** (tanpa booking) dan ⚠ **Menabrak** (ada booking + jumlahnya) | ⬜ | |
+| A3b | **Kelompok maintenance (baru)**: buat jadwal maintenance satu mobil pada rentang event → lihat wizard | Kelompok ketiga **"🔧 Sedang Maintenance"** tampil — mobil **nonaktif** (checkbox tidak bisa diklik) dengan keterangan **rentang maintenance-nya**; mobil itu TIDAK bisa dipilih meski dicoba submit (ditolak validasi) | ⬜ | |
 | A4 | Set **N = 2** tapi centang **1** mobil → buat | Ditolak: jumlah terpilih harus tepat N | ⬜ | |
 | A5 | Pilih 2 mobil **bebas** → Buat Event | Sukses “armada terkunci (bebas konflik)”; muncul di daftar status Terjadwal | ⬜ | |
 | A6 | Pegawai cari mobil terpilih rentang H+16..H+17 | Kedua mobil **tidak tersedia** | ⬜ | |

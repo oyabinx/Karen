@@ -29,6 +29,7 @@
 | B6 | Unggah ulang file yang SAMA | Semua baris ❌ (email sudah terdaftar) | ok | |
 | B7 | File dengan header diubah sembarangan | Ditolak: header tidak sesuai template | ok | |
 | B8 | CSV dengan kolom role kosong | User dibuat sebagai **pegawai** | ok | |
+| B9 | **Verifikasi ulang B3**: unggah CSV dengan password mengandung spasi (mis. `rahasia 123`) | Baris ditolak: **"Password tidak boleh mengandung spasi"** (juga berlaku di tambah/ubah user manual & ganti sandi profil) | ⬜ | |
 
 ## C. Bidang & Seksi + Kuota
 
@@ -42,6 +43,7 @@
 | C6 | **Hapus seksi** yang masih beranggota | Ditolak: masih ada anggota | ok | |
 | C7 | **Hapus bidang** yang masih punya seksi | Ditolak: masih punya seksi | ok | |
 | C8 | Tambah bidang baru (kosong) → hapus | Berhasil dibuat & dihapus | ok | |
+| C9 | **Verifikasi ulang C2 (kebijakan baru)**: isi kuota `9` → simpan; lalu `10` dan `0` | Kuota `9` **diterima** (rentang baru 1–9); `10` dan `0` **ditolak** | ⬜ | |
 
 ## D. Integrasi Google (halaman — tanpa kunci nyata)
 
@@ -53,3 +55,4 @@
 | D4 | Isi URL valid apa pun + tab → simpan; **Test Koneksi** (tanpa kunci) | Langkah 1 ❗gagal dengan pesan “belum diunggah”; hasil per langkah tampil | revisi | terdapat internal server error ketika klik tombol Test Koneksi, error exception app/Services/Google/SheetsBudgetSync.php:189 Trying to access array offset on null |
 | D5 | Interval isi selain 5/15/30/60 (lewat devtools/ubah nilai) | Ditolak | ok | |
 | D6 | Login pengurus → `/admin/integrasi/google` | 403 | ok | |
+| D7 | **Verifikasi ulang D4**: klik Test Koneksi (tanpa kunci) | **Tidak lagi error 500** — langkah 1 gagal anggun dengan pesan "belum diunggah"; hasil per langkah tampil | ⬜ | |

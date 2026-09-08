@@ -31,6 +31,7 @@ Siapkan: pengurus1 & pengurus2 (dua akun berbeda).
 | B5 | Filter **pelaku = pengurus1** | Hanya entri pengurus1 | ⬜ | |
 | B6 | Filter aksi = Menghapus / objek = Vehicle / cari "Log Uji" / rentang tanggal | Hasil sesuai | ⬜ | |
 | B7 | Pegawai melakukan booking + Selesai berkeluhan | Log aktivitas mencatat Menambah Peminjaman, Mengubah (status), Menambah Keluhan | ⬜ | |
+| B7b | **Pembatalan mandiri**: pegawai batalkan booking masa depan (skenario 01-D9) | Log mencatat **Mengubah Peminjaman (kolom: status, cancelled_at)** dengan pelaku pegawai tersebut | ⬜ | |
 | B8 | Jalankan autoReturn (lihat skenario 08 langkah 2) | Entri baru berpelaku **"Sistem (otomatis)"** | ⬜ | |
 | B9 | Login pegawai → `/admin/activity-logs` | 403 | ⬜ | |
 

@@ -50,8 +50,12 @@ dengan keluhan opsional, dan riwayat.
 
 ## D. Tombol “Selesai” + Keluhan (inti kesepakatan)
 
+> **Catatan pasca-revisi**: D1–D4 memerlukan booking yang **dimulai HARI INI**.
+> Booking dari C7 (H+10..H+12) kini menampilkan tombol **Batalkan Peminjaman**
+> (tombol adaptif) — gunakan booking baru H..H, atau lihat D8–D10 untuk
+> pengujian tombol Batalkan pada booking masa depan.
+
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
-|----|---------|------------------|--------|---------|
 | D1 | Di Peminjaman Saya / Dashboard, tekan **Selesai — Kembalikan Mobil** | **Pop-up** muncul: ringkasan + pertanyaan keluhan + textbox (boleh kosong) | ok | |
 | D2 | Tutup pop-up (Batal) | Tidak ada perubahan status | ok | |
 | D3 | Login **pegawai lain** (buat dulu lewat admin, skenario 02) → coba selesaikan booking pegawai pertama lewat URL `POST`/halaman | Tidak diizinkan (403 / error) | ok | |
@@ -78,3 +82,7 @@ dengan keluhan opsional, dan riwayat.
 | F1 | Buka Peminjaman Saya | Semua booking tampil: badge status, alamat/keperluan, waktu kembali | revisi | semua booking sudah tampil namun ada perbedaan jam antara jam ketika pengembalian dan yang ditampilkan di riwayat peminjaman, pastikan semua format datetime menggunakan pendekatan epoch time millis untuk meminimalizir perbedaan timezone antara front end dan backend |
 | F2 | Perhatikan booking yang pernah **diganti mobilnya** (skenario 03) | Badge **“Diganti dari {unit}”** | revisi | skema pergantian mobil, belum berjalan, saya sudah coba ketika mobil yang sedang dipinjam, lalu pengurus membuat jadwal maintenance diantara mobil yang sudah dipinjam, tidak terdapat peringatan apapun, namun untuk jadwal maintenance yang sebelumnya sudah dijadwalkan oleh pengurus, kemudian dilakukan peminjaman dengan rentang waktu yang menabrak jadwal maintenance sudah benar bahwa mobil tidak tampil di daftar mobil yang dapat dipinjam pegawai |
 | F3 | Dashboard pegawai → **Riwayat Terakhir** | Maks 5 terakhir + tautan Semua riwayat | ok | |
+| F4 | **Verifikasi ulang F1 (jam WIB)**: buat booking H..H → Selesai → cek jam di "Dikembalikan …" | Jam yang tampil = jam WIB saat menekan Selesai (perbaikan timezone Asia/Jakarta — data LAMA sebelum revisi tampil mundur 7 jam, hanya data baru yang acuan) | ⬜ | |
+| F5 | **Verifikasi ulang F2 (penggantian)**: ulangi skenario 03-C1 | Membuat maintenance menabrak booking kini **langsung mengarahkan ke halaman Penggantian Mobil** dengan peringatan kuning; banner "N menunggu mobil pengganti" tampil di Jadwal Maintenance | ⬜ | |
+| F6 | **Urutan riwayat (baru)**: pegawai punya booking AKTIF 14–15 Sep + booking DIBATALKAN 22–24 Sep → buka Peminjaman Saya | Yang **AKTIF tampil paling atas** (terdekat dulu), riwayat non-aktif di bawahnya terbaru dulu | ⬜ | |
+| F7 | **Pagination (baru)**: buat >10 booking → halaman 1 & halaman terakhir | Halaman 1 **tanpa tombol Sebelumnya**; halaman terakhir **tanpa tombol Berikutnya** (hilang, bukan disabled) | ⬜ | |

@@ -13,7 +13,8 @@ semua role untuk dashboard.
 | A4 | Filter: bidang | Hanya anggota bidang itu | ⬜ | |
 | A5 | Filter: status `menunggu_penggantian` | Hanya yang menunggu | ⬜ | |
 | A6 | Filter rentang tanggal yang memotong booking (mis. from=tengah booking) | Booking yang **menyentuh** rentang tetap tampil | ⬜ | |
-| A7 | Kombinasi filter + pagination | Konsisten (query string terjaga) | ⬜ | |
+| A7 | Kombinasi filter + pagination | Konsisten (query string terjaga); **halaman 1 tanpa tombol Sebelumnya, halaman terakhir tanpa tombol Berikutnya** (hilang, bukan disabled — revisi pasca-UAT) | ⬜ | |
+| A8 | **Chip waktu pembatalan**: buat booking masa depan lalu Batalkan (skenario 01-D9) → lihat monitoring | Booking tampil berstatus **Dibatalkan** + chip **"Dibatalkan {tanggal & jam}"** (bukan "dikembalikan") | ⬜ | |
 
 ## B. Laporan & Export CSV
 
@@ -33,5 +34,6 @@ semua role untuk dashboard.
 |----|---------|------------------|--------|---------|
 | C1 | Dashboard **admin** | Chip user per role; tabel per bidang (kuota/seksi/anggota); kartu **Kesehatan Scheduler** (info waktu terakhir; di dev tak ada peringatan merah) | ⬜ | |
 | C2 | Dashboard **pengurus** | 5 kartu (termasuk Menunggu Pengganti & Keluhan) + kartu **kuota pribadi** + daftar Peminjaman Berjalan Hari Ini + anggaran per pos + event terjadwal | ⬜ | |
-| C3 | Dashboard **pegawai** | Banner HP (bila kosong), kartu kuota, kartu peminjaman aktif + tombol Selesai, Riwayat Terakhir (5) | ⬜ | |
+| C3 | Dashboard **pegawai** | Banner HP (bila kosong), kartu kuota, kartu peminjaman aktif + **tombol adaptif** (Selesai bila hari ini ≥ mulai / Batalkan bila belum mulai), Riwayat Terakhir (5) | ⬜ | |
 | C4 | Buat keluhan baru (skenario 01-D5) → refresh dashboard pengurus | Kartu Keluhan naik +1 | ⬜ | |
+| C5 | Dashboard **pengurus** dengan pajak jatuh tempo ≤3 minggu (skenario 03-A11b) | Banner **"⚠ Peringatan Pajak Kendaraan"** dengan nama unit + jenis + sisa hari / "LEWAT n hari" | ⬜ | |
