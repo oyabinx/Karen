@@ -11,6 +11,20 @@
         <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
     @endif
 
+    {{-- Filter bulan (revisi user F7): default bulan berjalan, data lama via dropdown --}}
+    <div class="mb-4 flex flex-wrap items-center gap-3">
+        <span class="text-sm text-gray-500">Menampilkan riwayat:</span>
+        <form method="GET" class="flex items-center gap-2">
+            <select name="bulan" onchange="this.form.submit()"
+                    class="rounded-lg border-gray-300 text-sm min-h-[44px]">
+                @foreach ($bulanPilihan as $nilai => $label)
+                    <option value="{{ $nilai }}" {{ $bulanAktif === $nilai ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+        </form>
+        <span class="text-xs text-gray-400">— peminjaman aktif selalu tampil</span>
+    </div>
+
     {{-- Kartu (mobile & desktop) --}}
     <div class="space-y-3">
         @forelse ($bookings as $b)

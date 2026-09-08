@@ -21,7 +21,7 @@ Setelah selesai menggunakan mobil, pegawai menekan tombol **"Selesai"** pada pem
 - Pertanyaan: *"Apakah ada keluhan terkait unit yang dipinjam?"*
 - **Textbox bebas** — boleh dikosongkan (tidak ada keluhan) atau diisi uraian keluhan.
 - Tombol utama: **"Selesai — Kembalikan Mobil"**; tombol batal menutup pop-up tanpa perubahan.
-- Pengembalian dini (sebelum `end_date`) diperbolehkan.
+- Pengembalian dini (sebelum `end_date`) diperbolehkan — mobil **langsung tersedia** untuk sisa hari yang tidak terpakai (ketersediaan berbasis tanggal & status, bukan rentang asli). Riwayat tetap menampilkan rentang asli + status Dikembalikan + jam aktual.
 
 ### Proses (ReturnService)
 1. Validasi: booking milik user yang login, berstatus `dipinjam`, dan **sudah dimulai** (hari ini ≥ tanggal mulai).

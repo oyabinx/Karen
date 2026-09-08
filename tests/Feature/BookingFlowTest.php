@@ -38,13 +38,13 @@ class BookingFlowTest extends TestCase
         Booking::create([
             'user_id' => User::factory()->create()->id,
             'vehicle_id' => $dipakai->id,
-            'start_date' => '2026-12-01',
-            'end_date' => '2026-12-02',
+            'start_date' => today()->toDateString(),
+            'end_date' => today()->toDateString(),
             'address' => 'X', 'purpose' => 'Y',
         ]);
 
         $this->actingAs($this->pegawai)
-            ->get('/pegawai/search?start_date=2026-12-01&end_date=2026-12-02')
+            ->get('/pegawai/search?start_date='.today()->toDateString().'&end_date='.today()->toDateString())
             ->assertOk()
             ->assertSee($tersedia->name)
             ->assertDontSee($dipakai->name);
@@ -58,8 +58,8 @@ class BookingFlowTest extends TestCase
         $this->actingAs($this->pegawai)
             ->post('/pegawai/bookings', [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-12-01',
-                'end_date' => '2026-12-04',
+                'start_date' => today()->toDateString(),
+                'end_date' => today()->addDays(3)->toDateString(),
                 'address' => 'Kantor B',
                 'purpose' => 'Rapat',
             ])
@@ -70,8 +70,8 @@ class BookingFlowTest extends TestCase
         $this->actingAs($this->pegawai)
             ->post('/pegawai/bookings', [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-12-05',
-                'end_date' => '2026-12-07',
+                'start_date' => today()->addDays(5)->toDateString(),
+                'end_date' => today()->addDays(7)->toDateString(),
                 'address' => 'Kantor B',
                 'purpose' => 'Rapat',
             ])
@@ -121,14 +121,14 @@ class BookingFlowTest extends TestCase
 
         $this->actingAs($this->pegawai)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => $a->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02',
+                'vehicle_id' => $a->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHasNoErrors();
 
         $this->actingAs($this->pegawai)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => $b->id, 'start_date' => '2026-12-10', 'end_date' => '2026-12-11',
+                'vehicle_id' => $b->id, 'start_date' => today()->addDays(10)->toDateString(), 'end_date' => today()->addDays(11)->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHas('error') // pesan "masih memiliki peminjaman aktif"
@@ -143,12 +143,12 @@ class BookingFlowTest extends TestCase
         $v = Vehicle::factory()->count(3)->create();
 
         // Dua anggota meminjam → kuota (2) penuh
-        Booking::create(['user_id' => $anggota[0]->id, 'vehicle_id' => $v[0]->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02', 'address' => 'X', 'purpose' => 'Y']);
-        Booking::create(['user_id' => $anggota[1]->id, 'vehicle_id' => $v[1]->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02', 'address' => 'X', 'purpose' => 'Y']);
+        Booking::create(['user_id' => $anggota[0]->id, 'vehicle_id' => $v[0]->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(), 'address' => 'X', 'purpose' => 'Y']);
+        Booking::create(['user_id' => $anggota[1]->id, 'vehicle_id' => $v[1]->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(), 'address' => 'X', 'purpose' => 'Y']);
 
         $this->actingAs($this->pegawai)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => $v[2]->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02',
+                'vehicle_id' => $v[2]->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHas('error');
@@ -158,7 +158,7 @@ class BookingFlowTest extends TestCase
 
         $this->actingAs($this->pegawai)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => $v[2]->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02',
+                'vehicle_id' => $v[2]->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHasNoErrors();
@@ -172,13 +172,13 @@ class BookingFlowTest extends TestCase
         $anggota = User::factory()->count(2)->create(['role' => 'pegawai', 'seksi_id' => $this->pegawai->seksi_id]);
         $v = Vehicle::factory()->count(3)->create();
 
-        Booking::create(['user_id' => $anggota[0]->id, 'vehicle_id' => $v[0]->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02', 'address' => 'X', 'purpose' => 'Y']);
-        Booking::create(['user_id' => $anggota[1]->id, 'vehicle_id' => $v[1]->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02', 'address' => 'X', 'purpose' => 'Y']);
+        Booking::create(['user_id' => $anggota[0]->id, 'vehicle_id' => $v[0]->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(), 'address' => 'X', 'purpose' => 'Y']);
+        Booking::create(['user_id' => $anggota[1]->id, 'vehicle_id' => $v[1]->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(), 'address' => 'X', 'purpose' => 'Y']);
 
         // Anggota ketiga (kuota 3) → masih boleh
         $this->actingAs($this->pegawai)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => $v[2]->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02',
+                'vehicle_id' => $v[2]->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHasNoErrors();
@@ -190,12 +190,12 @@ class BookingFlowTest extends TestCase
         $v = Vehicle::factory()->create();
 
         // Pengurus bisa mengakses seluruh fitur peminjaman
-        $this->actingAs($pengurus)->get('/pegawai/search?start_date=2026-12-01&end_date=2026-12-02')->assertOk();
+        $this->actingAs($pengurus)->get('/pegawai/search?start_date='.today()->toDateString().'&end_date='.today()->toDateString())->assertOk();
         $this->actingAs($pengurus)->get('/pegawai/bookings')->assertOk();
 
         $this->actingAs($pengurus)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => $v->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02',
+                'vehicle_id' => $v->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHasNoErrors();
@@ -204,7 +204,7 @@ class BookingFlowTest extends TestCase
         $pegawaiLain = User::factory()->create(['role' => 'pegawai', 'seksi_id' => $this->pegawai->seksi_id]);
         $this->actingAs($pegawaiLain)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => Vehicle::factory()->create()->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02',
+                'vehicle_id' => Vehicle::factory()->create()->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHasNoErrors();
@@ -213,7 +213,7 @@ class BookingFlowTest extends TestCase
         $pengurus2 = User::factory()->create(['role' => 'pengurus', 'seksi_id' => $this->pegawai->seksi_id]);
         $this->actingAs($pengurus2)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => Vehicle::factory()->create()->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02',
+                'vehicle_id' => Vehicle::factory()->create()->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHas('error');
@@ -224,7 +224,7 @@ class BookingFlowTest extends TestCase
         $v = Vehicle::factory()->create();
         $service = app(BookingService::class);
 
-        $pertama = $service->create($this->pegawai, $v, '2026-12-01', '2026-12-02', 'X', 'Y');
+        $pertama = $service->create($this->pegawai, $v, today()->toDateString(), today()->toDateString(), 'X', 'Y');
 
         $this->assertSame('dipinjam', $pertama->status);
 
@@ -232,7 +232,7 @@ class BookingFlowTest extends TestCase
         $lain = User::factory()->create(['seksi_id' => Seksi::factory()->create()->id]);
 
         try {
-            $service->create($lain, $v, '2026-12-02', '2026-12-03', 'X', 'Y');
+            $service->create($lain, $v, today()->toDateString(), today()->addDays(2)->toDateString(), 'X', 'Y');
             $this->fail('Seharusnya melempar DomainException (mobil tidak tersedia).');
         } catch (\DomainException $e) {
             $this->assertStringContainsString('tidak lagi tersedia', $e->getMessage());
@@ -248,7 +248,7 @@ class BookingFlowTest extends TestCase
 
         $this->actingAs($tanpaSeksi)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => $v->id, 'start_date' => '2026-12-01', 'end_date' => '2026-12-02',
+                'vehicle_id' => $v->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
             ->assertSessionHas('error');
@@ -262,8 +262,8 @@ class BookingFlowTest extends TestCase
         Booking::create([
             'user_id' => $this->pegawai->id,
             'vehicle_id' => $lama->id,
-            'start_date' => '2026-11-01',
-            'end_date' => '2026-11-02',
+            'start_date' => today()->toDateString(),
+            'end_date' => today()->toDateString(),
             'address' => 'X', 'purpose' => 'Y',
             'status' => 'dikembalikan',
             'returned_at' => now(),
@@ -273,8 +273,8 @@ class BookingFlowTest extends TestCase
             'user_id' => $this->pegawai->id,
             'vehicle_id' => $baru->id,
             'original_vehicle_id' => $lama->id,
-            'start_date' => '2026-12-01',
-            'end_date' => '2026-12-02',
+            'start_date' => today()->toDateString(),
+            'end_date' => today()->toDateString(),
             'address' => 'X', 'purpose' => 'Y',
             'status' => 'dipinjam',
         ]);

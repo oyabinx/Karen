@@ -35,8 +35,10 @@ Fitur inti self-service: user memilih rentang tanggal, sistem menampilkan mobil 
 
 ### 4. Riwayat Peminjaman
 - Daftar peminjaman pribadi: mobil, tanggal, alamat, keperluan, status.
-- Peminjaman aktif menampilkan tombol **"Selesai"** (pop-up keluhan opsional — lihat [pengembalian.md](pengembalian.md)).
-- Pengembalian otomatis diberi penanda "dikembalikan otomatis".
+- Peminjaman aktif menampilkan tombol adaptif — **"Selesai — Kembalikan Mobil"** bila hari ini ≥ tanggal mulai, atau **"Batalkan Peminjaman"** bila belum mulai (lihat [pengembalian.md](pengembalian.md)).
+- Pengembalian otomatis diberi penanda "dikembalikan otomatis"; pembatalan diberi chip "Dibatalkan {waktu}".
+- **Filter bulan (revisi user F7)**: default hanya menampilkan riwayat **bulan berjalan** (tidak membebani pengguna); bulan sebelumnya (6 bulan ke belakang) dapat dipilih lewat dropdown. Peminjaman **AKTIF selalu tampil** meski dimulai bulan sebelumnya.
+- Urutan: aktif selalu paling atas (terdekat dulu) → riwayat terbaru dulu.
 
 ## Endpoint
 | Method | Path | Keterangan |

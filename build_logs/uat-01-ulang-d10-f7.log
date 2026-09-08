@@ -1,0 +1,58 @@
+╔══════════════════════════════════════════════════════════════════╗
+║       KAREN — TINDAK LANJUT UAT-01 ULANGAN (D10 + F7)              ║
+║   D10: klarifikasi pengembalian dini  F7: filter bulan riwayat     ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal : 2026-08-31
+  Sumber  : UAT-01 ulangan user (31 ok, 1 revisi F7, 1 klarifikasi D10)
+  Status  : ✅ 224/224 test HIJAU (+3)
+
+────────────────────────────────────────────────────────────────────
+ D10 — Klarifikasi "Selesai di tengah rentang 3 hari"
+────────────────────────────────────────────────────────────────────
+ PERTANYAAN user: booking Mobil A 3 hari, sudah berjalan 2 hari,
+ tekan Selesai → apa status riwayatnya? Apakah sisa hari (hari
+ terakhir) muncul tersedia bagi pegawai lain?
+
+ JAWABAN (perilaku sistem — SUDAH BENAR sejak awal, kini teruji):
+ • Status riwayat: **Dikembalikan** + waktu aktual penekanan
+   tombol; rentang ASLI (kemarin..besok) tetap tertera — bukti
+   bahwa peminjaman memang direncanakan 3 hari namun diselesaikan
+   lebih awal.
+ • Mobil **LANGSUNG tersedia** untuk hari terakhir (besok) bagi
+   pegawai lain — ketersediaan berbasis tanggal & status booking,
+   bukan rentang asli. Pegawai lain dapat langsung booking
+   tanggal tersisa itu.
+ → Test baru test_d10_pengembalian_dini_mobil_langsung_tersedia_
+   sisa_hari memverifikasi kedua hal + pegawai lain langsung
+   booking sisa hari.
+ → UAT/01 diberi baris D11 untuk verifikasi manual.
+ → DOCS pengembalian.md diperjelas.
+
+────────────────────────────────────────────────────────────────────
+ F7 — Riwayat dibatasi 1 bulan terakhir (revisi user)
+────────────────────────────────────────────────────────────────────
+ MASALAH: riwayat menampilkan SEMUA data → memberatkan pengguna.
+
+ FIX (skema baru):
+ • Default riwayat = **bulan berjalan saja** (dropdown "Menampilkan
+   riwayat: {bulan}" di atas daftar).
+ • Dropdown menyediakan **6 bulan ke belakang** (termasuk bulan
+   ini) — cukup untuk kebutuhan tinjauan.
+ • **Peminjaman AKTIF selalu tampil** meski dimulai bulan
+   sebelumnya (tidak mungkin tersembunyi hanya karena lintas
+   bulan).
+ • Pagination tetap berlaku dalam bulan terpilih.
+ → 2 test baru: default bulan berjalan + filter bulan; booking
+   aktif lintas bulan tetap tampil.
+ → DOCS peminjaman.md §4 diperbarui.
+ → UAT/01 F7 diperbarui.
+
+ Catatan proses: 25 tanggal hardcoded pada BookingFlowTest
+ (ditulis saat development Desember 2026) telah diganti ke tanggal
+ RELATIF (today()->…) agar test tidak kadaluarsa di masa depan —
+ satu test riwayat menyesuaikan bulan-berjalan.
+
+════════════════════════════════════════════════════════════════════
+                       — AKHIR —
+════════════════════════════════════════════════════════════════════

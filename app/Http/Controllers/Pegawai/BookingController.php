@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use App\Services\BookingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class BookingController extends Controller
@@ -67,15 +68,37 @@ class BookingController extends Controller
      * (terdekat dulu) — studi kasus: booking 22–24 Sep yang dibatalkan
      * tidak boleh menindih booking aktif 14–15 Sep. Riwayat di bawahnya
      * diurutkan terbaru dulu.
+     *
+     * FILTER BULAN (revisi user F7): default hanya bulan berjalan —
+     * agar tidak membebani pengguna; bulan sebelumnya via dropdown.
+     * Booking AKTIF selalu tampil meski mulai bulan lalu.
      */
     public function index(Request $request): View
     {
+        $bulan = $request->input('bulan', now()->format('Y-m'));
+        $awalBulan = Carbon::parse($bulan.'-01')->startOfMonth();
+        $akhirBulan = $awalBulan->copy()->endOfMonth();
+
         $bookings = Booking::with(['vehicle', 'originalVehicle'])
             ->where('user_id', $request->user()->id)
+            // Aktif selalu tampil; non-aktif hanya dalam bulan terpilih
+            ->where(function ($q) use ($awalBulan, $akhirBulan) {
+                $q->whereIn('status', ['dipinjam', 'menunggu_penggantian'])
+                    ->orWhereBetween('start_date', [$awalBulan, $akhirBulan]);
+            })
             ->orderByRaw("CASE WHEN status IN ('dipinjam', 'menunggu_penggantian') THEN 0 ELSE 1 END")
             ->orderByRaw("CASE WHEN status IN ('dipinjam', 'menunggu_penggantian') THEN UNIX_TIMESTAMP(start_date) ELSE -UNIX_TIMESTAMP(start_date) END")
             ->paginate(10);
 
-        return view('pegawai.bookings.index', ['bookings' => $bookings]);
+        // Daftar bulan untuk filter (6 bulan terakhir termasuk seeder)
+        $bulanPilihan = collect(range(0, 5))
+            ->map(fn ($i) => now()->subMonths($i)->format('Y-m'))
+            ->mapWithKeys(fn ($b) => [$b => Carbon::parse($b.'-01')->translatedFormat('F Y')]);
+
+        return view('pegawai.bookings.index', [
+            'bookings' => $bookings,
+            'bulanAktif' => $bulan,
+            'bulanPilihan' => $bulanPilihan,
+        ]);
     }
 }
