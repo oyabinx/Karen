@@ -23,5 +23,9 @@ class AppServiceProvider extends ServiceProvider
         // Master draft dokumen (bend26, draft nota, kartu inventaris)
         // dirender dari resources/draft_documents/ — docs/structure.md
         View::addNamespace('drafts', resource_path('draft_documents'));
+
+        // Pagination default aplikasi: tombol Sebelumnya/Berikutnya
+        // HILANG (bukan disabled) di halaman pertama/terakhir (UAT user)
+        \Illuminate\Pagination\Paginator::defaultView('pagination.karen');
     }
 }

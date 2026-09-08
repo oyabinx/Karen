@@ -1,0 +1,51 @@
+╔══════════════════════════════════════════════════════════════════╗
+║          KAREN — REVISI RIWAYAT PEMINJAMAN & PAGINATION            ║
+║                  (masukan user, pasca-UAT 03)                      ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal : 2026-08-31
+  Status  : ✅ 214/214 test HIJAU (+4)
+
+────────────────────────────────────────────────────────────────────
+ 1. URUTAN RIWAYAT — AKTIF SELALU PALING ATAS
+────────────────────────────────────────────────────────────────────
+ Masalah (studi kasus user persis): pegawai A booking 22–24 Sep lalu
+ dibatalkan, lalu booking aktif 14–15 Sep — tampilan lama
+ (orderByDesc start_date) menampilkan yang DIBATALKAN di atas
+ karena tanggalnya lebih besar.
+
+ FIX: pegawai/bookings + dashboard "Riwayat Terakhir" memakai
+ urutan dua tingkat (orderByRaw):
+   1) status aktif (dipinjam / menunggu_penggantian) = grup 0
+      → selalu di atas, terdekat dulu;
+   2) riwayat (dikembalikan/dibatalkan) → terbaru dulu.
+
+────────────────────────────────────────────────────────────────────
+ 2. PAGINATION — TOMBOL UJUNG HILANG, BUKAN DISABLED
+────────────────────────────────────────────────────────────────────
+ Masalah: halaman 1 menampilkan "Sebelumnya" disabled saat hover;
+ halaman terakhir menampilkan "Berikutnya" disabled. User meminta
+ tombolnya DIHILANGKAN.
+
+ FIX: view pagination custom `pagination/karen.blade.php`
+ (mobile + desktop) — Sebelumnya hanya dirender bila BUKAN halaman
+ pertama; Berikutnya hanya bila ADA halaman berikutnya. Didaftarkan
+ sebagai DEFAULT GLOBAL via Paginator::defaultView → seluruh
+ paginator aplikasi (users, monitoring, keluhan, laporan,
+ activity-logs, peminjaman) konsisten sekaligus.
+
+────────────────────────────────────────────────────────────────────
+ VERIFIKASI
+────────────────────────────────────────────────────────────────────
+ ✓ RiwayatUrutanDanPaginationTest (4): studi kasus user (aktif 14–15
+   di atas batal 22–24); menunggu_penggantian ikut grup atas;
+   dashboard riwayat singkat konsisten; hal-1 tanpa Sebelumnya &
+   hal-akhir tanpa Berikutnya (12 data / 2 halaman).
+ ✓ Suite: 214 PASSED (762 assertions); npm build 989ms.
+ ✓ Smoke live: users hal-1 Sebelumnya=0 (1 halaman → kedua tombol
+   hilang); pegawai/bookings Sebelumnya=0 & Berikutnya tampil
+   (data >10).
+
+════════════════════════════════════════════════════════════════════
+                       — AKHIR REVISI —
+════════════════════════════════════════════════════════════════════

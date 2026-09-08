@@ -62,12 +62,18 @@ class BookingController extends Controller
     /**
      * Riwayat peminjaman pribadi (badge status, penanda otomatis &
      * penggantian mobil).
+     *
+     * URUTAN (revisi user): peminjaman AKTIF selalu paling atas
+     * (terdekat dulu) — studi kasus: booking 22–24 Sep yang dibatalkan
+     * tidak boleh menindih booking aktif 14–15 Sep. Riwayat di bawahnya
+     * diurutkan terbaru dulu.
      */
     public function index(Request $request): View
     {
         $bookings = Booking::with(['vehicle', 'originalVehicle'])
             ->where('user_id', $request->user()->id)
-            ->orderByDesc('start_date')
+            ->orderByRaw("CASE WHEN status IN ('dipinjam', 'menunggu_penggantian') THEN 0 ELSE 1 END")
+            ->orderByRaw("CASE WHEN status IN ('dipinjam', 'menunggu_penggantian') THEN UNIX_TIMESTAMP(start_date) ELSE -UNIX_TIMESTAMP(start_date) END")
             ->paginate(10);
 
         return view('pegawai.bookings.index', ['bookings' => $bookings]);

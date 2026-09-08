@@ -108,10 +108,12 @@ class DashboardController extends Controller
     private function pegawaiData(User $user): array
     {
         return [
-            // Riwayat singkat 5 terakhir (docs/feature/dashboard.md)
+            // Riwayat singkat 5 terakhir (docs/feature/dashboard.md) —
+            // peminjaman aktif selalu di atas (konsisten Peminjaman Saya)
             'riwayatSingkat' => Booking::with('vehicle')
                 ->where('user_id', $user->id)
-                ->orderByDesc('start_date')
+                ->orderByRaw("CASE WHEN status IN ('dipinjam', 'menunggu_penggantian') THEN 0 ELSE 1 END")
+                ->orderByRaw("CASE WHEN status IN ('dipinjam', 'menunggu_penggantian') THEN UNIX_TIMESTAMP(start_date) ELSE -UNIX_TIMESTAMP(start_date) END")
                 ->limit(5)
                 ->get(),
         ];
