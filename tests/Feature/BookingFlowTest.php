@@ -126,15 +126,25 @@ class BookingFlowTest extends TestCase
             ])
             ->assertSessionHasNoErrors();
 
+        // Booking kedua yang OVERLAP hari ini → DITOLAK (guard overlap)
         $this->actingAs($this->pegawai)
             ->post('/pegawai/bookings', [
-                'vehicle_id' => $b->id, 'start_date' => today()->addDays(10)->toDateString(), 'end_date' => today()->addDays(11)->toDateString(),
+                'vehicle_id' => $b->id, 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString(),
                 'address' => 'X', 'purpose' => 'Y',
             ])
-            ->assertSessionHas('error') // pesan "masih memiliki peminjaman aktif"
+            ->assertSessionHas('error') // "overlap dengan tanggal ini"
             ->assertSessionDoesntHaveErrors();
 
-        $this->assertSame(1, Booking::where('user_id', $this->pegawai->id)->count());
+        // Booking non-overlap (minggu depan) → DITERIMA (Opsi A)
+        $c = Vehicle::factory()->create();
+        $this->actingAs($this->pegawai)
+            ->post('/pegawai/bookings', [
+                'vehicle_id' => $c->id, 'start_date' => today()->addDays(7)->toDateString(), 'end_date' => today()->addDays(8)->toDateString(),
+                'address' => 'Z', 'purpose' => 'Non-overlap',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(2, Booking::where('user_id', $this->pegawai->id)->count());
     }
 
     public function test_kuota_bidang_default_2_dan_lepas_setelah_dikembalikan(): void

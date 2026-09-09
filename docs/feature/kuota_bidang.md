@@ -11,10 +11,12 @@ Setiap bidang memiliki **jatah maksimal mobil yang dapat dipinjam secara bersama
 - Batas nilai yang dapat diisi admin: **1–9** *(direvisi dari 1–5 — kesepakatan UAT C2)*.
 
 ### Definisi "Bersamaan" (Cara Hitung Kuota)
-- Yang dihitung adalah booking dengan status `dipinjam` (atau `menunggu_penggantian`) milik **semua user yang terdaftar pada seksi di bawah bidang tersebut** — **termasuk booking untuk tanggal mendatang** yang sudah dikonfirmasi (booking langsung terkonfirmasi tanpa approval, sehingga booking mendatang sudah mengunci jatah).
+- Kuota dihitung berdasarkan **jumlah mobil BERBEDA yang dipakai BERSAMAAN pada satu tanggal** — bukan jumlah record booking. Ini adalah Opsi A (kesepakatan user): booking hasil split parsial (2–3 record berurutan) pada satu titik waktu hanya memakai 1 mobil → dihitung **1 slot kuota**.
+- **Pengecekan kuota per tanggal rentang booking baru**: sistem menghitung untuk setiap tanggal dalam rentang yang diajukan, berapa mobil akan dipakai bersamaan oleh seluruh anggota bidang. Bila ada satu tanggal saja yang melampaui kuota → ditolak. Booking hari ini tidak menghalangi booking minggu depan bila kuota tersedia pada tanggal tersebut.
 - Booking `dikembalikan` / `dibatalkan` **melepaskan** jatah.
-- **Peminjaman oleh pegawai maupun pengurus sama-sama diizinkan selama kuota bidang masih tersisa**; pengurus dihitung pada kuota bidang tempat **seksi** pengurus terdaftar (karena itu seksi wajib diisi untuk pegawai dan pengurus).
+- **Peminjaman oleh pegawai maupun pengurus sama-sama diizinkan selama kuota bidang masih tersedia**; pengurus dihitung pada kuota bidang tempat **seksi** pengurus terdaftar (karena itu seksi wajib diisi untuk pegawai dan pengurus).
 - **Pengecualian kuota**: pemakaian mobil melalui **event armada bidang** (dibuat admin/pengurus) tidak dihitung dalam kuota — event adalah jalur resmi untuk pemakaian armada di atas kuota, lihat [event_bidang.md](event_bidang.md).
+- **Guard "1 peminjaman aktif"** juga berbasis overlap tanggal: pegawai dengan booking hasil split yang aktif hari ini **tetap bisa** booking untuk minggu depan (non-overlap); tapi **ditolak** bila rentangnya bertabrakan dengan booking yang sedang berjalan.
 
 ### Validasi Saat Booking
 - Sebelum menyimpan booking baru, `BookingService` menghitung:
