@@ -20,7 +20,15 @@ use Illuminate\Support\Facades\DB;
  */
 class BookingService
 {
-    public const MAX_DURASI_HARI = 3;
+    /**
+     * Durasi maksimal peminjaman — TIDAK LAGI konstanta tetap.
+     * Dibaca dinamis dari AppSettings (admin dapat mengubahnya via UI,
+     * skema baru UAT 03). Fallback 3 hari bila belum diatur.
+     */
+    public static function maxDurasiHari(): int
+    {
+        return \App\Support\AppSettings::maxBookingDays();
+    }
 
     public function __construct(
         private readonly AvailabilityService $availability,
@@ -55,8 +63,8 @@ class BookingService
         // Durasi inklusif: 1 Feb–3 Feb = 3 hari
         $durasi = $start->diffInDays($end) + 1;
 
-        if ($durasi > self::MAX_DURASI_HARI) {
-            $errors[] = "Durasi maksimal peminjaman ".self::MAX_DURASI_HARI." hari (termasuk Sabtu–Minggu) — rentang Anda {$durasi} hari.";
+        if ($durasi > self::maxDurasiHari()) {
+            $errors[] = "Durasi maksimal peminjaman ".self::maxDurasiHari()." hari (termasuk Sabtu–Minggu) — rentang Anda {$durasi} hari.";
         }
 
         return $errors;

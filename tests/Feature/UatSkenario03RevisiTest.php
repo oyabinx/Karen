@@ -263,8 +263,8 @@ class UatSkenario03RevisiTest extends TestCase
         $this->assertSame($b->id, $split->vehicle_id);
     }
 
-    /** B7 batasan — tabrakan TENGAH tidak ditawarkan parsial. */
-    public function test_b7_parsial_tengah_tidak_tersedia(): void
+    /** B7 — tabrakan TENGAH kini DIDUKUNG parsial (revisi UAT 03-B7d). */
+    public function test_b7_parsial_tengah_tersedia(): void
     {
         $a = Vehicle::factory()->create();
 
@@ -277,16 +277,19 @@ class UatSkenario03RevisiTest extends TestCase
         ]);
         Maintenance::create(['vehicle_id' => $a->id, 'start_date' => $this->d(21), 'end_date' => $this->d(21)]); // tengah
 
+        // Parsial TENGAH kini tersedia (3 booking) — direvisi dari yang
+        // semula tidak didukung (UAT 03-B7d user minta dukungan tengah)
         $this->actingAs($this->pengurus)
             ->get("/pengurus/replacements/{$booking->id}")
             ->assertOk()
-            ->assertDontSee('Pengganti sebagian');
+            ->assertSee('Pengganti sebagian');
 
+        // Parsial tengah kini BERHASIL (bukan error)
         $this->actingAs($this->pengurus)
             ->patch("/pengurus/replacements/{$booking->id}/assign-partial", [
                 'vehicle_id' => Vehicle::factory()->create()->id,
             ])
-            ->assertSessionHas('error'); // parsial tidak tersedia → gunakan penuh
+            ->assertSessionHasNoErrors();
     }
 
     /** D3 — menu mandiri "Penggantian Mobil" tampil di sidebar pengurus. */

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\AppSettingController;
 use App\Http\Controllers\Admin\BidangController;
 use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\SeksiController;
@@ -75,6 +76,10 @@ Route::middleware(['auth', 'role:admin'])
 
         // Log aktivitas "siapa mengubah apa, kapan" (keputusan user pasca-UAT 03)
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+
+        // Pengaturan aplikasi — durasi maksimal dll (skema baru UAT 03)
+        Route::get('/settings', [AppSettingController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [AppSettingController::class, 'update'])->name('settings.update');
     });
 
 // ── PENGURUS + ADMIN: kendaraan, maintenance, penggantian mobil,

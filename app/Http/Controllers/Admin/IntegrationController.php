@@ -96,11 +96,13 @@ class IntegrationController extends Controller
     {
         $steps = app(SheetsBudgetSync::class)->testConnection();
 
+        $semuaOk = collect($steps)->every(fn ($s) => $s['ok']);
+
         return back()->with([
             'integration_test_steps' => $steps,
-            'success' => collect($steps)->every(fn ($s) => $s['ok'])
-                ? 'Test koneksi: semua langkah lolos ✅'
-                : 'Test koneksi selesai — ada langkah yang gagal, periksa rincian di bawah.',
+            $semuaOk ? 'success' : 'error' => $semuaOk
+                ? '✅ Test koneksi: semua langkah lolos.'
+                : '❌ Test koneksi GAGAL — periksa rincian di bawah.',
         ]);
     }
 

@@ -110,13 +110,11 @@ class ReplacementService
     }
 
     /**
-     * Penggantian PARSIAL (UAT 03-B7): tabrakan hanya menimpa bagian
-     * rentang di TEPI (awal/akhir) → tanggal yang menabrak memakai
-     * mobil pengganti (booking baru), sisa tanggal TETAP mobil lama
-     * (booking asli dipangkas). Tabrakan penuh/m tengah → gunakan
-     * assign() biasa.
+     * Penggantian PARSIAL (UAT 03-B7b/d): bagian yang menabrak memakai
+     * mobil pengganti; sisa tanggal TETAP mobil lama. Mendukung tepi
+     * (2 booking) dan TENGAH (3 booking: sebelum + tengah + sesudah).
      *
-     * @return array{original: Booking, split: Booking}
+     * @return array{original: Booking, segments: Booking[]}
      */
     public function assignPartial(Booking $booking, Carbon $overlapStart, Carbon $overlapEnd, Vehicle $replacement): array
     {
@@ -137,10 +135,6 @@ class ReplacementService
             throw new \DomainException('Seluruh rentang tertabrak — gunakan penggantian penuh.');
         }
 
-        if (! ($os->equalTo($bs) || $oe->equalTo($be))) {
-            throw new \DomainException('Tabrakan di tengah rentang tidak didukung penggantian parsial — gunakan penggantian penuh.');
-        }
-
         return DB::transaction(function () use ($booking, $bs, $be, $os, $oe, $replacement) {
             Vehicle::whereKey($replacement->id)->lockForUpdate()->first();
 
@@ -155,23 +149,43 @@ class ReplacementService
 
             $mobilLama = $booking->vehicle_id;
 
-            // Pangkas booking asli ke sisa tanggal di sisi yang bebas
-            if ($os->equalTo($bs)) {
-                $sisaStart = $oe->copy()->addDay();
-                $sisaEnd = $be;
-            } else {
-                $sisaStart = $bs;
-                $sisaEnd = $os->copy()->subDay();
+            // Hitung segmen non-tabrakan (sebelum & sesudah overlap)
+            $segmenSisa = [];
+            if ($os->gt($bs)) {
+                $segmenSisa[] = ['start' => $bs->toDateString(), 'end' => $os->copy()->subDay()->toDateString()];
+            }
+            if ($oe->lt($be)) {
+                $segmenSisa[] = ['start' => $oe->copy()->addDay()->toDateString(), 'end' => $be->toDateString()];
             }
 
-            $booking->update([
-                'start_date' => $sisaStart->toDateString(),
-                'end_date' => $sisaEnd->toDateString(),
-                'status' => Booking::STATUS_DIPINJAM,
-            ]);
+            // Segmen pertama → update booking asli; segmen kedua → booking baru
+            $segments = [];
+            $sisaBookings = [];
 
-            // Booking baru untuk bagian yang menabrak — memakai pengganti
-            $split = Booking::create([
+            if (count($segmenSisa) > 0) {
+                $booking->update([
+                    'start_date' => $segmenSisa[0]['start'],
+                    'end_date' => $segmenSisa[0]['end'],
+                    'status' => Booking::STATUS_DIPINJAM,
+                ]);
+                $sisaBookings[] = $booking->refresh();
+
+                // Segmen sisa kedua (tabrakan tengah → ada sebelum & sesudah)
+                if (count($segmenSisa) > 1) {
+                    $sisaBookings[] = Booking::create([
+                        'user_id' => $booking->user_id,
+                        'vehicle_id' => $mobilLama,
+                        'start_date' => $segmenSisa[1]['start'],
+                        'end_date' => $segmenSisa[1]['end'],
+                        'address' => $booking->address,
+                        'purpose' => $booking->purpose,
+                        'status' => Booking::STATUS_DIPINJAM,
+                    ]);
+                }
+            }
+
+            // Booking untuk bagian yang menabrak — memakai pengganti
+            $penggantiBooking = Booking::create([
                 'user_id' => $booking->user_id,
                 'vehicle_id' => $replacement->id,
                 'original_vehicle_id' => $mobilLama,
@@ -182,7 +196,18 @@ class ReplacementService
                 'status' => Booking::STATUS_DIPINJAM,
             ]);
 
-            return ['original' => $booking->refresh(), 'split' => $split];
+            // Susun kronologis: [sebelum] + [pengganti/tabrakan] + [sesudah]
+            // sehingga segments[0]=awal, [1]=tengah, [2]=akhir
+            $segments = [];
+            if (isset($sisaBookings[0])) {
+                $segments[] = $sisaBookings[0]; // sebelum
+            }
+            $segments[] = $penggantiBooking;    // tengah (pengganti)
+            if (isset($sisaBookings[1])) {
+                $segments[] = $sisaBookings[1]; // sesudah
+            }
+
+            return ['original' => $booking->refresh(), 'segments' => $segments];
         });
     }
 
@@ -231,8 +256,11 @@ class ReplacementService
     }
 
     /**
-     * Rentang parsial yang layak (tabrakan tepi, bukan penuh, bukan
-     * tengah) atau null bila tidak tersedia.
+     * Rentang parsial yang layak — kini mendukung TEPI dan TENGAH
+     * (UAT 03-B7b/d + D3b):
+     * - Tepi awal/akhir: 2 segmen (sisa + bagian tabrakan)
+     * - Tengah: 3 segmen (sebelum + tabrakan + sesudah)
+     * - Penuh: null (gunakan penggantian penuh)
      *
      * @return array{os: Carbon, oe: Carbon}|null
      */
@@ -250,10 +278,9 @@ class ReplacementService
         $oe = $be->min($blocker['end']);
 
         $penuh = $os->equalTo($bs) && $oe->equalTo($be);
-        $tepi = $os->equalTo($bs) || $oe->equalTo($be);
 
-        if ($penuh || ! $tepi) {
-            return null;
+        if ($penuh) {
+            return null; // seluruh rentang tertabrak — gunakan penuh
         }
 
         return ['os' => $os, 'oe' => $oe];

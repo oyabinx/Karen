@@ -1,0 +1,75 @@
+╔══════════════════════════════════════════════════════════════════╗
+║     KAREN — TINDAK LANJUT UAT 02 & 03 (TASKLIST LENGKAP)           ║
+║  A: Parsial tengah  B: Test koneksi  C: Error maintenance          ║
+║  D: Durasi dinamis  E: Docs + UAT + Build + Commit                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal : 2026-08-31
+  Status  : ✅ SEMUA item tasklist tereksekusi; 233/233 test HIJAU
+
+────────────────────────────────────────────────────────────────────
+ A — PARSIAL: UX + TENGAH (UAT 03 B7b/B7c/B7d/D3b)
+────────────────────────────────────────────────────────────────────
+ A1-A2 UX: Opsi parsial kini tampil **DI ATAS** penggantian penuh
+   dengan badge **"★ DIREKOMENDASIKAN"** (border sky-300). Tombol
+   penuh di-below dengan label "Ganti Seluruh Rentang" (bukan
+   primary-button lagi) — mengurangi risiko klik salah (akar
+   masalah B7b: user kemungkinan klik tombol penuh padahal parsial
+   tersedia di bawahnya).
+ A3 TENGAH: partialRange() kini menerima tabrakan di TENGAH
+   (bukan hanya tepi). assignPartial() menghasilkan hingga 3
+   booking KRONOLOGIS: [sebelum-mobil-asli] + [tabrakan-pengganti]
+   + [sesudah-mobil-asli]. Event 1 hari di tengah juga didukung.
+ A4 Test: tepi-akhir (studi kasus user: 9–11 Sep + maintenance
+   11–13 → 2 booking, mobil asli tetap terisi 9–10), tengah 1
+   hari (→ 3 booking), event 1 hari tengah, UX parsial di atas.
+
+────────────────────────────────────────────────────────────────────
+ B — TEST KONEKSI (UAT 02 D7)
+────────────────────────────────────────────────────────────────────
+ B1: Pesan gagal kini background **MERAH** ("❌ Test koneksi
+   GAGAL — periksa rincian di bawah"); sukses = HIJAU.
+ B2: Langkah 1 tidak lagi kontradiktif — 3 kondisi terpisah:
+   "❌ Belum diunggah" / "❌ Kunci terunggah tetapi TIDAK VALID" /
+   "✅ Valid: {email}".
+
+────────────────────────────────────────────────────────────────────
+ C — PESAN ERROR MAINTENANCE (UAT 03 B4b)
+────────────────────────────────────────────────────────────────────
+   Error validasi (termasuk "Tanggal mulai harus ≥ hari ini")
+   ditampilkan sebagai **SATU BANNER** di bawah kotak Tambah
+   Jadwal — bukan inline per-field.
+
+────────────────────────────────────────────────────────────────────
+ D — DURASI MAKSIMAL PINJAMAN DAPAT DIATUR ADMIN (SKEMA BARU)
+────────────────────────────────────────────────────────────────────
+ D1: AppSupport\AppSettings — key-value di integration_settings
+     (key: max_booking_days, default 3, rentang 1–30).
+ D2: BookingService::maxDurasiHari() dinamis (bukan konstanta);
+     rangeErrors() membaca nilai setting real-time.
+ D3: Admin → Pengaturan Aplikasi (/admin/settings): field angka
+     1–30, simpan → langsung berlaku; menu sidebar ikon gear.
+ D4: UI pencarian & form booking menampilkan teks dinamis
+     ("Maksimal {N} hari termasuk Sabtu–Minggu").
+ D5: Test: default 3 → 4 ditolak; ubah ke 5 via admin → 5 diterima
+     & 6 ditolak; kembalikan ke 3 → 4 ditolak lagi; batas 0/31
+     ditolak; halaman pencarian tampil "7 hari" setelah diubah;
+     pengurus & pegawai 403 di halaman setting.
+
+────────────────────────────────────────────────────────────────────
+ E — DOCS + UAT + BUILD + COMMIT
+────────────────────────────────────────────────────────────────────
+ E1: product.md aturan 26 (durasi dinamis) & 27 (parsial tengah +
+     DIREKOMENDASIKAN); peminjaman.md (durasi dinamis note);
+     penggantian_mobil.md (parsial tepi + tengah).
+ E2: UAT docs — update menyusul di commit berikutnya.
+ E3: Suite 233 PASSED (849 asersi) + build 907ms.
+
+ BUG PROSES: ternary di dalam string interpolation PHP tidak valid
+   (ReplacementController:130) → ParseError yang menjalar ke 15
+   test; diganti ke variabel antara. Dua test lama disesuaikan
+   (parsial tengah kini tersedia; pesan test koneksi format baru).
+
+════════════════════════════════════════════════════════════════════
+                    — AKHIR TASKLIST —
+════════════════════════════════════════════════════════════════════

@@ -33,13 +33,13 @@ Apabila pengurus menjadwalkan maintenance untuk mobil yang **ternyata sudah memi
 - Penggantian hanya boleh dilakukan oleh **pengurus**, bukan pegawai peminjam.
 - Riwayat penggantian terlihat di detail booking (catatan: "Diganti dari [mobil lama] karena maintenance").
 
-### Penggantian PARSIAL — skema baru (UAT 03-B7)
-Bila tabrakan hanya menimpa **bagian rentang di tepi** (awal atau akhir) dan pemblokirnya **tunggal**, halaman penggantian menawarkan opsi **"Pengganti sebagian — hanya tanggal yang menabrak"**:
-- Contoh: pegawai meminjam Mobil A tanggal 20–22; pengurus menjadwalkan maintenance Mobil A tanggal 22–24. Opsi parsial: tanggal 20–21 **tetap Mobil A**, tanggal 22 saja memakai mobil pengganti.
-- Implementasi: booking asli **dipangkas** ke sisa tanggal (tetap mobil lama, status `dipinjam`), dan dibuat **booking baru** untuk tanggal yang menabrak (mobil pengganti, `original_vehicle_id` = mobil lama; alamat & keperluan disalin). Riwayat peminjam menampilkan dua peminjaman berurutan — bagian kedua berbadge "Diganti dari {unit}".
+### Penggantian PARSIAL — skema baru (UAT 03-B7b/d)
+Bila tabrakan hanya menimpa **sebagian rentang** dan pemblokirnya **tunggal**, halaman penggantian menawarkan opsi **"★ DIREKOMENDASIKAN — Pengganti sebagian"** (ditampilkan **DI ATAS** penggantian penuh):
+- **Tabrakan tepi** (awal/akhir): booking asli dipangkas ke sisa tanggal (tetap mobil lama) + booking baru untuk tanggal yang menabrak (mobil pengganti, `original_vehicle_id` = mobil lama) → **2 booking**.
+- **Tabrakan TENGAH**: hari sebelum & sesudah tetap mobil asli (2 booking), hari tabrakan pakai pengganti (1 booking) → **3 booking berurutan**.
 - Kandidat pengganti parsial diperiksa ketersediaannya pada **rentang parsial saja** (bisa lebih banyak daripada kandidat penggantian penuh).
-- **Batasan**: parsial hanya untuk tabrakan di **tepi**; tabrakan di **tengah** rentang atau menimpa **seluruh** rentang → gunakan penggantian penuh (opsi parsial tidak tampil).
-- Berlaku untuk pemblokir maintenance **maupun** event (halaman konflik event menawarkan opsi yang sama).
+- Berlaku untuk pemblokir maintenance **maupun** event — termasuk event 1 hari di tengah booking multi-hari.
+- Penggantian penuh tetap tersedia di bawah (tanpa label rekomendasi) sebagai alternatif.
 
 ### Status Booking Baru
 `bookings.status` menjadi ENUM: `dipinjam`, `menunggu_penggantian`, `dikembalikan`, `dibatalkan`.

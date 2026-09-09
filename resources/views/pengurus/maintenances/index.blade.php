@@ -40,17 +40,14 @@
                         <option value="{{ $v->id }}">{{ $v->name }}</option>
                     @endforeach
                 </select>
-                <x-input-error :messages="$errors->get('vehicle_id')" class="mt-1" />
             </div>
             <div>
                 <x-input-label for="start_date" value="Mulai" />
                 <x-text-input id="start_date" name="start_date" type="date" class="block mt-1 w-full" required />
-                <x-input-error :messages="$errors->get('start_date')" class="mt-1" />
             </div>
             <div>
                 <x-input-label for="end_date" value="Selesai" />
                 <x-text-input id="end_date" name="end_date" type="date" class="block mt-1 w-full" required />
-                <x-input-error :messages="$errors->get('end_date')" class="mt-1" />
             </div>
             <div>
                 <x-input-label for="note" value="Catatan (opsional)" />
@@ -58,6 +55,19 @@
             </div>
             <x-primary-button class="justify-center min-h-[44px]">Simpan</x-primary-button>
         </form>
+
+        {{-- Pesan error VALIDASI ditampilkan SATU BANNER di bawah kotak
+             Tambah Jadwal (UAT 03-B4b) — bukan inline per-field --}}
+        @if ($errors->any())
+            <div class="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                <ul class="list-disc list-inside space-y-0.5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <p class="text-xs text-gray-500 mt-2">Catatan: Tanggal mulai harus berisi tanggal setelah atau sama dengan hari ini.</p>
+            </div>
+        @endif
     </section>
 
     {{-- Tab status --}}

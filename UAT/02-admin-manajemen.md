@@ -29,7 +29,7 @@
 | B6 | Unggah ulang file yang SAMA | Semua baris ❌ (email sudah terdaftar) | ok | |
 | B7 | File dengan header diubah sembarangan | Ditolak: header tidak sesuai template | ok | |
 | B8 | CSV dengan kolom role kosong | User dibuat sebagai **pegawai** | ok | |
-| B9 | **Verifikasi ulang B3**: unggah CSV dengan password mengandung spasi (mis. `rahasia 123`) | Baris ditolak: **"Password tidak boleh mengandung spasi"** (juga berlaku di tambah/ubah user manual & ganti sandi profil) | ⬜ | |
+| B9 | **Verifikasi ulang B3**: unggah CSV dengan password mengandung spasi (mis. `rahasia 123`) | Baris ditolak: **"Password tidak boleh mengandung spasi"** (juga berlaku di tambah/ubah user manual & ganti sandi profil) | ok | |
 
 ## C. Bidang & Seksi + Kuota
 
@@ -43,7 +43,7 @@
 | C6 | **Hapus seksi** yang masih beranggota | Ditolak: masih ada anggota | ok | |
 | C7 | **Hapus bidang** yang masih punya seksi | Ditolak: masih punya seksi | ok | |
 | C8 | Tambah bidang baru (kosong) → hapus | Berhasil dibuat & dihapus | ok | |
-| C9 | **Verifikasi ulang C2 (kebijakan baru)**: isi kuota `9` → simpan; lalu `10` dan `0` | Kuota `9` **diterima** (rentang baru 1–9); `10` dan `0` **ditolak** | ⬜ | |
+| C9 | **Verifikasi ulang C2 (kebijakan baru)**: isi kuota `9` → simpan; lalu `10` dan `0` | Kuota `9` **diterima** (rentang baru 1–9); `10` dan `0` **ditolak** | ok | |
 
 ## D. Integrasi Google (halaman — tanpa kunci nyata)
 
@@ -55,4 +55,4 @@
 | D4 | Isi URL valid apa pun + tab → simpan; **Test Koneksi** (tanpa kunci) | Langkah 1 ❗gagal dengan pesan “belum diunggah”; hasil per langkah tampil | revisi | terdapat internal server error ketika klik tombol Test Koneksi, error exception app/Services/Google/SheetsBudgetSync.php:189 Trying to access array offset on null |
 | D5 | Interval isi selain 5/15/30/60 (lewat devtools/ubah nilai) | Ditolak | ok | |
 | D6 | Login pengurus → `/admin/integrasi/google` | 403 | ok | |
-| D7 | **Verifikasi ulang D4**: klik Test Koneksi (tanpa kunci) | **Tidak lagi error 500** — langkah 1 gagal anggun dengan pesan "belum diunggah"; hasil per langkah tampil | ⬜ | |
+| D7 | **Verifikasi ulang D4**: klik Test Koneksi (tanpa kunci) | **Tidak lagi error 500** — langkah 1 gagal anggun dengan pesan "belum diunggah"; hasil per langkah tampil | revisi | secara ui agak rancu ketika tombol test koneksi selesai lalu muncul status di bagian atas halaman dengan background hijau dengan tulisan "Test koneksi selesai — ada langkah yang gagal, periksa rincian di bawah"", kenapa untuk background warnanya tidak merah saja sehingga background hijau hanya digunakan untuk test koneksi yang sukses, selain itu di bagian bawah Hasil Test Koneksi status juga masih rancu, kenapa status nya Kunci service account terbaca & valid, belum diunggah, padahal saya belum upload file json apapun ke sistem, kenapa dengan status kunci kredensial belum diunggah, atau kunci kredensial berhasil diunggah tetapi tidak valid, atau kunci kredensial berhasil diunggah dan valid |

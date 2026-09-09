@@ -121,11 +121,14 @@ class ReplacementController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        $lama = $result['original'];
-        $split = $result['split'];
+        $segmenInfo = collect($result['segments'])
+            ->map(fn ($s) => "{$s->start_date->translatedFormat('d M')}–{$s->end_date->translatedFormat('d M Y')} {$s->vehicle->name}")
+            ->implode('; ');
+
+        $jumlahSegmen = count($result['segments']);
 
         return redirect()
             ->route('pengurus.replacements.index')
-            ->with('success', "Peminjaman dipecah: {$lama->start_date->translatedFormat('d M')}–{$lama->end_date->translatedFormat('d M Y')} tetap {$lama->vehicle->name}; {$split->start_date->translatedFormat('d M')}–{$split->end_date->translatedFormat('d M Y')} memakai {$split->vehicle->name}.");
+            ->with('success', "Peminjaman dipecah menjadi {$jumlahSegmen} bagian: {$segmenInfo}");
     }
 }

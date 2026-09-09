@@ -123,7 +123,7 @@ class UatSkenario02RevisiTest extends TestCase
         $steps = session('integration_test_steps');
         $this->assertNotNull($steps);
         $this->assertFalse($steps[0]['ok']);
-        $this->assertSame('belum diunggah', $steps[0]['pesan']);
+        $this->assertStringContainsString('Belum diunggah', $steps[0]['pesan']);
     }
 
     /** B1 — halaman impor memuat tombol pilih file & area nama file baru. */

@@ -1,7 +1,7 @@
 <x-app-layout title="Cari Mobil Tersedia">
     <div class="mb-6">
         <h1 class="text-2xl font-semibold">Cari Mobil Tersedia</h1>
-        <p class="text-sm text-gray-500 mt-1">Maksimal 3 hari termasuk Sabtu–Minggu · peminjaman hari penuh (00:00–24:00).</p>
+        <p class="text-sm text-gray-500 mt-1">Maksimal {{ \App\Services\BookingService::maxDurasiHari() }} hari termasuk Sabtu–Minggu · peminjaman hari penuh (00:00–24:00).</p>
     </div>
 
     @if (session('success'))

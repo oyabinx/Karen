@@ -5,6 +5,10 @@ Fitur inti self-service: user memilih rentang tanggal, sistem menampilkan mobil 
 
 > **Pengguna fitur ini: pegawai DAN pengurus.** Sejatinya pengurus adalah user pegawai juga — pengurus dapat mencari, meminjam, dan mengembalikan mobil dengan alur yang sama, **selama kuota bidang masih tersisa**, dan terikat kuota bidang tempat **seksi** pengurus terdaftar.
 
+> **Durasi maksimal peminjaman** tidak lagi tetap 3 hari — **dapat diatur admin** melalui menu **Pengaturan Aplikasi** (rentang 1–30 hari, default 3). Perubahan langsung berlaku pada pencarian, form, dan validasi tanpa ubah kode *(skema baru UAT 03 — docs/feature/… )*.
+
+> **Pengguna fitur ini: pegawai DAN pengurus.** Sejatinya pengurus adalah user pegawai juga — pengurus dapat mencari, meminjam, dan mengembalikan mobil dengan alur yang sama, **selama kuota bidang masih tersisa**, dan terikat kuota bidang tempat **seksi** pengurus terdaftar.
+
 ## Aturan Durasi (penting)
 - Satuan peminjaman = **hari penuh, 00:00–24:00** (tidak ada jam).
 - Durasi maksimal **3 hari kalender, termasuk Sabtu & Minggu**.

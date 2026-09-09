@@ -182,9 +182,11 @@ class EventController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        $split = $result['split'];
+        $segmenInfo = collect($result['segments'])
+            ->map(fn ($s) => "{$s->start_date->translatedFormat('d M')}–{$s->end_date->translatedFormat('d M Y')} {$s->vehicle->name}")
+            ->implode('; ');
 
-        return back()->with('success', "Pengganti parsial: {$split->start_date->translatedFormat('d M')}–{$split->end_date->translatedFormat('d M Y')} memakai {$split->vehicle->name}; sisa tanggal tetap mobil semula.");
+        return back()->with('success', "Pengganti parsial — peminjaman terpecah: {$segmenInfo}");
     }
 
     /**
