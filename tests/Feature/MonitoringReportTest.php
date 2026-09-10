@@ -114,7 +114,7 @@ class MonitoringReportTest extends TestCase
             'end_date' => now()->startOfYear()->addDay()->toDateString(),
             'workshop_name' => 'Bengkel Laporan',
         ]);
-        app(BudgetService::class)->inputNota($m, ['workshop_name' => 'Bengkel Laporan', 'costs' => ['servis' => 500000, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 0]]);
+        app(BudgetService::class)->inputNota($m, ['workshop_name' => 'Bengkel Laporan', 'details' => ['servis' => ['Servis rutin']], 'detail_amounts' => ['servis' => [500000]]]);
 
         $this->actingAs($this->pengurus)
             ->get('/pengurus/reports')

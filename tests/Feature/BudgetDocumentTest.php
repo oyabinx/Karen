@@ -80,7 +80,7 @@ class BudgetDocumentTest extends TestCase
             ->assertSee('Realisasi', false);
     }
 
-    public function test_input_nota_mengali_koefisien_113_dan_menandai_selesai(): void
+    public function test_input_nota_total_dari_rincian_dikali_koefisien_dan_menandai_selesai(): void
     {
         Storage::fake('local');
 
@@ -92,7 +92,9 @@ class BudgetDocumentTest extends TestCase
                 'workshop_name' => 'Bengkel Jaya',
                 'nota_number' => 'INV/2026/081',
                 'nota_date' => '2026-09-11',
-                'costs' => ['servis' => 500000, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 300000],
+                // Rincian per baris — total pos = auto-sum rincian (rev UAT 04)
+                'details' => ['servis' => ['Tune up', 'Ganti kampas'], 'pelumas' => ['Oli mesin']],
+                'detail_amounts' => ['servis' => [300000, 200000], 'pelumas' => [300000]],
             ]);
 
         $response->assertSessionHasNoErrors();
@@ -101,23 +103,33 @@ class BudgetDocumentTest extends TestCase
         $this->assertSame('selesai', $m->status);
         $this->assertSame('Bengkel Jaya', $m->workshop_name);
 
-        // ×1,13
-        $this->assertEquals(565000.0, (float) $m->costs->firstWhere('post', 'servis')->taxed_amount);
+        // Auto-sum rincian: servis 300rb+200rb=500rb, ×1,13
+        $servis = $m->costs->firstWhere('post', 'servis');
+        $this->assertEquals(500000.0, (float) $servis->raw_amount);
+        $this->assertEquals(565000.0, (float) $servis->taxed_amount);
+        $this->assertEquals(1.13, (float) $servis->koefisien_used);
+        $this->assertCount(2, $servis->details);
         $this->assertEquals(339000.0, (float) $m->costs->firstWhere('post', 'pelumas')->taxed_amount);
         $this->assertSame(0.0, (float) $m->costs->firstWhere('post', 'ac')->raw_amount);
+        $this->assertCount(0, $m->costs->firstWhere('post', 'ac')->details);
     }
 
-    public function test_nota_tanpa_pos_bernilai_ditolak(): void
+    public function test_nota_tanpa_rincian_bernilai_ditolak(): void
     {
         $v = Vehicle::factory()->create();
         $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-10', 'end_date' => '2026-09-11']);
 
+        // Semua rincian 0 / tanpa baris → ditolak
         $this->actingAs($this->pengurus)
             ->put("/pengurus/maintenances/{$m->id}/costs", [
                 'workshop_name' => 'Bengkel Jaya',
-                'costs' => ['servis' => 0, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 0],
+                'details' => ['servis' => ['Servis rutin']],
+                'detail_amounts' => ['servis' => [0]],
             ])
-            ->assertSessionHasErrors('costs');
+            ->assertSessionHasErrors('details');
+
+        $m->refresh();
+        $this->assertSame('terjadwal', $m->status);
     }
 
     public function test_generate_dokumen_bend26_dan_draft_nota_hanya_pos_bernilai(): void
@@ -130,7 +142,8 @@ class BudgetDocumentTest extends TestCase
         $this->actingAs($this->pengurus)
             ->put("/pengurus/maintenances/{$m->id}/costs", [
                 'workshop_name' => 'Bengkel Jaya',
-                'costs' => ['servis' => 500000, 'suku_cadang' => 0, 'ac' => 200000, 'pelumas' => 0],
+                'details' => ['servis' => ['Servis rutin'], 'ac' => ['Freon']],
+                'detail_amounts' => ['servis' => [500000], 'ac' => [200000]],
             ]);
 
         // 1 bend26 + 2 draft nota (servis & ac saja)
@@ -154,7 +167,8 @@ class BudgetDocumentTest extends TestCase
 
         $this->actingAs($this->pengurus)->put("/pengurus/maintenances/{$m->id}/costs", [
             'workshop_name' => 'Bengkel Jaya',
-            'costs' => ['servis' => 500000, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 0],
+            'details' => ['servis' => ['Servis rutin']],
+            'detail_amounts' => ['servis' => [500000]],
         ]);
 
         $this->actingAs($this->pengurus)
@@ -178,7 +192,8 @@ class BudgetDocumentTest extends TestCase
         $this->actingAs($this->pengurus)->put("/pengurus/maintenances/{$m->id}/costs", [
             'workshop_name' => 'Bengkel Jaya',
             'nota_date' => '2026-09-11',
-            'costs' => ['servis' => 500000, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 0],
+            'details' => ['servis' => ['Servis rutin']],
+            'detail_amounts' => ['servis' => [500000]],
         ]);
 
         $summary = app(BudgetService::class)->summary($v, 2026);
@@ -194,7 +209,7 @@ class BudgetDocumentTest extends TestCase
         app(BudgetService::class)->setBudgets($v, 2026, ['servis' => 5000000, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 0]);
 
         $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-10', 'end_date' => '2026-09-11', 'workshop_name' => 'Bengkel Jaya']);
-        app(BudgetService::class)->inputNota($m, ['workshop_name' => 'Bengkel Jaya', 'costs' => ['servis' => 500000, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 0]]);
+        app(BudgetService::class)->inputNota($m, ['workshop_name' => 'Bengkel Jaya', 'details' => ['servis' => ['Servis rutin']], 'detail_amounts' => ['servis' => [500000]]]);
 
         $this->actingAs($this->pengurus)
             ->post("/pengurus/vehicles/{$v->id}/generate-kartu-inventaris", ['year' => 2026])

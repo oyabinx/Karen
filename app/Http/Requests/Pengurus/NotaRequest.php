@@ -2,14 +2,16 @@
 
 namespace App\Http\Requests\Pengurus;
 
-use App\Models\VehicleBudget;
 use Illuminate\Foundation\Http\FormRequest;
 
 class NotaRequest extends FormRequest
 {
     /**
-     * Input nota bengkel: minimal satu pos bernilai > 0
-     * (docs/feature/anggaran_maintenance.md).
+     * Validasi nota (rev UAT 04):
+     * - Bengkel wajib
+     * - Rincian per baris opsional (description + amount)
+     * - Total per pos dihitung otomatis dari jumlah rincian
+     * - Minimal satu baris rincian dengan nominal > 0 di seluruh nota
      */
     public function rules(): array
     {
@@ -17,19 +19,13 @@ class NotaRequest extends FormRequest
             'workshop_name' => ['required', 'string', 'max:100'],
             'nota_number' => ['nullable', 'string', 'max:50'],
             'nota_date' => ['nullable', 'date'],
-            'costs' => ['required', 'array'],
-            'costs.servis' => ['required', 'numeric', 'min:0'],
-            'costs.suku_cadang' => ['required', 'numeric', 'min:0'],
-            'costs.ac' => ['required', 'numeric', 'min:0'],
-            'costs.pelumas' => ['required', 'numeric', 'min:0'],
-            'costs' => [
-                function (string $attribute, mixed $value, \Closure $fail) {
-                    $total = collect($value)->filter(fn ($v, $k) => in_array($k, VehicleBudget::POSTS, true))->sum();
-                    if ($total <= 0) {
-                        $fail('Minimal satu pos harus bernilai lebih dari 0.');
-                    }
-                },
-            ],
+            'details' => ['nullable', 'array'],
+            'details.*' => ['nullable', 'array'],
+            'details.*.*' => ['nullable', 'string', 'max:255'],
+            'detail_amounts' => ['nullable', 'array'],
+            'detail_amounts.*' => ['nullable', 'array'],
+            // Bisa string ("500.000" dari form) maupun angka (API/test)
+            'detail_amounts.*.*' => ['nullable'],
         ];
     }
 
@@ -39,7 +35,26 @@ class NotaRequest extends FormRequest
             'workshop_name' => 'nama bengkel',
             'nota_number' => 'nomor nota',
             'nota_date' => 'tanggal nota',
-            'costs' => 'rincian nota',
         ];
+    }
+
+    /**
+     * Minimal satu baris rincian bernilai > 0 di seluruh nota
+     * (nota kosong tidak tersimpan — total dihitung dari rincian).
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $total = 0;
+            foreach ((array) $this->input('detail_amounts', []) as $list) {
+                foreach ((array) $list as $value) {
+                    $total += (float) str_replace('.', '', (string) $value);
+                }
+            }
+
+            if ($total <= 0) {
+                $validator->errors()->add('details', 'Nota harus memiliki minimal satu rincian bernilai (lebih dari 0).');
+            }
+        });
     }
 }

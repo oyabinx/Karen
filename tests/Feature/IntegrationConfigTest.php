@@ -144,7 +144,8 @@ class IntegrationConfigTest extends TestCase
         ]);
         app(\App\Services\BudgetService::class)->inputNota($m, [
             'workshop_name' => 'Bengkel Jaya',
-            'costs' => ['servis' => 500000, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 300000],
+            'details' => ['servis' => ['Servis rutin'], 'pelumas' => ['Oli mesin']],
+            'detail_amounts' => ['servis' => [500000], 'pelumas' => [300000]],
         ]);
 
         $rows = app(SheetsBudgetSync::class)->realizationRows();

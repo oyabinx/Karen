@@ -88,11 +88,12 @@ class BudgetService
     }
 
     /**
-     * Input nota bengkel: identitas nota + rincian nilai per pos
-     * + rincian baris (description + amount, opsional — skema baru UAT 04).
-     * Nilai × koefisien dinamis = realisasi. Maintenance otomatis selesai.
+     * Input nota bengkel: identitas nota + rincian baris per pos
+     * (details + detail_amounts parallel arrays — rev UAT 04).
+     * Nilai pos = auto-sum rincian; × koefisien dinamis = realisasi.
+     * Maintenance otomatis selesai.
      *
-     * @param  array{workshop_name?: string, nota_number?: ?string, nota_date?: ?string, costs?: array<string, numeric>, details?: array<string, array<int, array{description?: string, amount?: numeric}>>}  $data
+     * @param  array{workshop_name?: string, nota_number?: ?string, nota_date?: ?string, details?: array<string, array<int, string>>, detail_amounts?: array<string, array<int, string|numeric>>}  $data
      * @return array<string, MaintenanceCost> pos => cost tersimpan
      */
     public function inputNota(Maintenance $maintenance, array $data): array
@@ -111,7 +112,27 @@ class BudgetService
         $saved = [];
 
         foreach (VehicleBudget::POSTS as $post) {
-            $raw = (float) ($data['costs'][$post] ?? 0);
+            // Parse rincian dari parallel arrays (details + detail_amounts)
+            $descriptions = $data['details'][$post] ?? [];
+            $amounts = $data['detail_amounts'][$post] ?? [];
+            $detailRows = [];
+
+            foreach ($descriptions as $i => $desc) {
+                $desc = trim((string) $desc);
+                // Strip pemisah ribuan "150.000" → 150000
+                $amountStr = str_replace('.', '', (string) ($amounts[$i] ?? '0'));
+                $amount = (float) ($amountStr ?: 0);
+
+                if ($desc !== '' || $amount > 0) {
+                    $detailRows[] = [
+                        'description' => $desc !== '' ? $desc : '(tanpa deskripsi)',
+                        'amount' => $amount,
+                    ];
+                }
+            }
+
+            // raw_amount = AUTO-SUM dari rincian (rev UAT 04: bukan input manual)
+            $raw = collect($detailRows)->sum('amount');
 
             $saved[$post] = MaintenanceCost::updateOrCreate(
                 ['maintenance_id' => $maintenance->id, 'post' => $post],
@@ -122,20 +143,10 @@ class BudgetService
                 ],
             );
 
-            // Rincian baris per pos (replace: hapus lama, buat baru)
+            // Replace rincian
             $saved[$post]->details()->delete();
-
-            $details = $data['details'][$post] ?? [];
-            foreach ($details as $detail) {
-                $desc = trim((string) ($detail['description'] ?? ''));
-                $amount = (float) ($detail['amount'] ?? 0);
-
-                if ($desc !== '' || $amount > 0) {
-                    $saved[$post]->details()->create([
-                        'description' => $desc !== '' ? $desc : '(tanpa deskripsi)',
-                        'amount' => $amount,
-                    ]);
-                }
+            foreach ($detailRows as $row) {
+                $saved[$post]->details()->create($row);
             }
         }
 

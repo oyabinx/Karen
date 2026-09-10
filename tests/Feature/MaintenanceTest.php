@@ -17,6 +17,12 @@ class MaintenanceTest extends TestCase
 
     private User $pengurus;
 
+    /** Tanggal relatif — bebas dari tanggal eksekusi test */
+    private function d(int $days): string
+    {
+        return now()->addDays($days)->toDateString();
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -30,8 +36,8 @@ class MaintenanceTest extends TestCase
         $this->actingAs($this->pengurus)
             ->post('/pengurus/maintenances', [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-09-10',
-                'end_date' => '2026-09-12',
+                'start_date' => $this->d(10),
+                'end_date' => $this->d(12),
                 'note' => 'Servis rutin',
             ])
             ->assertSessionHasNoErrors();
@@ -46,8 +52,8 @@ class MaintenanceTest extends TestCase
         $this->actingAs($this->pengurus)
             ->post('/pengurus/maintenances', [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-09-12',
-                'end_date' => '2026-09-10',
+                'start_date' => $this->d(12),
+                'end_date' => $this->d(10),
             ])
             ->assertSessionHasErrors('end_date');
     }
@@ -55,13 +61,13 @@ class MaintenanceTest extends TestCase
     public function test_dua_jadwal_overlap_satu_kendaraan_ditolak(): void
     {
         $v = Vehicle::factory()->create();
-        Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-10', 'end_date' => '2026-09-12']);
+        Maintenance::create(['vehicle_id' => $v->id, 'start_date' => $this->d(10), 'end_date' => $this->d(12)]);
 
         $this->actingAs($this->pengurus)
             ->post('/pengurus/maintenances', [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-09-12',
-                'end_date' => '2026-09-14',
+                'start_date' => $this->d(12),
+                'end_date' => $this->d(14),
             ])
             ->assertSessionHasErrors('end_date');
     }
@@ -73,14 +79,14 @@ class MaintenanceTest extends TestCase
         $this->actingAs($this->pengurus)
             ->post('/pengurus/maintenances', [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-09-10',
-                'end_date' => '2026-09-12',
+                'start_date' => $this->d(10),
+                'end_date' => $this->d(12),
             ]);
 
         $service = app(AvailabilityService::class);
 
-        $this->assertFalse($service->isAvailable($v, Carbon::parse('2026-09-10'), Carbon::parse('2026-09-12')));
-        $this->assertTrue($service->isAvailable($v, Carbon::parse('2026-09-13'), Carbon::parse('2026-09-14')));
+        $this->assertFalse($service->isAvailable($v, Carbon::parse($this->d(10)), Carbon::parse($this->d(12))));
+        $this->assertTrue($service->isAvailable($v, Carbon::parse($this->d(13)), Carbon::parse($this->d(14))));
     }
 
     public function test_jadwal_menabrak_booking_menandai_menunggu_penggantian(): void
@@ -89,8 +95,8 @@ class MaintenanceTest extends TestCase
         $booking = Booking::create([
             'user_id' => User::factory()->create()->id,
             'vehicle_id' => $v->id,
-            'start_date' => '2026-09-10',
-            'end_date' => '2026-09-11',
+            'start_date' => $this->d(10),
+            'end_date' => $this->d(11),
             'address' => 'Kantor B',
             'purpose' => 'Rapat',
         ]);
@@ -98,8 +104,8 @@ class MaintenanceTest extends TestCase
         $response = $this->actingAs($this->pengurus)
             ->post('/pengurus/maintenances', [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-09-11',
-                'end_date' => '2026-09-12',
+                'start_date' => $this->d(11),
+                'end_date' => $this->d(12),
             ]);
 
         $response->assertSessionHasNoErrors();
@@ -109,23 +115,23 @@ class MaintenanceTest extends TestCase
     public function test_update_rentang_bisa_menandai_booking_baru(): void
     {
         $v = Vehicle::factory()->create();
-        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-01', 'end_date' => '2026-09-02']);
+        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => $this->d(1), 'end_date' => $this->d(2)]);
 
         $booking = Booking::create([
             'user_id' => User::factory()->create()->id,
             'vehicle_id' => $v->id,
-            'start_date' => '2026-09-10',
-            'end_date' => '2026-09-11',
+            'start_date' => $this->d(10),
+            'end_date' => $this->d(11),
             'address' => 'Kantor B',
             'purpose' => 'Rapat',
         ]);
 
-        // Geser jadwal ke 09-10..09-12 → menabrak booking
+        // Geser jadwal ke H+10..H+12 → menabrak booking
         $this->actingAs($this->pengurus)
             ->put("/pengurus/maintenances/{$m->id}", [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-09-10',
-                'end_date' => '2026-09-12',
+                'start_date' => $this->d(10),
+                'end_date' => $this->d(12),
             ])
             ->assertSessionHasNoErrors();
 
@@ -135,24 +141,24 @@ class MaintenanceTest extends TestCase
     public function test_update_menjauh_dari_booking_mengembalikan_status_dipinjam(): void
     {
         $v = Vehicle::factory()->create();
-        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-10', 'end_date' => '2026-09-11']);
+        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => $this->d(10), 'end_date' => $this->d(11)]);
 
         $booking = Booking::create([
             'user_id' => User::factory()->create()->id,
             'vehicle_id' => $v->id,
-            'start_date' => '2026-09-10',
-            'end_date' => '2026-09-11',
+            'start_date' => $this->d(10),
+            'end_date' => $this->d(11),
             'address' => 'Kantor B',
             'purpose' => 'Rapat',
             'status' => Booking::STATUS_MENUNGGU_PENGGANTIAN,
         ]);
 
-        // Geser jadwal menjauh (20-21 Sept) → booking tidak lagi tertabrak
+        // Geser jadwal menjauh (H+30..H+31) → booking tidak lagi tertabrak
         $this->actingAs($this->pengurus)
             ->put("/pengurus/maintenances/{$m->id}", [
                 'vehicle_id' => $v->id,
-                'start_date' => '2026-09-20',
-                'end_date' => '2026-09-21',
+                'start_date' => $this->d(30),
+                'end_date' => $this->d(31),
             ])
             ->assertSessionHasNoErrors();
 
@@ -162,7 +168,7 @@ class MaintenanceTest extends TestCase
     public function test_tandai_selesai_dan_hapus_jadwal(): void
     {
         $v = Vehicle::factory()->create();
-        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-01', 'end_date' => '2026-09-02']);
+        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => $this->d(1), 'end_date' => $this->d(2)]);
 
         $this->actingAs($this->pengurus)
             ->patch("/pengurus/maintenances/{$m->id}/finish")
@@ -178,13 +184,13 @@ class MaintenanceTest extends TestCase
     public function test_hapus_jadwal_mengembalikan_booking_menunggu_ke_dipinjam(): void
     {
         $v = Vehicle::factory()->create();
-        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-10', 'end_date' => '2026-09-11']);
+        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => $this->d(10), 'end_date' => $this->d(11)]);
 
         $booking = Booking::create([
             'user_id' => User::factory()->create()->id,
             'vehicle_id' => $v->id,
-            'start_date' => '2026-09-10',
-            'end_date' => '2026-09-11',
+            'start_date' => $this->d(10),
+            'end_date' => $this->d(11),
             'address' => 'Kantor B',
             'purpose' => 'Rapat',
             'status' => Booking::STATUS_MENUNGGU_PENGGANTIAN,

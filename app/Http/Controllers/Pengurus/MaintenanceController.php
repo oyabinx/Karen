@@ -123,8 +123,9 @@ class MaintenanceController extends Controller
     }
 
     /**
-     * Simpan nota: nilai per pos ×1,13 = realisasi; maintenance
-     * berstatus selesai; bend26 + draft nota per pos digenerate.
+     * Simpan nota: rincian per baris dijumlah otomatis per pos,
+     * dikalikan koefisien pajak; maintenance berstatus selesai;
+     * bend26 + draft nota per pos digenerate.
      */
     public function inputNota(NotaRequest $request, Maintenance $maintenance): RedirectResponse
     {
@@ -132,7 +133,8 @@ class MaintenanceController extends Controller
             'workshop_name' => $request->input('workshop_name'),
             'nota_number' => $request->input('nota_number'),
             'nota_date' => $request->input('nota_date'),
-            'costs' => $request->input('costs'),
+            'details' => $request->input('details', []),
+            'detail_amounts' => $request->input('detail_amounts', []),
         ]);
 
         $documents = $this->documents->generateForMaintenance($maintenance->refresh());
@@ -141,7 +143,7 @@ class MaintenanceController extends Controller
 
         return redirect()
             ->route('pengurus.maintenances.index', ['status' => 'selesai'])
-            ->with('success', 'Nota tersimpan (×1,13). bend26 + '.$nota.' draft nota digenerate — lihat menu Dokumen.');
+            ->with('success', 'Nota tersimpan (total dari rincian, dikalikan koefisien pajak). bend26 + '.$nota.' draft nota digenerate — lihat menu Dokumen.');
     }
 
     /**

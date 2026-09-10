@@ -15,7 +15,7 @@ Monitoring dan laporan seluruh peminjaman kendaraan untuk pengurus: peminjaman b
   - hari pakai per mobil (akumulasi durasi);
   - daftar keluhan beserta status penanganan;
   - pengembalian terlambat (auto-return) per pegawai;
-  - **realisasi anggaran maintenance per pos** (servis, suku cadang, AC, pelumas): anggaran vs realisasi (× 1,13) vs sisa per mobil — sumber data [anggaran_maintenance.md](anggaran_maintenance.md).
+  - **realisasi anggaran maintenance per pos** (servis, suku cadang, AC, pelumas): anggaran vs realisasi (× koefisien pajak) vs sisa per mobil — sumber data [anggaran_maintenance.md](anggaran_maintenance.md).
 - **Export CSV/Excel** sesuai filter aktif.
 
 ### Keluhan

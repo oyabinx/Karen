@@ -1,0 +1,99 @@
+╔══════════════════════════════════════════════════════════════════╗
+║   KAREN — UAT 04 REV: REALISASI BULANAN 2 LEVEL + NOTA AUTO-SUM   ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal : 2026-09-11
+  Status  : ✅ 238/238 test HIJAU
+
+────────────────────────────────────────────────────────────────────
+ REVISI USER (UAT 04, 2 permintaan terakhir)
+────────────────────────────────────────────────────────────────────
+ 1. Realisasi Bulanan — tampilan default diinginkan berupa LIST
+    MOBIL yang di-maintenance bulan itu (bukan langsung tabel
+    rincian); baru setelah mobil diklik tampil rincian per pos.
+ 2. Input Nota — total servis/suku cadang/pelumas/AC harus
+    AKUMULASI OTOMATIS dari rincian (bukan input field manual);
+    angka koefisien TIDAK ditampilkan di form.
+
+────────────────────────────────────────────────────────────────────
+ R1 — REALISASI BULANAN DUA LEVEL
+────────────────────────────────────────────────────────────────────
+ • RealisasiBulananController dirombak:
+   - Level 1 (default): costs dikelompokkan per vehicle →
+     perVehicle (nama, plat, jumlah maintenance, totalRaw,
+     totalTaxed, perPost) untuk kartu list mobil.
+   - Level 2 (?vehicle=X): selectedVehicle = drill-down per pos
+     (subtotal sebelum pajak + total setelah koefisien + costs).
+   - Ringkasan 4 pos armada tetap dihitung untuk header.
+   - Ekspor CSV mengikuti filter mobil (?vehicle + &export=1).
+ • View realisasi-bulanan/index.blade.php ditulis ulang:
+   - List kartu mobil (klik → drill-down) + chip per pos bernilai.
+   - Level 2: seksi per pos bernilai, nota per pos (bengkel/
+     tanggal/nomor) + rincian baris expandable (details).
+   - Link "← Semua mobil", pemilih bulan, tombol CSV tetap.
+
+────────────────────────────────────────────────────────────────────
+ R2 — FORM NOTA: TOTAL = AUTO-SUM RINCIAN
+────────────────────────────────────────────────────────────────────
+ • costs.blade.php ditulis ulang (mobile-first):
+   - Input utama = baris rincian (deskripsi + nominal Rp) per pos,
+     tambah/hapus baris, nominal berpemisah ribuan live.
+   - Subtotal per pos & total "dikalikan koefisien pajak"
+     tampil READONLY (auto-sum JS) — tanpa input total manual,
+     tanpa menampilkan angka koefisien.
+ • Hidden input js-pos-total tetap dikirim (kompatibilitas)
+   namun server TIDAK memakainya — raw dihitung ulang dari
+   rincian (jangan percaya klien).
+
+────────────────────────────────────────────────────────────────────
+ R3 — BACKEND NOTA (PARALLEL ARRAYS)
+────────────────────────────────────────────────────────────────────
+ • BudgetService::inputNota(): parse details[post][] +
+   detail_amounts[post][] (parallel arrays); strip pemisah
+   ribuan; baris kosong dilewati; raw_amount = collect sum;
+   taxed = raw × koefisien dinamis; koefisien_used disimpan;
+   details() di-replace seluruhnya tiap simpan.
+ • MaintenanceController::inputNota(): meneruskan kedua array.
+ • NotaRequest: validasi baru (details/detail_amounts nullable
+   array) + aturan after(): minimal SATU rincian bernilai > 0 di
+   seluruh nota, else error di key 'details' (nota kosong
+   ditolak — menggantikan aturan lama costs.* required).
+ • Leaf amount divalidasi bebas tipe (string "500.000" dari
+   browser maupun angka dari API/test).
+
+────────────────────────────────────────────────────────────────────
+ R4 — TESTS & PERBAIKAN SAMPINGAN
+────────────────────────────────────────────────────────────────────
+ • BudgetDocumentTest: test nota dirombak ke format rincian —
+   baru: input nota 2 rincian servis (300rb+200rb) → raw 500rb,
+   taxed 565rb, koefisien_used 1,13, 2 baris details tersimpan;
+   nota kosong (rincian 0) ditolak di key 'details'.
+ • IntegrationConfigTest + MonitoringReportTest: inputNota
+   langsung ke service diubah ke format details/detail_amounts.
+ • MaintenanceTest (pre-existing failure): tanggal hardcoded
+   2026-09-xx telah lewat → ditolak aturan "mulai ≥ hari ini"
+   (UAT 03-B4). Diganti helper d(n) = now()->addDays(n) — test
+   bebas tanggal eksekusi.
+
+────────────────────────────────────────────────────────────────────
+ DOKUMENTASI
+────────────────────────────────────────────────────────────────────
+ • anggaran_maintenance.md: alur koefisien dinamis, seksi 3
+   (input nota rincian + auto-sum + mobile-first + hidden
+   koefisien), seksi 4b BARU (Anggaran terpusat + Realisasi
+   Bulanan 2 level + CSV), skema (maintenance_cost_details,
+   koefisien_used, integration_settings koefisien_pajak),
+   endpoint baru, aturan validasi & skenario uji diperbarui.
+ • product.md: kapabilitas pengurus + aturan 14 (rev) + aturan
+   27b BARU (realisasi bulanan).
+ • laporan.md: ×1,13 → ×koefisien pajak.
+ • UAT/04: seksi B direvisi (rincian → total otomatis, B1b, B12
+   cek mobile); seksi D BARU (Realisasi Bulanan D1–D7); seksi E
+   BARU (Anggaran terpusat + koefisien admin E1–E4).
+
+────────────────────────────────────────────────────────────────────
+ VERIFIKASI
+────────────────────────────────────────────────────────────────────
+ • php artisan test → 238 passed, 0 failed (866 assertions).
+ • npm run build → sukses (CSS 45.79 kB, JS 52.89 kB).
+ • Commit + push GitHub (oyabinx/Karen).
