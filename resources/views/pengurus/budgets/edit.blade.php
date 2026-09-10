@@ -41,9 +41,12 @@
                         <x-input-label for="amounts_{{ $post }}" value="{{ ucfirst(str_replace('_', ' ', $post)) }}" />
                         <div class="flex items-center mt-1">
                             <span class="px-3 py-2 rounded-s-lg bg-gray-100 border border-e-0 border-gray-300 text-sm text-gray-500">Rp</span>
-                            <input id="amounts_{{ $post }}" type="number" step="0.01" min="0" name="amounts[{{ $post }}]"
-                                   value="{{ old('amounts.'.$post, $budgets[$post]->amount ?? 0) }}" required
-                                   class="flex-1 rounded-none rounded-e-lg border-gray-300 text-sm">
+                            <input id="amounts_{{ $post }}" type="text" inputmode="numeric"
+                                   name="amounts[{{ $post }}]"
+                                   value="{{ old('amounts.'.$post, number_format((float)($budgets[$post]->amount ?? 0), 0, ',', '.')) }}"
+                                   required
+                                   class="flex-1 rounded-none rounded-e-lg border-gray-300 text-sm js-thousand-sep"
+                                   placeholder="0">
                         </div>
                         <x-input-error :messages="$errors->get('amounts.'.$post)" class="mt-1" />
                     </div>
@@ -104,4 +107,16 @@
             @endif
         </section>
     </div>
+
+    {{-- Pemisah ribuan live (UAT 04-A2): 1000000 → 1.000.000 --}}
+    <script>
+        document.querySelectorAll('.js-thousand-sep').forEach(function (input) {
+            input.addEventListener('input', function () {
+                var digits = this.value.replace(/\D/g, '');
+                this.value = digits ? parseInt(digits).toLocaleString('id-ID') : '';
+            });
+            // Trigger awal untuk nilai yang sudah ada
+            input.dispatchEvent(new Event('input'));
+        });
+    </script>
 </x-app-layout>

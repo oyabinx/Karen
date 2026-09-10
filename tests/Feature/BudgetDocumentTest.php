@@ -58,12 +58,12 @@ class BudgetDocumentTest extends TestCase
         $this->assertSame(1500000.0, $s2026['pelumas']['anggaran']);
         $this->assertSame(2000000.0, $s2027['pelumas']['anggaran']);
 
-        // Halaman dengan ?year=2027 menampilkan alokasi 2027
+        // Halaman dengan ?year=2027 menampilkan alokasi 2027 (format ribuan)
         $this->actingAs($this->pengurus)
             ->get("/pengurus/vehicles/{$v->id}/budgets?year=2027")
             ->assertOk()
-            ->assertSee('value="7000000', false)
-            ->assertDontSee('value="5000000', false);
+            ->assertSee('value="7.000.000', false)
+            ->assertDontSee('value="5.000.000', false);
 
         // 8 baris anggaran tersimpan (4 pos × 2 tahun)
         $this->assertSame(8, \App\Models\VehicleBudget::where('vehicle_id', $v->id)->count());

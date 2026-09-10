@@ -8,16 +8,17 @@ terjadwal); siapkan kalkulator untuk cek ×1,13.
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| A1 | Data Kendaraan → **Anggaran** mobil A | Halaman anggaran: form 4 pos + tabel Realisasi & Sisa + pemilih tahun ◀ ▶ | ⬜ | |
-| A2 | Isi tahun **2026**: servis 5.000.000, suku cadang 8.000.000, AC 2.000.000, pelumas 1.500.000 → Simpan | Tersimpan; tabel sisa = anggaran (belum ada realisasi) | ⬜ | |
-| A3 | Tekan ▶ ke **2027** → isi nilai BERBEDA → Simpan; kembali ◀ 2026 | Nilai 2026 **tidak berubah** (tiap tahun independen) | ⬜ | |
-| A4 | Isi kuota/anggaran dengan teks/huruf | Ditolak (angka ≥ 0) | ⬜ | |
+| A1 | Data Kendaraan → **Anggaran** mobil A | Halaman anggaran: form 4 pos + tabel Realisasi & Sisa + pemilih tahun ◀ ▶ | ok | apakah tahun yang ditampilkan secara default adalah tahun berjalan? atau ketika saya membuka sistem pada tahun 2027 juga akan mengikuti tahun 2027? |
+| A1b | **Jawaban A1**: default tahun = `now()->year` — ya, otomatis mengikuti tahun berjalan. Buka di 2027 → langsung tampil 2027 | ⬜ | |
+| A2 | Isi tahun **2026**: servis 5.000.000, suku cadang 8.000.000, AC 2.000.000, pelumas 1.500.000 → Simpan | Tersimpan; tabel sisa = anggaran (belum ada realisasi) | ok | tambahan: untuk field input angka, kalau bisa diberikan pemisah ribuan, jadi ketika saya ketik 1000000 tampilan menunjukkan 1.000.000 sebelum menekan tombol simpan anggaran|
+| A3 | Tekan ▶ ke **2027** → isi nilai BERBEDA → Simpan; kembali ◀ 2026 | Nilai 2026 **tidak berubah** (tiap tahun independen) | ok | |
+| A4 | Isi kuota/anggaran dengan teks/huruf | Ditolak (angka ≥ 0) | ok | secara tampilan sudah tidak bisa mengetik selain nomor |
 
 ## B. Input Nota ×1,13 → Generate Dokumen
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| B1 | Jadwal Maintenance → pilih jadwal terjadwal → **Input Nota** (tautan/tombol menuju form) | Form: bengkel, nomor & tgl nota, 4 pos dengan kalkulasi ×1,13 live | ⬜ | |
+| B1 | Jadwal Maintenance → pilih jadwal terjadwal → **Input Nota** (tautan/tombol menuju form) | Form: bengkel, nomor & tgl nota, 4 pos dengan kalkulasi ×1,13 live | revisi | pada menu jadwal maintenance di card mobil yang sedang di maintenance tidak ada tombol ataupun tautan Input Nota|
 | B2 | Isi semua pos **0** → simpan | Ditolak: minimal satu pos > 0 | ⬜ | |
 | B3 | Isi: bengkel “Bengkel Jaya”, nota `INV/001`, servis **500.000**, pelumas **300.000**, lain 0 → perhatikan angka live | Live: 565.000 & 339.000 (×1,13) | ⬜ | |
 | B4 | **Simpan Nota & Generate Dokumen** | Sukses; jadwal otomatis **Selesai** | ⬜ | |

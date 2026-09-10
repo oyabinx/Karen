@@ -39,13 +39,16 @@ class BudgetController extends Controller
 
     public function update(BudgetSaveRequest $request, Vehicle $vehicle): RedirectResponse
     {
-        $year = (int) $request->input('year');
+        // Strip pemisah ribuan "1.000.000" → 1000000 (UAT 04-A2)
+        $amounts = collect($request->input('amounts'))
+            ->map(fn ($v) => (float) str_replace('.', '', (string) $v))
+            ->all();
 
-        $this->budgets->setBudgets($vehicle, $year, $request->input('amounts'));
+        $this->budgets->setBudgets($vehicle, (int) $request->input('year'), $amounts);
 
         // Kembali ke halaman tahun yang baru disunting (bukan tahun berjalan)
         return redirect()
-            ->route('pengurus.budgets.edit', ['vehicle' => $vehicle, 'year' => $year])
-            ->with('success', 'Anggaran tahun '.$year.' disimpan.');
+            ->route('pengurus.budgets.edit', ['vehicle' => $vehicle, 'year' => (int) $request->input('year')])
+            ->with('success', 'Anggaran tahun '.$request->input('year').' disimpan.');
     }
 }

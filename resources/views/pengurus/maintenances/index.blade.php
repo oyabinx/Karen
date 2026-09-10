@@ -94,6 +94,13 @@
                 </div>
 
                 <div class="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                    {{-- INPUT NOTA — tombol utama saat maintenance terjadwal/selesai (UAT 04-B1) --}}
+                    <a href="{{ route('pengurus.maintenances.costs', $m) }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 min-h-[36px]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Input Nota
+                    </a>
+
                     @if ($m->status === 'terjadwal')
                         <form method="POST" action="{{ route('pengurus.maintenances.finish', $m) }}">
                             @csrf @method('PATCH')
