@@ -80,7 +80,7 @@
                 <td class="num">{{ $rp(collect($summary)->sum('anggaran')) }}</td>
             </tr>
             <tr>
-                <td colspan="3">REALISASI (×1,13)</td>
+                <td colspan="3">REALISASI (×{{ number_format(App\Services\BudgetService::koefisienPajak(), 2, ', ', '.') }})</td>
                 @foreach (\App\Models\VehicleBudget::POSTS as $post)
                     <td class="num">{{ $rp($summary[$post]['realisasi']) }}</td>
                 @endforeach

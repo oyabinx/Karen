@@ -14,10 +14,15 @@ use App\Models\IntegrationSetting;
 class AppSettings
 {
     public const KEY_MAX_BOOKING_DAYS = 'max_booking_days';
+    public const KEY_KOEFISIEN_PAJAK = 'koefisien_pajak';
 
     public const DEFAULT_MAX_BOOKING_DAYS = 3;
     public const MIN_MAX_BOOKING_DAYS = 1;
     public const MAX_MAX_BOOKING_DAYS = 30;
+
+    public const DEFAULT_KOEFISIEN_PAJAK = 1.13;
+    public const MIN_KOEFISIEN_PAJAK = 1.00;
+    public const MAX_KOEFISIEN_PAJAK = 2.00;
 
     public static function get(string $key, mixed $default = null): mixed
     {
@@ -41,5 +46,17 @@ class AppSettings
         $val = (int) self::get(self::KEY_MAX_BOOKING_DAYS, self::DEFAULT_MAX_BOOKING_DAYS);
 
         return max(self::MIN_MAX_BOOKING_DAYS, min(self::MAX_MAX_BOOKING_DAYS, $val));
+    }
+
+    /**
+     * Koefisien pajak (multiplier) — dibaca dinamis oleh BudgetService,
+     * form nota JS, dan semua tampilan realisasi. Perubahan hanya
+     * berlaku untuk nota BARU (skema baru UAT 04).
+     */
+    public static function koefisienPajak(): float
+    {
+        $val = (float) self::get(self::KEY_KOEFISIEN_PAJAK, self::DEFAULT_KOEFISIEN_PAJAK);
+
+        return round(max(self::MIN_KOEFISIEN_PAJAK, min(self::MAX_KOEFISIEN_PAJAK, $val)), 2);
     }
 }

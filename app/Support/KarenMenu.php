@@ -43,6 +43,7 @@ class KarenMenu
                 Route::has('pengurus.maintenances.index') ? self::item('pengurus.maintenances.index', 'Jadwal Maintenance', self::icon('wrench')) : null,
                 // Menu mandiri — dipakai maintenance & event (UAT 03-D3)
                 Route::has('pengurus.replacements.index') ? self::item('pengurus.replacements.index', 'Penggantian Mobil', self::icon('swap')) : null,
+                Route::has('pengurus.anggaran.index') ? self::item('pengurus.anggaran.index', 'Anggaran', self::icon('chart')) : null,
                 Route::has('pengurus.documents.index') ? self::item('pengurus.documents.index', 'Dokumen (bend26/nota)', self::icon('doc')) : null,
                 Route::has('pengurus.events.index') ? self::item('pengurus.events.index', 'Event Armada', self::icon('calendar')) : null,
             ]);
@@ -51,6 +52,7 @@ class KarenMenu
                 Route::has('pengurus.bookings.index') ? self::item('pengurus.bookings.index', 'Semua Peminjaman', self::icon('list')) : null,
                 Route::has('pengurus.complaints.index') ? self::item('pengurus.complaints.index', 'Keluhan Unit', self::icon('alert')) : null,
                 Route::has('pengurus.reports.index') ? self::item('pengurus.reports.index', 'Laporan', self::icon('chart')) : null,
+                Route::has('pengurus.realisasi-bulanan.index') ? self::item('pengurus.realisasi-bulanan.index', 'Realisasi Bulanan', self::icon('calendar')) : null,
             ]);
         }
 

@@ -197,7 +197,7 @@ class Uat0203TindakLanjutTest extends TestCase
 
         // Admin ubah ke 5 hari
         $this->actingAs($admin)
-            ->post('/admin/settings', ['max_booking_days' => 5])
+            ->post('/admin/settings', ['max_booking_days' => 5, 'koefisien_pajak' => 1.13])
             ->assertSessionHasNoErrors();
 
         $this->assertSame(5, AppSettings::maxBookingDays());
@@ -228,7 +228,7 @@ class Uat0203TindakLanjutTest extends TestCase
         $v = Vehicle::factory()->create();
 
         // Kembalikan ke 3
-        $this->actingAs($admin)->post('/admin/settings', ['max_booking_days' => 3]);
+        $this->actingAs($admin)->post('/admin/settings', ['max_booking_days' => 3, 'koefisien_pajak' => 1.13]);
 
         // Booking 4 hari ditolak lagi
         $this->actingAs($this->pegawai)
@@ -240,16 +240,16 @@ class Uat0203TindakLanjutTest extends TestCase
             ->assertSessionHasErrors('end_date');
 
         // Batas: 0 dan 31 ditolak
-        $this->actingAs($admin)->post('/admin/settings', ['max_booking_days' => 0])
+        $this->actingAs($admin)->post('/admin/settings', ['max_booking_days' => 0, 'koefisien_pajak' => 1.13])
             ->assertSessionHasErrors('max_booking_days');
-        $this->actingAs($admin)->post('/admin/settings', ['max_booking_days' => 31])
+        $this->actingAs($admin)->post('/admin/settings', ['max_booking_days' => 31, 'koefisien_pajak' => 1.13])
             ->assertSessionHasErrors('max_booking_days');
     }
 
     public function test_d_halaman_pencarian_menampilkan_durasi_dinamis(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $this->actingAs($admin)->post('/admin/settings', ['max_booking_days' => 7]);
+        $this->actingAs($admin)->post('/admin/settings', ['max_booking_days' => 7, 'koefisien_pajak' => 1.13]);
 
         $this->actingAs($this->pegawai)
             ->get('/pegawai/search')
@@ -260,6 +260,6 @@ class Uat0203TindakLanjutTest extends TestCase
     public function test_d_hanya_admin_yang_bisa_mengubah(): void
     {
         $this->actingAs($this->pegawai)->get('/admin/settings')->assertForbidden();
-        $this->actingAs($this->pengurus)->post('/admin/settings', ['max_booking_days' => 5])->assertForbidden();
+        $this->actingAs($this->pengurus)->post('/admin/settings', ['max_booking_days' => 5, 'koefisien_pajak' => 1.13])->assertForbidden();
     }
 }

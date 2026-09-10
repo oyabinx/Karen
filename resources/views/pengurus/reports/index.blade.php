@@ -86,7 +86,7 @@
         {{-- Realisasi anggaran per pos --}}
         <section class="bg-white rounded-xl border border-gray-200 p-6">
             <h2 class="font-semibold mb-1">Realisasi Anggaran per Pos — {{ $tahun }}</h2>
-            <p class="text-xs text-gray-400 mb-4">Seluruh unit; nilai realisasi sudah ×1,13. Rincian per unit: halaman Anggaran kendaraan / Kartu Inventaris.</p>
+            <p class="text-xs text-gray-400 mb-4">Seluruh unit; nilai realisasi sudah ×{{ number_format(App\Services\BudgetService::koefisienPajak(), 2, ', ', '.') }}. Rincian per unit: halaman Anggaran kendaraan / Kartu Inventaris.</p>
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-left text-xs uppercase tracking-wider text-gray-400 border-b">

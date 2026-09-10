@@ -75,7 +75,7 @@
                         <tr class="text-left text-xs uppercase tracking-wider text-gray-400 border-b">
                             <th class="py-2">Pos</th>
                             <th class="py-2 text-right">Anggaran</th>
-                            <th class="py-2 text-right">Realisasi ×1,13</th>
+                            <th class="py-2 text-right">Realisasi ×{{ number_format(App\Services\BudgetService::koefisienPajak(), 2, ', ', '.') }}</th>
                             <th class="py-2 text-right">Sisa</th>
                         </tr>
                     </thead>

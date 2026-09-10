@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Pengurus\BudgetController;
+use App\Http\Controllers\Pengurus\BudgetOverviewController;
 use App\Http\Controllers\Pengurus\BookingMonitorController;
 use App\Http\Controllers\Pengurus\DocumentController;
 use App\Http\Controllers\Pengurus\EventController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Pegawai\ReturnController;
 use App\Http\Controllers\Pegawai\SearchController;
 use App\Http\Controllers\Pengurus\ComplaintController;
 use App\Http\Controllers\Pengurus\MaintenanceController;
+use App\Http\Controllers\Pengurus\RealisasiBulananController;
 use App\Http\Controllers\Pengurus\ReplacementController;
 use App\Http\Controllers\Pengurus\ReportController;
 use App\Http\Controllers\Pengurus\VehicleController;
@@ -119,6 +121,12 @@ Route::middleware(['auth', 'role:admin|pengurus'])
         // ikut dibuka untuk admin agar tidak mati)
         Route::get('/vehicles/{vehicle}/budgets', [BudgetController::class, 'edit'])->name('budgets.edit');
         Route::put('/vehicles/{vehicle}/budgets', [BudgetController::class, 'update'])->name('budgets.update');
+
+        // Anggaran terpusat (semua kendaraan) — skema baru UAT 04
+        Route::get('/anggaran', [BudgetOverviewController::class, 'index'])->name('anggaran.index');
+
+        // Realisasi bulanan + rincian — skema baru UAT 04
+        Route::get('/realisasi-bulanan', [RealisasiBulananController::class, 'index'])->name('realisasi-bulanan.index');
 
         // Dokumen hasil generate
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');

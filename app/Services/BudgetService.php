@@ -12,11 +12,20 @@ use Illuminate\Support\Collection;
  * Anggaran maintenance 4 pos + input nota (docs/feature/anggaran_maintenance.md).
  *
  * Pos: servis, suku_cadang, ac, pelumas.
- * Realisasi = nilai nota × KOEFISIEN PAJAK 1,13.
+ * Realisasi = nilai nota × koefisien pajak (dapat diatur admin via
+ * Pengaturan Aplikasi — skema baru UAT 04; nota lama menyimpan
+ * koefisien saat input di kolom koefisien_used).
  */
 class BudgetService
 {
-    public const KOEFISIEN_PAJAK = 1.13;
+    /**
+     * Koefisien pajak — TIDAK LAGI konstanta 1.13. Dibaca dinamis
+     * dari AppSettings. Nota lama tetap pakai koefisien saat input.
+     */
+    public static function koefisienPajak(): float
+    {
+        return \App\Support\AppSettings::koefisienPajak();
+    }
 
     /**
      * Simpan total anggaran 4 pos untuk satu mobil & tahun anggaran (upsert).
@@ -79,10 +88,11 @@ class BudgetService
     }
 
     /**
-     * Input nota bengkel: identitas nota + rincian nilai per pos.
-     * Nilai ×1,13 = realisasi. Maintenance otomatis berstatus selesai.
+     * Input nota bengkel: identitas nota + rincian nilai per pos
+     * + rincian baris (description + amount, opsional — skema baru UAT 04).
+     * Nilai × koefisien dinamis = realisasi. Maintenance otomatis selesai.
      *
-     * @param  array{workshop_name?: string, nota_number?: ?string, nota_date?: ?string, costs?: array<string, numeric>}  $data
+     * @param  array{workshop_name?: string, nota_number?: ?string, nota_date?: ?string, costs?: array<string, numeric>, details?: array<string, array<int, array{description?: string, amount?: numeric}>>}  $data
      * @return array<string, MaintenanceCost> pos => cost tersimpan
      */
     public function inputNota(Maintenance $maintenance, array $data): array
@@ -97,7 +107,9 @@ class BudgetService
         }
         $maintenance->update($payload);
 
+        $koefisien = self::koefisienPajak();
         $saved = [];
+
         foreach (VehicleBudget::POSTS as $post) {
             $raw = (float) ($data['costs'][$post] ?? 0);
 
@@ -105,10 +117,26 @@ class BudgetService
                 ['maintenance_id' => $maintenance->id, 'post' => $post],
                 [
                     'raw_amount' => $raw,
-                    // Koefisien pajak 1,13 — dibulatkan 2 desimal
-                    'taxed_amount' => round($raw * self::KOEFISIEN_PAJAK, 2),
+                    'taxed_amount' => round($raw * $koefisien, 2),
+                    'koefisien_used' => $koefisien,
                 ],
             );
+
+            // Rincian baris per pos (replace: hapus lama, buat baru)
+            $saved[$post]->details()->delete();
+
+            $details = $data['details'][$post] ?? [];
+            foreach ($details as $detail) {
+                $desc = trim((string) ($detail['description'] ?? ''));
+                $amount = (float) ($detail['amount'] ?? 0);
+
+                if ($desc !== '' || $amount > 0) {
+                    $saved[$post]->details()->create([
+                        'description' => $desc !== '' ? $desc : '(tanpa deskripsi)',
+                        'amount' => $amount,
+                    ]);
+                }
+            }
         }
 
         return $saved;
