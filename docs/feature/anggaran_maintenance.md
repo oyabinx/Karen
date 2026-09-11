@@ -37,23 +37,25 @@ Alur: keluhan pengembalian muncul di dashboard pengurus → pengurus menjadwalka
 - **Atribusi tahun realisasi**: realisasi dihitung per tahun berdasarkan **tahun tanggal nota** (fallback: tahun tanggal mulai maintenance bila nota tanpa tanggal) — menentukan anggaran tahun mana yang dikurangi.
 - Input nota bersifat **upsert**: identitas nota (bengkel/nomor/tanggal) yang tidak dikirim mempertahankan nilai lama; revisi rincian **mengganti** seluruh baris rincian lama — revisi nilai tidak menghapus identitas yang sudah tersimpan.
 
-### 4. Generate Dokumen
-Setelah input nota disimpan, sistem menggenerate (PDF, via library dompdf). **Master draft dokumen dikelola satu sistem di Karen** — folder `resources/draft_documents/` di dalam project berisi template draft (bend26, draft nota, kartu inventaris pemeliharaan kendaraan) yang dipakai `DocumentService` sebagai dasar generate; hasil generate tersimpan di `storage/app/documents/`. (Google Drive **tidak** dipakai sebagai tempat draft master — Google hanya untuk sinkronisasi data anggaran via Sheets API; arsip sekunder ke Drive dapat ditambahkan kemudian tanpa mengubah alur ini.)
+### 4. Generate Dokumen *(rev UAT 04-2)*
+PDF via dompdf. **Master draft dikelola satu sistem di Karen** — folder `resources/draft_documents/` berisi template (bend26, draft nota, kartu pemeliharaan) yang dipakai `DocumentService`; hasil generate tersimpan di `storage/app/private/documents/`. (Google hanya untuk sinkronisasi Sheets; arsip sekunder Drive opsional.)
 
 Dokumen yang digenerate:
 
-1. **Bukti Pengeluaran Bendahara (lembar bend26)** — berisi rincian 4 pos (nilai asli, pajak sesuai koefisien, nilai akhir), total, identitas mobil, nama bengkel, nomor maintenance, dan tanggal.
-2. **Draft nota per pos** (maksimal 4 file) — tiap pos menjadi satu draft nota yang akan dibuat ulang oleh bengkel sesuai rincian tersebut; draft memuat rincian baris (deskripsi + nominal) bila tersedia.
-3. **Kartu Inventaris Pemeliharaan Kendaraan** — rekap riwayat per mobil: seluruh maintenance (tanggal, keluhan asal, bengkel, rincian 4 pos × koefisien), akumulasi realisasi per pos vs anggaran, dan sisa anggaran. Digenerate per kendaraan kapan pun oleh pengurus.
+1. **bend26 (BUKTI KAS PENGELUARAN) — BULANAN per pos** *(rev UAT 04-B6, format dari file contoh docs/Bend26/)*:
+   - Digenerate **on demand** dari menu **Realisasi Bulanan** (tombol "Generate Bend26 {bulan}" untuk semua pos, atau "Bend26 pos ini" per pos) — **tidak lagi otomatis saat input nota**.
+   - Isi = agregasi seluruh nota bulan tsb per pos (4 jenis: Servis, Suku Cadang, Pelumas, Servis AC): Terima dari, Uang sebesar + terbilang, "Yaitu untuk pembayaran: Belanja {pos} ... {daftar plat mobil}", Terbilang + kota/bulan, 3 kolom tanda tangan (Pengguna Anggaran / Bendahara Pengeluaran / Yang menerima), strip bawah (Barang diterima PPTK | Telah dipungut PPN/PPh/Jml | Telah dibukukan No. Rek/Kode Kegiatan/TA).
+   - **PPN/PPh** dihitung seperti contoh: `DPP = total / (1 + PPN%)`, `PPN = DPP × 11%` (default), `PPh = DPP × tarif pos` (servis & AC 2%, suku cadang & pelumas 1,5%) — dibulatkan rupiah utuh.
+   - **Identitas bend26 dikonfigurasi admin** (Pengaturan Aplikasi → seksi lanjutan): nama instansi, kota, 4 pejabat+NIP, kode kegiatan, No. Rek & tarif PPh per pos. Default dari file contoh.
+2. **Draft nota per pos** (per maintenance, otomatis saat simpan/edit nota) — **satu baris per rincian** (deskripsi + nominal asli) + **jumlah total pos** (nilai asli nota, sesuai contoh: 450.000 + 300.000 → total 750.000).
+3. **Kartu Pemeliharaan Kendaraan** *(eks Kartu Inventaris — rev UAT 04-B10)* — judul center: "Kartu Pemeliharaan Kendaraan / Tahun Anggaran {tahun} / {nama kendaraan} / {plat}"; tabel **Nomor | Tanggal | Jenis Perbaikan | Rincian Pemeliharaan (satu cell: baris rincian + bengkel) | Biaya (setelah koefisien)** per maintenance per pos. Digenerate dari **menu Laporan** (pilih mobil + tahun).
 
-Rumus per pos: `jumlah_rincian_pos × koefisien_pajak = nilai_bend26_pos`; total bend26 = jumlah keempatnya.
-
-Dokumen tersimpan di server dan bisa diunduh ulang kapan pun; bila nota direvisi, dokumen di-generate ulang (versi lama diarsipkan).
+**Timpa di tempat** *(rev UAT 04-B4/B11 — menggantikan skema versi v1/v2/arsip)*: dokumen dengan kunci sama (type + maintenance/vehicle/period + pos) **ditimpa isi terbarunya pada file & record yang sama** — tidak ada versi baru. Kolom `regenerated_at` menandai dokumen pernah diperbarui; menu Dokumen menampilkan badge **"Diperbarui {tgl jam}"**. Endpoint regenerate lama dihapus; tombol kartu berubah "Input Nota" → **"Edit Nota"** setelah nota tersimpan.
 
 ### 4b. Menu Anggaran Terpusat & Realisasi Bulanan *(skema baru UAT 04)*
-- **Menu "Anggaran" (terpusat)**: ringkasan seluruh armada per tahun anggaran (pemilih tahun) — anggaran vs realisasi vs sisa per pos tiap mobil, dengan pintasan atur anggaran per mobil dan generate kartu inventaris. Nota juga dapat diinput dari sini (tautan ke form nota maintenance selesai yang belum punya nota).
+- **Menu "Anggaran" (terpusat)**: ringkasan seluruh armada per tahun anggaran (pemilih tahun) — anggaran vs realisasi vs sisa per pos tiap mobil, dengan pintasan atur anggaran per mobil. Nota juga dapat diinput dari sini (tautan ke form nota maintenance selesai yang belum punya nota).
 - **Menu "Realisasi Bulanan"** — tampilan **dua level** *(rev UAT 04)*:
-  - **Level 1 (default): daftar mobil** yang punya realisasi (maintenance ber-nota) pada bulan terpilih — tiap kartu menampilkan nama, plat, jumlah maintenance, total realisasi (termasuk pajak), dan chip per pos bernilai; pemilih bulan 12 bulan terakhir.
+  - **Level 1 (default): daftar mobil** yang punya realisasi (maintenance ber-nota) pada bulan terpilih — **urut maintenance terbaru di atas** *(rev UAT 04-D1)*; tiap kartu menampilkan nama, plat, jumlah maintenance, total realisasi (termasuk pajak), dan chip per pos bernilai; pemilih bulan 12 bulan terakhir; tombol **Generate Bend26** bulan terpilih.
   - **Level 2 (klik mobil)**: rincian per pos — subtotal sebelum pajak, total setelah koefisien, daftar nota per pos (bengkel, tanggal, nomor) dengan **rincian baris expandable** (deskripsi + nominal).
   - Ringkasan 4 pos seluruh armada (realisasi vs anggaran vs sisa) tetap tampil di atas pada kedua level.
   - **Ekspor CSV** (per bulan, mengikuti filter mobil bila ada): kolom tanggal, mobil, plat, bengkel, nota, pos, rincian, nilai, koefisien, total.
@@ -75,20 +77,20 @@ Sistem berjalan di **intranet tanpa akses inbound dari internet**, sehingga Goog
 - `maintenances` tambah: `status` ENUM('terjadwal','selesai'), `workshop_name`, `nota_number`, `nota_date`.
 - `maintenance_costs`: `maintenance_id`, `post`, `raw_amount` (auto-sum rincian), `taxed_amount` (raw × koefisien), `koefisien_used DECIMAL(4,2)` (koefisien saat input) — UNIQUE(maintenance_id, post).
 - `maintenance_cost_details` *(skema baru UAT 04)*: `maintenance_cost_id`, `description` VARCHAR(255), `amount DECIMAL(12,2)` — baris rincian nota per pos.
-- `generated_documents`: `maintenance_id` NULL (untuk kartu inventaris, diikat `vehicle_id`), `vehicle_id` NULL, `type` ENUM('bend26','draft_nota','kartu_inventaris'), `post` NULL (untuk draft_nota), `file_path`, `version`.
-- `integration_settings`: key `koefisien_pajak` (rentang 1,00–2,00, default 1,13) — diatur admin via Pengaturan Aplikasi.
+- `generated_documents` *(rev UAT 04-2)*: `type` ENUM('bend26','draft_nota','kartu_pemeliharaan'); tambah `period` VARCHAR(7) NULL (YYYY-MM — bend26 bulanan) dan `regenerated_at` TIMESTAMP NULL (dokumen ditimpa); `version` tetap 1 (tidak ada lagi v2/arsip); bend26 bulanan tidak terikat maintenance/vehicle (agregat armada).
+- `integration_settings`: key `koefisien_pajak` (1,00–2,00, default 1,13) dan `bend26_identity` (JSON: instansi, kota, pejabat+NIP, kode kegiatan, PPN%, PPh% & No. Rek per pos) — diatur admin via Pengaturan Aplikasi (satu tombol Simpan Pengaturan).
 
 ## Endpoint
 | Method | Path | Keterangan |
 |--------|------|------------|
 | GET | `/pengurus/anggaran` | Menu anggaran terpusat seluruh armada (pemilih tahun) |
 | GET/PUT | `/pengurus/vehicles/{vehicle}/budgets` | Lihat/atur total anggaran 4 pos per mobil |
-| GET | `/pengurus/realisasi-bulanan` | Realisasi bulanan: level 1 list mobil; `?vehicle=X` level 2 rincian; `&export=1` CSV |
+| GET | `/pengurus/realisasi-bulanan` | Realisasi bulanan: level 1 list mobil (terbaru di atas); `?vehicle=X` level 2 rincian; `&export=1` CSV |
+| POST | `/pengurus/documents/bend26-bulanan` | Generate bend26 bulanan (month=YYYY-MM, post opsional) |
+| POST | `/pengurus/vehicles/{vehicle}/generate-kartu-pemeliharaan` | Generate kartu pemeliharaan (tombol di menu Laporan) |
 | POST | `/pengurus/maintenances` | Jadwalkan maintenance (dari keluhan) |
 | PATCH | `/pengurus/maintenances/{m}/finish` | Tandai perawatan selesai |
-| GET/PUT | `/pengurus/maintenances/{m}/costs` | Form input nota (rincian baris per 4 pos) |
-| POST | `/pengurus/maintenances/{m}/generate` | Generate bend26 + draft nota per pos |
-| POST | `/pengurus/vehicles/{vehicle}/generate-kartu-inventaris` | Generate kartu inventaris pemeliharaan kendaraan |
+| GET/PUT | `/pengurus/maintenances/{m}/costs` | Form input/edit nota (rincian baris per 4 pos) — tombol kartu berubah "Edit Nota" setelah tersimpan |
 | GET | `/pengurus/documents/{doc}/download` | Unduh dokumen |
 | (task) | `budgets:sync-sheets` | Sinkron Google Sheets (interval via UI admin, default 15 menit) |
 
@@ -125,12 +127,13 @@ Sistem berjalan di **intranet tanpa akses inbound dari internet**, sehingga Goog
 
 ## Skenario Uji
 1. Set anggaran 4 pos untuk mobil 2020 → beda dengan mobil 2015.
-2. Keluhan → jadwalkan maintenance → tandai selesai → input nota: servis 2 rincian (300.000 + 200.000), pelumas 1 rincian 300.000.
+2. Keluhan → jadwalkan maintenance → tandai selesai → input nota: servis 2 rincian (300.000 + 200.000), pelumas 1 rincian 300.000; nominal tampil berpemisah ribuan live; tombol kartu berubah "Edit Nota".
 3. Total otomatis: servis 500.000 → realisasi 565.000; pelumas 300.000 → 339.000 (×1,13) — tanpa menginput total manual.
-4. Generate → bend26 menampilkan 565.000 + 339.000, total 904.000; tersimpan & bisa diunduh.
-5. Draft nota terbit hanya untuk pos bernilai > 0 (2 dari 4) dan memuat rincian baris.
-6. Realisasi Bulanan: bulan nota → list mobil → klik → rincian per pos + expandable rincian baris; ekspor CSV sesuai filter.
-7. Admin ubah koefisien ke 1,15 → nota baru memakai 1,15; nota lama tetap 1,13 (koefisien_used).
-8. Generate kartu inventaris mobil → memuat seluruh riwayat maintenance + akumulasi per pos vs anggaran.
-9. Realisasi melebihi anggaran → badge peringatan merah di sisa anggaran.
-10. Ubah anggaran di Google Sheets → task `budgets:sync-sheets` menarik perubahan ke Karen dalam ≤ 15 menit.
+4. Draft nota otomatis per pos bernilai (2 dari 4), memuat baris rincian + jumlah total.
+5. Edit nota → draft nota DITIMPA (jumlah record tetap) + badge "Diperbarui" di menu Dokumen.
+6. Realisasi Bulanan (bulan nota) → list mobil terbaru di atas → klik → rincian per pos + expandable; tombol Generate Bend26 → 1 PDF per pos bernilai (kolom period terisi) → regenerasi bulan sama = timpa, bukan dobel.
+7. bend26: terbilang sesuai total; PPN = DPP×11%, PPh sesuai tarif pos, Jml = PPN+PPh; identitas pejabat sesuai Pengaturan Aplikasi.
+8. Admin ubah koefisien ke 1,15 → nota baru memakai 1,15; nota lama tetap 1,13 (koefisien_used).
+9. Laporan → pilih mobil + tahun → Kartu Pemeliharaan: judul center, baris per pos per maintenance, rincian satu cell, biaya setelah koefisien.
+10. Realisasi melebihi anggaran → badge peringatan merah di sisa anggaran.
+11. Ubah anggaran di Google Sheets → task `budgets:sync-sheets` menarik perubahan ke Karen dalam ≤ 15 menit.

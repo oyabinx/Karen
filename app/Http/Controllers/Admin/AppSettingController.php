@@ -23,6 +23,7 @@ class AppSettingController extends Controller
             'koefisienPajak' => AppSettings::koefisienPajak(),
             'koefMin' => AppSettings::MIN_KOEFISIEN_PAJAK,
             'koefMax' => AppSettings::MAX_KOEFISIEN_PAJAK,
+            'bend26' => AppSettings::bend26Identity(),
         ]);
     }
 
@@ -39,6 +40,19 @@ class AppSettingController extends Controller
                 'min:'.AppSettings::MIN_KOEFISIEN_PAJAK,
                 'max:'.AppSettings::MAX_KOEFISIEN_PAJAK,
             ],
+            // Identitas bend26 — opsional; default dipertahankan bila kosong
+            'b26' => ['nullable', 'array'],
+            'b26.terima_dari' => ['nullable', 'string', 'max:150'],
+            'b26.kota' => ['nullable', 'string', 'max:50'],
+            'b26.kode_kegiatan' => ['nullable', 'string', 'max:50'],
+            'b26.ppn_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'b26.pejabat' => ['nullable', 'array'],
+            'b26.pejabat.*.nama' => ['nullable', 'string', 'max:100'],
+            'b26.pejabat.*.nip' => ['nullable', 'string', 'max:40'],
+            'b26.no_rek' => ['nullable', 'array'],
+            'b26.no_rek.*' => ['nullable', 'string', 'max:40'],
+            'b26.pph_percent' => ['nullable', 'array'],
+            'b26.pph_percent.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ], [
             'max_booking_days.min' => 'Durasi minimal :min hari.',
             'max_booking_days.max' => 'Durasi maksimal :max hari.',
@@ -49,6 +63,13 @@ class AppSettingController extends Controller
         AppSettings::set(AppSettings::KEY_MAX_BOOKING_DAYS, (string) $validated['max_booking_days']);
         AppSettings::set(AppSettings::KEY_KOEFISIEN_PAJAK, (string) $validated['koefisien_pajak']);
 
-        return back()->with('success', "Pengaturan disimpan — durasi maksimal {$validated['max_booking_days']} hari, koefisien pajak ×{$validated['koefisien_pajak']} (hanya untuk nota baru).");
+        if (array_key_exists('b26', $validated)) {
+            // Gabungkan dengan nilai tersimpan/default agar field kosong
+            // tidak menghapus identitas lain
+            $identity = array_replace_recursive(AppSettings::bend26Identity(), $validated['b26']);
+            AppSettings::setBend26Identity($identity);
+        }
+
+        return back()->with('success', "Pengaturan disimpan — durasi maksimal {$validated['max_booking_days']} hari, koefisien pajak ×{$validated['koefisien_pajak']} (hanya untuk nota baru)".(array_key_exists('b26', $validated) ? ', identitas bend26 diperbarui' : '').'.');
     }
 }

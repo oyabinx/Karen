@@ -13,16 +13,17 @@ class GeneratedDocument extends Model
 
     public const TYPE_BEND26 = 'bend26';
     public const TYPE_DRAFT_NOTA = 'draft_nota';
-    public const TYPE_KARTU_INVENTARIS = 'kartu_inventaris';
+    public const TYPE_KARTU_PEMELIHARAAN = 'kartu_pemeliharaan';
 
     protected $fillable = [
-        'maintenance_id', 'vehicle_id', 'type', 'post', 'file_path', 'version',
+        'maintenance_id', 'vehicle_id', 'type', 'post', 'period', 'file_path', 'version', 'regenerated_at',
     ];
 
     protected function casts(): array
     {
         return [
             'version' => 'integer',
+            'regenerated_at' => 'datetime',
         ];
     }
 

@@ -18,6 +18,11 @@ Monitoring dan laporan seluruh peminjaman kendaraan untuk pengurus: peminjaman b
   - **realisasi anggaran maintenance per pos** (servis, suku cadang, AC, pelumas): anggaran vs realisasi (× koefisien pajak) vs sisa per mobil — sumber data [anggaran_maintenance.md](anggaran_maintenance.md).
 - **Export CSV/Excel** sesuai filter aktif.
 
+### Kartu Pemeliharaan Kendaraan *(rev UAT 04-B10)*
+- Tombol **Generate Kartu Pemeliharaan** ada di menu Laporan (pilih mobil + tahun anggaran, default tahun berjalan) — satu-satunya lokasi generate (dihapus dari menu Dokumen & halaman anggaran kendaraan).
+- PDF: judul center "Kartu Pemeliharaan Kendaraan / Tahun Anggaran {tahun} / {nama kendaraan} / {plat}"; tabel **Nomor | Tanggal | Jenis Perbaikan (Servis/Suku Cadang/Pelumas/Servis AC) | Rincian Pemeliharaan (satu cell: baris rincian + bengkel) | Biaya (setelah koefisien)** — satu baris per maintenance per pos; maintenance terbaru di atas.
+- Regenerasi mobil+tahun sama → dokumen ditimpa di tempat + badge Diperbarui.
+
 ### Keluhan
 - Daftar keluhan (dari form pengembalian): mobil, pelapor, isi, tanggal, status `resolved`.
 - Tombol "Tandai Selesai" setelah ditindaklanjuti (tidak otomatis mengubah kondisi mobil — kondisi diatur di manajemen kendaraan).

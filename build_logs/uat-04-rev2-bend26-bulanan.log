@@ -1,0 +1,94 @@
+╔══════════════════════════════════════════════════════════════════╗
+║  KAREN — UAT 04 REV-2: BEND26 BULANAN + EDIT NOTA + TIMPA DOKUMEN ║
+║          + KARTU PEMELIHARAAN + UI (239 TEST HIJAU)               ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal : 2026-09-11
+  Status  : ✅ 239/239 test HIJAU (+1) — diverifikasi browser & PDF
+
+────────────────────────────────────────────────────────────────────
+ SUMBER REVISI (UAT/04 ulangan user + file contoh docs/Bend26/)
+────────────────────────────────────────────────────────────────────
+ B3  format ribuan field uang · B4 alur Edit Nota + urutan terbaru
+ B6  bend26 4 jenis format user · B7 draft nota rinci
+ B9  satu entrian per maintenance · B10 kartu pemeliharaan → Laporan
+ B11 hapus skema versi · B12 padding mobile · D1 realisasi desc
+ D2/E2 satu tombol simpan pengaturan
+
+ TEMUAN FILE CONTOH: bend26 kantor = BKPN agregat BULANAN per pos
+ (multi-mobil, "Bulan Juni 2026"); PPN = DPP×11% (DPP=total/1,11 ✓
+ cek matematis), PPh 2% (jasa) / 1,5% (barang); No. Rek per pos;
+ nama pejabat+NIP tetap. File "Servis AC.pdf" = lembar SPJ (padanan
+ rincian Karen). File "Pelumas"↔"Suku Cadang" tertukar label (isi).
+
+────────────────────────────────────────────────────────────────────
+ A — INPUT/EDIT NOTA + URUTAN
+────────────────────────────────────────────────────────────────────
+ • Kartu maintenance: tombol Input Nota → EDIT NOTA (oranye) bila
+   nota sudah ada (cost raw>0); controller orderByDesc start+id
+   (terbaru di atas, kedua tab); pesan sukses beda mode input/edit.
+
+────────────────────────────────────────────────────────────────────
+ B — TIMPA DI TEMPAT (ganti skema v1/v2 arsip)
+────────────────────────────────────────────────────────────────────
+ • Migrasi: generated_documents + regenerated_at + period; enum
+   kartu_inventaris → kartu_pemeliharaan.
+ • DocumentService::store(): kunci sama → file & record DITIMPA;
+   regenerated_at diisi; endpoint regenerate DIHAPUS.
+ • Menu Dokumen: badge "Diperbarui {tgl jam}" + periode bend26.
+
+────────────────────────────────────────────────────────────────────
+ C — BEND26 BULANAN 4 JENIS (format file contoh, PDF)
+────────────────────────────────────────────────────────────────────
+ • bend26Bulanan(year, month, ?pos): agregasi nota bulan tsb per
+   pos; period YYYY-MM; generate ON DEMAND dari Realisasi Bulanan
+   (tombol header semua pos + per-pos di drill-down).
+ • Template BKPN: judul center, Terima dari, Uang sebesar + terbilang
+   (NumberFormatter id_ID, rupiah utuh — fix desimal ikut dieja),
+   Yaitu untuk pembayaran (label pos + daftar plat + Sub Kegiatan +
+   Kegiatan + Bulan + Nota terlampir), kota+bulan kanan-atas (fix
+   wrap 3 baris → baris sendiri), 3 kolom ttd pejabat+NIP, strip
+   bawah bergaris (PPTK | PPN/PPh/Jml — fix pembulatan konsisten |
+   No. Rek/Kode Kegiatan/TA).
+ • Bend26Identity: defaults dari contoh + pajak() + terbilang();
+   identitas dikonfigurasi admin (Pengaturan Aplikasi → seksi
+   lanjutan; JSON via AppSettings) — No. Rek pelumas/AC kosong
+   (tidak ada di contoh, diisi admin).
+ • Simpan nota TIDAK lagi membuat bend26 (hanya draft nota).
+
+────────────────────────────────────────────────────────────────────
+ D/E — DRAFT NOTA RINCI + KARTU PEMELIHARAAN
+────────────────────────────────────────────────────────────────────
+ • Draft nota: 1 baris per rincian (deskripsi + nominal asli) +
+   footer JUMLAH total asli pos (contoh user: 450.000+300.000 →
+   750.000).
+ • Kartu Pemeliharaan Kendaraan (rename): judul center 4 baris;
+   tabel Nomor|Tanggal|Jenis Perbaikan|Rincian (satu cell)|Biaya
+   (setelah koefisien); terbaru di atas; tombol generate HANYA di
+   menu Laporan (pilih mobil+tahun); dihapus dari Dokumen & anggaran.
+
+────────────────────────────────────────────────────────────────────
+ F — UI KECIL
+────────────────────────────────────────────────────────────────────
+ • B3 diverifikasi browser: ketik 1000000 → "1.000.000" live,
+   subtotal Rp 1.000.000, total Rp 1.130.000 — kode benar (user
+   kemungkinan menguji build lama); UAT diberi baris B3b.
+ • B12: padding bawah mobile pb-28 → pb-36; diverifikasi visual
+   viewport 390px (tombol simpan utuh di atas bar navigasi).
+ • D1: realisasi bulanan list mobil + nota drill-down descending.
+ • D2/E2: Pengaturan Aplikasi SATU tombol "Simpan Pengaturan" di
+   paling bawah (hapus "Simpan Semua" & tombol ganda).
+
+────────────────────────────────────────────────────────────────────
+ VERIFIKASI
+────────────────────────────────────────────────────────────────────
+ • php artisan test → 239 passed (880 assertions).
+ • Browser (login pengurus): form nota mobile & desktop OK; halaman
+   Realisasi Bulanan + tombol Generate Bend26; Laporan + form kartu;
+   Dokumen badge Diperbarui; 8 record bend26 lama dibersihkan.
+ • PDF dirender & diperiksa: bend26 servis Sep-2026 (terbilang
+   benar; PPN 182.838 + PPh 33.243 = Jml 216.081 konsisten),
+   draft nota rinci, kartu pemeliharaan 7 baris (m1 4 pos + m3
+   3 pos; biaya ×1,13 tepat).
+ • Docs + UAT/04 (baris verifikasi b) + TASKLIST-UAT04.md.
+ • Commit + push GitHub (oyabinx/Karen).

@@ -1,98 +1,135 @@
 @php($rp = fn ($v) => 'Rp '.number_format((float) $v, 0, ',', '.'))
+@php($bulanTahun = \Illuminate\Support\Carbon::create($year, $month, 1)->translatedFormat('F Y'))
+@php($pejabat = $identity['pejabat'] ?? [])
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Bukti Pengeluaran Bendahara (Bend26)</title>
+    <title>Bend26 — {{ $posLabel }} — {{ $bulanTahun }}</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111; }
-        .kop { text-align: center; border-bottom: 3px double #111; padding-bottom: 8px; margin-bottom: 14px; }
-        .kop h1 { font-size: 14px; margin: 0; letter-spacing: 1px; }
-        .kop p { margin: 2px 0; font-size: 10px; color: #333; }
-        h2.title { text-align: center; font-size: 13px; margin: 0 0 4px; text-decoration: underline; }
-        p.nomor { text-align: center; margin: 0 0 14px; font-size: 10px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #444; padding: 5px 7px; }
-        th { background: #eee; text-align: left; font-size: 10px; }
-        td.num, th.num { text-align: right; }
-        tfoot td { font-weight: bold; background: #f7f7f7; }
-        .info { margin-bottom: 12px; }
-        .info td { border: none; padding: 1px 4px 1px 0; font-size: 11px; }
-        .ttd { margin-top: 28px; width: 100%; }
-        .ttd td { border: none; text-align: center; vertical-align: top; font-size: 10px; width: 33%; }
-        .footer { position: fixed; bottom: 12px; left: 0; right: 0; text-align: center; font-size: 8px; color: #888; }
+        h1.title { text-align: center; font-size: 14px; text-decoration: underline; margin: 0 0 16px; }
+        table.form { width: 100%; border-collapse: collapse; }
+        table.form td { padding: 2px 4px; vertical-align: top; border: none; }
+        td.label { width: 165px; }
+        td.semicolon { width: 8px; }
+        .terbilang-row td { padding-top: 0; }
+        .ttd { margin-top: 18px; width: 100%; border-collapse: collapse; }
+        .ttd td { border: none; text-align: center; font-size: 11px; width: 33.33%; vertical-align: top; padding: 2px 6px; }
+        .ttd .space { height: 58px; }
+        .bawah { margin-top: 14px; width: 100%; border-collapse: collapse; }
+        .bawah td { border: 1px solid #444; vertical-align: top; font-size: 10.5px; padding: 6px 8px; }
+        .bawah .space { height: 46px; }
+        .footer { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 8px; color: #888; }
     </style>
 </head>
 <body>
-    <div class="kop">
-        <h1>BUKTI PENGELUARAN BENDAHARA (BEND26)</h1>
-        <p>Dihasilkan otomatis oleh sistem Karen — koefisien pajak {{ $koefisien }}</p>
-    </div>
+    <h1 class="title">BUKTI KAS PENGELUARAN</h1>
 
-    <h2 class="title">Kwitansi Belanja Maintenance Kendaraan</h2>
-    <p class="nomor">Maintenance #{{ $maintenance->id }} — Nota {{ $maintenance->nota_number ?? '-' }}</p>
-
-    <table class="info">
+    <table class="form">
         <tr>
-            <td width="18%"><strong>Kendaraan</strong></td>
-            <td width="32%">: {{ $vehicle->name }} ({{ $vehicle->plate_number }}), tahun {{ $vehicle->year }}</td>
-            <td width="18%"><strong>Bengkel</strong></td>
-            <td>: {{ $maintenance->workshop_name ?? '-' }}</td>
+            <td class="label">Terima dari</td>
+            <td class="semicolon">:</td>
+            <td>{{ $identity['terima_dari'] }}</td>
         </tr>
         <tr>
-            <td><strong>Perawatan</strong></td>
-            <td>: {{ $maintenance->start_date->translatedFormat('d/m/Y') }} s.d. {{ $maintenance->end_date->translatedFormat('d/m/Y') }}</td>
-            <td><strong>Tgl Nota</strong></td>
-            <td>: {{ optional($maintenance->nota_date)->translatedFormat('d/m/Y') ?? '-' }}</td>
+            <td class="label">Uang sebesar</td>
+            <td class="semicolon">:</td>
+            <td>{{ $rp($total) }}</td>
+        </tr>
+        <tr class="terbilang-row">
+            <td class="label" style="text-align:right">dengan huruf</td>
+            <td class="semicolon">:</td>
+            <td>{{ $terbilang }} rupiah</td>
         </tr>
         <tr>
-            <td><strong>Catatan</strong></td>
-            <td>: {{ $maintenance->note ?? '-' }}</td>
-            <td></td>
-            <td></td>
+            <td class="label">Yaitu untuk pembayaran</td>
+            <td class="semicolon">:</td>
+            <td>
+                {{ $posLabel }}<br>
+                {{ $vehicles->pluck('plate_number')->implode(', ') }}, Sub Kegiatan Penyediaan Jasa Pemeliharaan,
+                Biaya Pemeliharaan, Pajak dan Perizinan Kendaraan Dinas Operasional atau Lapangan, Kegiatan
+                Pemeliharaan Barang Milik Daerah Penunjang Urusan Pemerintahan Daerah.
+                Bulan {{ $bulanTahun }}, Nota terlampir
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Terbilang</td>
+            <td class="semicolon">:</td>
+            <td>{{ $rp($total) }}</td>
         </tr>
     </table>
 
-    <table>
-        <thead>
-            <tr>
-                <th width="6%">No</th>
-                <th>Pos Anggaran</th>
-                <th class="num">Nilai Nota</th>
-                <th class="num">Pajak (13%)</th>
-                <th class="num">Nilai × {{ $koefisien }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (\App\Models\VehicleBudget::POSTS as $i => $post)
-                @php($c = $costs->firstWhere('post', $post))
-                <tr>
-                    <td>{{ $i + 1 }}</td>
-                    <td>{{ strtoupper(str_replace('_', ' ', $post)) }}</td>
-                    <td class="num">{{ $rp($c->raw_amount ?? 0) }}</td>
-                    <td class="num">{{ $rp(($c->raw_amount ?? 0) * ($koefisien - 1)) }}</td>
-                    <td class="num">{{ $rp($c->taxed_amount ?? 0) }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="2">JUMLAH</td>
-                <td class="num">{{ $rp($totalRaw) }}</td>
-                <td class="num">{{ $rp($totalRaw * ($koefisien - 1)) }}</td>
-                <td class="num">{{ $rp($totalTaxed) }}</td>
-            </tr>
-        </tfoot>
-    </table>
+    <p style="text-align:right; margin: 6px 0 0">{{ $identity['kota'] }}, {{ $bulanTahun }}</p>
 
     <table class="ttd">
         <tr>
-            <td>Diterima,<div style="height:52px"></div>( ................ )</td>
-            <td>Bendahara Pengeluaran,<div style="height:52px"></div>( ................ )</td>
-            <td>Pengurus Kendaraan,<div style="height:52px"></div>( ................ )</td>
+            <td>Mengetahui dan menyetujui<br><br></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Pengguna Anggaran,</td>
+            <td>Bendahara Pengeluaran,</td>
+            <td>Yang menerima,</td>
+        </tr>
+        <tr>
+            <td><div class="space"></div></td>
+            <td><div class="space"></div></td>
+            <td><div class="space"></div></td>
+        </tr>
+        <tr>
+            <td>
+                <strong>{{ $pejabat['pengguna_anggaran']['nama'] ?? '' }}</strong><br>
+                NIP. {{ $pejabat['pengguna_anggaran']['nip'] ?? '' }}
+            </td>
+            <td>
+                <strong>{{ $pejabat['bendahara']['nama'] ?? '' }}</strong><br>
+                NIP. {{ $pejabat['bendahara']['nip'] ?? '' }}
+            </td>
+            <td>
+                @if (!empty($pejabat['penerima']['nama']))<strong>{{ $pejabat['penerima']['nama'] }}</strong><br>@endif
+                Alamat : {{ $pejabat['penerima']['nip'] ?? '' }}
+            </td>
         </tr>
     </table>
 
-    <div class="footer">Dokumen digenerate oleh Karen pada {{ now()->translatedFormat('d/m/Y H:i') }} — versi otomatis, tanda tangan basah dibubuhkan setelah cetak.</div>
+    <table class="bawah">
+        <tr>
+            <td style="text-align:center; font-weight:bold">Barang tersebut sudah diterima<br>dengan cukup dan baik</td>
+            <td style="text-align:center; font-weight:bold">Telah dipungut :</td>
+            <td style="text-align:center; font-weight:bold">Telah dibukukan :</td>
+        </tr>
+        <tr style="height:64px">
+            <td></td>
+            <td>
+                PPN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ number_format($pajak['ppn'], 0, ',', '.') }}<br>
+                PPh &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ number_format($pajak['pph'], 0, ',', '.') }} +<br>
+                Jml. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ number_format($pajak['jumlah'], 0, ',', '.') }}
+            </td>
+            <td>
+                BK. Tgl. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No.<br>
+                No. Rek. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $identity['no_rek'][$post] ?? '' }}<br>
+                Kode Kegiatan &nbsp;{{ $identity['kode_kegiatan'] ?? '' }}<br>
+                Tahun Anggaran : {{ $year }}
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align:center">
+                <strong>{{ $pejabat['pptk']['nama'] ?? '' }}</strong><br>
+                NIP. {{ $pejabat['pptk']['nip'] ?? '' }}
+            </td>
+            <td style="text-align:center">
+                <strong>{{ $pejabat['bendahara']['nama'] ?? '' }}</strong><br>
+                NIP. {{ $pejabat['bendahara']['nip'] ?? '' }}
+            </td>
+            <td style="text-align:center">
+                <strong>{{ $pejabat['bendahara']['nama'] ?? '' }}</strong><br>
+                NIP. {{ $pejabat['bendahara']['nip'] ?? '' }}
+            </td>
+        </tr>
+    </table>
+
+    <div class="footer">Bend26 bulanan digenerate oleh Karen pada {{ now()->translatedFormat('d/m/Y H:i') }} — total = akumulasi realisasi pos {{ strtolower(str_replace('_', ' ', $post)) }} bulan {{ $bulanTahun }} (termasuk koefisien pajak).</div>
 </body>
 </html>

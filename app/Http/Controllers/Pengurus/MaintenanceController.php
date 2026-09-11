@@ -31,10 +31,12 @@ class MaintenanceController extends Controller
 
     public function index(Request $request): View
     {
-        $maintenances = Maintenance::with('vehicle')
+        // Terbaru di atas (UAT 04-B4) + costs untuk label tombol Input/Edit Nota
+        $maintenances = Maintenance::with(['vehicle', 'costs'])
             ->when($request->status === 'selesai', fn ($q) => $q->where('status', 'selesai'))
             ->when(! $request->filled('status') || $request->status === 'terjadwal', fn ($q) => $q->where('status', 'terjadwal'))
-            ->orderBy('start_date')
+            ->orderByDesc('start_date')
+            ->orderByDesc('id')
             ->get();
 
         return view('pengurus.maintenances.index', [
@@ -125,10 +127,15 @@ class MaintenanceController extends Controller
     /**
      * Simpan nota: rincian per baris dijumlah otomatis per pos,
      * dikalikan koefisien pajak; maintenance berstatus selesai;
-     * bend26 + draft nota per pos digenerate.
+     * draft nota per pos digenerate (timpa di tempat bila revisi —
+     * bend26 kini dokumen BULANAN, digenerate terpisah dari
+     * Realisasi Bulanan, UAT 04 rev-2).
      */
     public function inputNota(NotaRequest $request, Maintenance $maintenance): RedirectResponse
     {
+        // Sudah ada nota sebelumnya? → mode EDIT (dokumen ditimpa, bukan versi baru)
+        $modeEdit = $maintenance->costs()->where('raw_amount', '>', 0)->exists();
+
         $this->budgets->inputNota($maintenance, [
             'workshop_name' => $request->input('workshop_name'),
             'nota_number' => $request->input('nota_number'),
@@ -139,20 +146,14 @@ class MaintenanceController extends Controller
 
         $documents = $this->documents->generateForMaintenance($maintenance->refresh());
 
-        $nota = collect($documents)->filter(fn ($d) => $d->type === 'draft_nota')->count();
+        $nota = count($documents);
+
+        $pesan = $modeEdit
+            ? "Nota diperbarui — {$nota} draft nota ditimpa dengan nilai terbaru (lihat badge Diperbarui di menu Dokumen)."
+            : "Nota tersimpan (total dari rincian, dikalikan koefisien pajak). {$nota} draft nota digenerate — lihat menu Dokumen. bend26 dibuat bulanan dari menu Realisasi Bulanan.";
 
         return redirect()
             ->route('pengurus.maintenances.index', ['status' => 'selesai'])
-            ->with('success', 'Nota tersimpan (total dari rincian, dikalikan koefisien pajak). bend26 + '.$nota.' draft nota digenerate — lihat menu Dokumen.');
-    }
-
-    /**
-     * Generate ulang dokumen (bila nota direvisi — versi lama diarsipkan).
-     */
-    public function generate(Maintenance $maintenance): RedirectResponse
-    {
-        $documents = $this->documents->generateForMaintenance($maintenance->load('costs'));
-
-        return back()->with('success', count($documents).' dokumen digenerate ulang (versi baru).');
+            ->with('success', $pesan);
     }
 }

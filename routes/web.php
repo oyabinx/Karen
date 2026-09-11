@@ -106,10 +106,9 @@ Route::middleware(['auth', 'role:admin|pengurus'])
         Route::patch('/maintenances/{maintenance}/finish', [MaintenanceController::class, 'finish'])->name('maintenances.finish');
         Route::delete('/maintenances/{maintenance}', [MaintenanceController::class, 'destroy'])->name('maintenances.destroy');
 
-        // Input nota bengkel (4 pos × 1,13) + generate dokumen
+        // Input nota bengkel: rincian baris per pos → total otomatis × koefisien
         Route::get('/maintenances/{maintenance}/costs', [MaintenanceController::class, 'costs'])->name('maintenances.costs');
         Route::put('/maintenances/{maintenance}/costs', [MaintenanceController::class, 'inputNota'])->name('maintenances.nota');
-        Route::post('/maintenances/{maintenance}/generate', [MaintenanceController::class, 'generate'])->name('maintenances.generate');
 
         Route::get('/replacements', [ReplacementController::class, 'index'])->name('replacements.index');
         Route::get('/replacements/{booking}', [ReplacementController::class, 'show'])->name('replacements.show');
@@ -128,10 +127,11 @@ Route::middleware(['auth', 'role:admin|pengurus'])
         // Realisasi bulanan + rincian — skema baru UAT 04
         Route::get('/realisasi-bulanan', [RealisasiBulananController::class, 'index'])->name('realisasi-bulanan.index');
 
-        // Dokumen hasil generate
+        // Dokumen hasil generate (bend26 bulanan, draft nota, kartu pemeliharaan)
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
-        Route::post('/vehicles/{vehicle}/generate-kartu-inventaris', [DocumentController::class, 'kartuInventaris'])->name('documents.kartu');
+        Route::post('/documents/bend26-bulanan', [DocumentController::class, 'bend26Bulanan'])->name('documents.bend26');
+        Route::post('/vehicles/{vehicle}/generate-kartu-pemeliharaan', [DocumentController::class, 'kartuPemeliharaan'])->name('documents.kartu');
     });
 
 // ── PENGURUS + ADMIN: keluhan unit, monitoring & laporan ──

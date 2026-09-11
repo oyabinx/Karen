@@ -34,10 +34,14 @@ class RealisasiBulananController extends Controller
             ->orderBy('maintenance_id')
             ->get();
 
-        // LEVEL 1: group by vehicle
+        // LEVEL 1: group by vehicle — maintenance TERBARU di atas (UAT 04-D1)
         $perVehicle = $costs->groupBy(fn ($c) => $c->maintenance->vehicle_id)->map(function ($group) {
             $perPost = collect(VehicleBudget::POSTS)->mapWithKeys(function ($post) use ($group) {
-                $postCosts = $group->where('post', $post)->values();
+                // Nota terbaru dulu dalam tiap pos
+                $postCosts = $group->where('post', $post)
+                    ->sortByDesc(fn ($c) => optional($c->maintenance->nota_date ?? $c->maintenance->start_date)->timestamp)
+                    ->values();
+
                 return [$post => [
                     'raw' => $postCosts->sum('raw_amount'),
                     'taxed' => $postCosts->sum('taxed_amount'),
@@ -51,8 +55,9 @@ class RealisasiBulananController extends Controller
                 'totalTaxed' => $group->sum('taxed_amount'),
                 'perPost' => $perPost,
                 'maintenanceCount' => $group->groupBy('maintenance_id')->count(),
+                'lastDate' => $group->max(fn ($c) => optional($c->maintenance->nota_date ?? $c->maintenance->start_date)->timestamp),
             ];
-        })->values();
+        })->sortByDesc('lastDate')->values();
 
         // Ringkasan 4 pos (seluruh armada)
         $ringkasan = collect(VehicleBudget::POSTS)->mapWithKeys(function ($post) use ($costs, $awal) {

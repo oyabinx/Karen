@@ -101,7 +101,7 @@
                     </div>
                 </aside>
 
-                <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-28 lg:pb-8">
+                <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-36 lg:pb-8">
                     @if (session('status'))
                         <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
                             {{ __('Tersimpan.') }}

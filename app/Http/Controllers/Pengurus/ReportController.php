@@ -45,6 +45,7 @@ class ReportController extends Controller
             'to' => $to->toDateString(),
             'bidangList' => Bidang::orderBy('id')->get(),
             'bidangId' => $bidangId,
+            'vehicles' => Vehicle::orderBy('name')->get(),
             'rekap' => $this->rekapPerMobil($semua),
             'totals' => [
                 'peminjaman' => $semua->count(),

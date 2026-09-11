@@ -15,6 +15,7 @@ class AppSettings
 {
     public const KEY_MAX_BOOKING_DAYS = 'max_booking_days';
     public const KEY_KOEFISIEN_PAJAK = 'koefisien_pajak';
+    public const KEY_BEND26_IDENTITY = 'bend26_identity';
 
     public const DEFAULT_MAX_BOOKING_DAYS = 3;
     public const MIN_MAX_BOOKING_DAYS = 1;
@@ -58,5 +59,22 @@ class AppSettings
         $val = (float) self::get(self::KEY_KOEFISIEN_PAJAK, self::DEFAULT_KOEFISIEN_PAJAK);
 
         return round(max(self::MIN_KOEFISIEN_PAJAK, min(self::MAX_KOEFISIEN_PAJAK, $val)), 2);
+    }
+
+    /**
+     * Identitas dokumen bend26 (nama dinas, pejabat + NIP, No. Rek &
+     * tarif PPh per pos) — JSON, dikonsumsi Bend26Identity.
+     * Default diambil dari file contoh docs/Bend26 (UAT 04 rev-2).
+     */
+    public static function bend26Identity(): array
+    {
+        $stored = json_decode((string) self::get(self::KEY_BEND26_IDENTITY, '{}'), true);
+
+        return array_replace_recursive(Bend26Identity::defaults(), is_array($stored) ? $stored : []);
+    }
+
+    public static function setBend26Identity(array $identity): void
+    {
+        self::set(self::KEY_BEND26_IDENTITY, json_encode($identity, JSON_UNESCAPED_UNICODE));
     }
 }

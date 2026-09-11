@@ -28,6 +28,36 @@
            class="px-4 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 min-h-[44px] flex items-center justify-center">⬇ Export CSV</a>
     </form>
 
+    {{-- Kartu Pemeliharaan Kendaraan — dipindah ke Laporan (UAT 04-B10) --}}
+    <form method="POST" action="{{ route('pengurus.documents.kartu', $vehicles->first()?->id ?? 0) }}"
+          class="bg-white rounded-xl border border-gray-200 p-4 mb-5 flex flex-col sm:flex-row gap-3 items-stretch sm:items-end"
+          data-kartu-form>
+        @csrf
+        <div class="flex-1">
+            <x-input-label for="kartu-vehicle" value="Kartu Pemeliharaan Kendaraan (PDF)" />
+            <select id="kartu-vehicle" name="vehicle_dummy" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
+                @foreach ($vehicles as $v)
+                    <option value="{{ $v->id }}">{{ $v->name }} — {{ $v->plate_number }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <x-input-label for="kartu-year" value="Tahun" />
+            <input id="kartu-year" name="year" type="number" min="2000" max="2100" value="{{ $tahun }}"
+                   class="block mt-1 w-full rounded-lg border-gray-300 text-sm" />
+        </div>
+        <button type="submit" class="px-4 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px] whitespace-nowrap">Generate Kartu Pemeliharaan</button>
+    </form>
+    {{-- Arahkan form ke mobil terpilih (route memakai {vehicle}) --}}
+    <script>
+        document.querySelector('[data-kartu-form] select').addEventListener('change', function () {
+            document.querySelector('[data-kartu-form]').action =
+                '{{ route('pengurus.documents.kartu', ['vehicle' => ':ID:']) }}'.replace(':ID:', this.value);
+        });
+        document.querySelector('[data-kartu-form]').action =
+            '{{ route('pengurus.documents.kartu', ['vehicle' => $vehicles->first()?->id ?? 0]) }}';
+    </script>
+
     {{-- Ringkasan totals --}}
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <div class="bg-white rounded-xl border border-gray-200 p-4">
@@ -86,7 +116,7 @@
         {{-- Realisasi anggaran per pos --}}
         <section class="bg-white rounded-xl border border-gray-200 p-6">
             <h2 class="font-semibold mb-1">Realisasi Anggaran per Pos — {{ $tahun }}</h2>
-            <p class="text-xs text-gray-400 mb-4">Seluruh unit; nilai realisasi sudah ×{{ number_format(App\Services\BudgetService::koefisienPajak(), 2, ', ', '.') }}. Rincian per unit: halaman Anggaran kendaraan / Kartu Inventaris.</p>
+            <p class="text-xs text-gray-400 mb-4">Seluruh unit; nilai realisasi sudah dikalikan koefisien pajak. Rincian per unit: halaman Anggaran kendaraan / Kartu Pemeliharaan.</p>
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-left text-xs uppercase tracking-wider text-gray-400 border-b">

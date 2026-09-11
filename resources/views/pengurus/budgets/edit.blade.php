@@ -62,11 +62,6 @@
         <section class="bg-white rounded-xl border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold">Realisasi & Sisa ({{ $year }})</h2>
-                <form method="POST" action="{{ route('pengurus.documents.kartu', $vehicle) }}">
-                    @csrf
-                    <input type="hidden" name="year" value="{{ $year }}">
-                    <button class="text-sm text-indigo-600 hover:underline">Generate Kartu Inventaris PDF</button>
-                </form>
             </div>
 
             <div class="overflow-x-auto">
@@ -75,7 +70,7 @@
                         <tr class="text-left text-xs uppercase tracking-wider text-gray-400 border-b">
                             <th class="py-2">Pos</th>
                             <th class="py-2 text-right">Anggaran</th>
-                            <th class="py-2 text-right">Realisasi ×{{ number_format(App\Services\BudgetService::koefisienPajak(), 2, ', ', '.') }}</th>
+                            <th class="py-2 text-right">Realisasi (termasuk pajak)</th>
                             <th class="py-2 text-right">Sisa</th>
                         </tr>
                     </thead>

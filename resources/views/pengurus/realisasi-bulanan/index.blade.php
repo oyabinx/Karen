@@ -23,6 +23,14 @@
                 </form>
                 <a href="?bulan={{ $bulan }}@if($vehicleId)&vehicle={{ $vehicleId }}@endif&export=1"
                    class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 min-h-[44px] flex items-center">⬇ CSV</a>
+                {{-- Generate bend26 BULANAN semua pos bernilai (UAT 04-B6) --}}
+                @if ($perVehicle->isNotEmpty())
+                    <form method="POST" action="{{ route('pengurus.documents.bend26') }}">
+                        @csrf
+                        <input type="hidden" name="month" value="{{ $bulan }}">
+                        <button class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px] whitespace-nowrap">Generate Bend26 {{ \Illuminate\Support\Carbon::parse($bulan.'-01')->translatedFormat('M Y') }}</button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>
@@ -45,11 +53,20 @@
                 @php($postData = $selectedVehicle['perPost'][$post])
                 @if ($postData['raw'] > 0)
                     <section class="bg-white rounded-xl border border-gray-200 p-4">
-                        <div class="flex items-center justify-between mb-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <h3 class="font-semibold">{{ ucfirst(str_replace('_', ' ', $post)) }}</h3>
-                            <div class="text-right">
-                                <p class="font-bold text-emerald-700">{{ $rp($postData['taxed']) }}</p>
-                                <p class="text-xs text-gray-400">{{ $rp($postData['raw']) }} (sebelum pajak)</p>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <p class="font-bold text-emerald-700">{{ $rp($postData['taxed']) }}</p>
+                                    <p class="text-xs text-gray-400">{{ $rp($postData['raw']) }} (sebelum pajak)</p>
+                                </div>
+                                {{-- Generate bend26 bulanan POS INI saja (UAT 04-B6) --}}
+                                <form method="POST" action="{{ route('pengurus.documents.bend26') }}">
+                                    @csrf
+                                    <input type="hidden" name="month" value="{{ $bulan }}">
+                                    <input type="hidden" name="post" value="{{ $post }}">
+                                    <button class="px-3 py-1.5 rounded-lg border border-indigo-300 text-indigo-700 text-xs font-medium hover:bg-indigo-50 min-h-[36px] whitespace-nowrap">Bend26 pos ini</button>
+                                </form>
                             </div>
                         </div>
 

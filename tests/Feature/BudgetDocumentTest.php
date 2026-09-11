@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\GeneratedDocument;
 use App\Models\Maintenance;
+use App\Models\MaintenanceCost;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleBudget;
@@ -132,7 +133,7 @@ class BudgetDocumentTest extends TestCase
         $this->assertSame('terjadwal', $m->status);
     }
 
-    public function test_generate_dokumen_bend26_dan_draft_nota_hanya_pos_bernilai(): void
+    public function test_simpan_nota_hanya_membuat_draft_nota_per_pos(): void
     {
         Storage::fake('local');
 
@@ -146,9 +147,10 @@ class BudgetDocumentTest extends TestCase
                 'detail_amounts' => ['servis' => [500000], 'ac' => [200000]],
             ]);
 
-        // 1 bend26 + 2 draft nota (servis & ac saja)
+        // UAT 04 rev-2: bend26 TIDAK lagi otomatis (bulanan, on demand);
+        // hanya draft nota untuk pos bernilai (servis & ac)
         $docs = GeneratedDocument::where('maintenance_id', $m->id)->get();
-        $this->assertSame(1, $docs->where('type', 'bend26')->count());
+        $this->assertSame(0, $docs->where('type', 'bend26')->count());
         $this->assertSame(2, $docs->where('type', 'draft_nota')->count());
         $this->assertSame(0, $docs->where('type', 'draft_nota')->where('post', 'pelumas')->count());
 
@@ -158,7 +160,7 @@ class BudgetDocumentTest extends TestCase
         }
     }
 
-    public function test_regenerate_menaikkan_versi_dan_mengarsipkan(): void
+    public function test_edit_nota_menimpa_dokumen_di_tempat_tanpa_versi_baru(): void
     {
         Storage::fake('local');
 
@@ -171,13 +173,74 @@ class BudgetDocumentTest extends TestCase
             'detail_amounts' => ['servis' => [500000]],
         ]);
 
+        $before = GeneratedDocument::where('maintenance_id', $m->id)->where('type', 'draft_nota')->first();
+        $this->assertNull($before->regenerated_at);
+
+        // EDIT nota — nilai berubah
+        $this->actingAs($this->pengurus)->put("/pengurus/maintenances/{$m->id}/costs", [
+            'workshop_name' => 'Bengkel Jaya',
+            'details' => ['servis' => ['Servis rutin + rem']],
+            'detail_amounts' => ['servis' => [700000]],
+        ]);
+
+        // Timpa di tempat: record TIDAK bertambah, regenerated_at terisi (UAT 04-B4/B11)
+        $this->assertSame(1, GeneratedDocument::where('maintenance_id', $m->id)->where('type', 'draft_nota')->count());
+        $after = GeneratedDocument::where('maintenance_id', $m->id)->where('type', 'draft_nota')->first();
+        $this->assertSame($before->id, $after->id);
+        $this->assertNotNull($after->regenerated_at);
+        Storage::disk('local')->assertExists($after->file_path);
+    }
+
+    public function test_bend26_bulanan_per_pos_dari_realisasi(): void
+    {
+        Storage::fake('local');
+
+        $v1 = Vehicle::factory()->create(['plate_number' => 'AB 1001 UH']);
+        $v2 = Vehicle::factory()->create(['plate_number' => 'AB 1002 UH']);
+
+        foreach ([$v1, $v2] as $i => $v) {
+            $m = Maintenance::create([
+                'vehicle_id' => $v->id,
+                'start_date' => '2026-09-0'.(5 + $i), 'end_date' => '2026-09-0'.(6 + $i),
+                'workshop_name' => 'Bengkel Jaya', 'nota_number' => 'INV/'.$i, 'nota_date' => '2026-09-1'.(0 + $i),
+            ]);
+            app(BudgetService::class)->inputNota($m, [
+                'workshop_name' => 'Bengkel Jaya',
+                'details' => ['servis' => ['Servis rutin']],
+                'detail_amounts' => ['servis' => [500000]],
+            ]);
+        }
+
+        // Generate bend26 bulanan September 2026 (semua pos)
         $this->actingAs($this->pengurus)
-            ->post("/pengurus/maintenances/{$m->id}/generate")
+            ->post('/pengurus/documents/bend26-bulanan', ['month' => '2026-09'])
+            ->assertRedirect()
             ->assertSessionHasNoErrors();
 
-        $bend = GeneratedDocument::where('maintenance_id', $m->id)->where('type', 'bend26')->get();
-        $this->assertCount(2, $bend); // v1 arsip + v2 baru
-        $this->assertSame(2, $bend->max('version'));
+        // Hanya pos servis bernilai → 1 bend26 period 2026-09 (bukan per maintenance)
+        $bend = GeneratedDocument::where('type', 'bend26')->get();
+        $this->assertCount(1, $bend);
+        $this->assertSame('servis', $bend->first()->post);
+        $this->assertSame('2026-09', $bend->first()->period);
+        $this->assertNull($bend->first()->maintenance_id);
+        Storage::disk('local')->assertExists($bend->first()->file_path);
+
+        // Total = 2 nota × 565.000 (servis × koefisien 1,13)
+        $this->assertSame(1130000.0, (float) MaintenanceCost::where('post', 'servis')->sum('taxed_amount'));
+
+        // Regenerate bulan sama → TIDAK menambah record, menandai Diperbarui
+        $this->actingAs($this->pengurus)
+            ->post('/pengurus/documents/bend26-bulanan', ['month' => '2026-09'])
+            ->assertRedirect();
+
+        $this->assertCount(1, GeneratedDocument::where('type', 'bend26')->get());
+        $this->assertNotNull($bend->first()->fresh()->regenerated_at);
+
+        // Bulan tanpa realisasi → tidak membuat apa pun + peringatan
+        $this->actingAs($this->pengurus)
+            ->post('/pengurus/documents/bend26-bulanan', ['month' => '2026-01'])
+            ->assertSessionHas('warning');
+        $this->assertSame(0, GeneratedDocument::where('type', 'bend26')->where('period', '2026-01')->count());
     }
 
     public function test_realisasi_mengurangi_sisa_dan_melebihi_anggaran_tidak_diblokir(): void
@@ -201,7 +264,7 @@ class BudgetDocumentTest extends TestCase
         $this->assertEquals(-465000.0, $summary['servis']['sisa']); // negatif = peringatan, bukan blokir
     }
 
-    public function test_kartu_inventaris_digenerate_per_kendaraan(): void
+    public function test_kartu_pemeliharaan_digenerate_dari_laporan(): void
     {
         Storage::fake('local');
 
@@ -211,11 +274,12 @@ class BudgetDocumentTest extends TestCase
         $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-10', 'end_date' => '2026-09-11', 'workshop_name' => 'Bengkel Jaya']);
         app(BudgetService::class)->inputNota($m, ['workshop_name' => 'Bengkel Jaya', 'details' => ['servis' => ['Servis rutin']], 'detail_amounts' => ['servis' => [500000]]]);
 
+        // Tombol generate kini di menu Laporan (UAT 04-B10)
         $this->actingAs($this->pengurus)
-            ->post("/pengurus/vehicles/{$v->id}/generate-kartu-inventaris", ['year' => 2026])
+            ->post("/pengurus/vehicles/{$v->id}/generate-kartu-pemeliharaan", ['year' => 2026])
             ->assertRedirect();
 
-        $kartu = GeneratedDocument::where('vehicle_id', $v->id)->where('type', 'kartu_inventaris')->first();
+        $kartu = GeneratedDocument::where('vehicle_id', $v->id)->where('type', 'kartu_pemeliharaan')->first();
         $this->assertNotNull($kartu);
         Storage::disk('local')->assertExists($kartu->file_path);
     }
@@ -227,7 +291,7 @@ class BudgetDocumentTest extends TestCase
         $v = Vehicle::factory()->create();
         $doc = GeneratedDocument::create([
             'vehicle_id' => $v->id,
-            'type' => 'kartu_inventaris',
+            'type' => 'kartu_pemeliharaan',
             'file_path' => 'documents/kartu-test-v1.pdf',
             'version' => 1,
         ]);
@@ -236,7 +300,7 @@ class BudgetDocumentTest extends TestCase
         $this->actingAs($this->pengurus)
             ->get('/pengurus/documents')
             ->assertOk()
-            ->assertSee('Kartu Inventaris');
+            ->assertSee('Kartu Pemeliharaan');
 
         $this->actingAs($this->pengurus)
             ->get("/pengurus/documents/{$doc->id}/download")
