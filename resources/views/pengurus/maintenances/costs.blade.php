@@ -44,16 +44,19 @@
                     <div class="js-details space-y-2">
                         @if ($existing && $existing->details->isNotEmpty())
                             @foreach ($existing->details as $detail)
-                                <div class="js-detail-row flex gap-2 items-center">
+                                {{-- Mobile: 2 baris (rincian / Rp+hapus) — desktop: 1 baris (rev UAT 04) --}}
+                                <div class="js-detail-row flex flex-col sm:flex-row gap-2 sm:items-center">
                                     <input type="text" name="details[{{ $post }}][]" value="{{ $detail->description }}"
                                            placeholder="mis. Ganti oli mesin" maxlength="255"
-                                           class="flex-1 rounded-lg border-gray-300 text-sm min-h-[44px]">
-                                    <div class="flex items-center w-36 shrink-0">
-                                        <span class="px-2 py-2 rounded-s-lg bg-gray-100 border border-e-0 border-gray-300 text-xs text-gray-400">Rp</span>
-                                        <input type="text" inputmode="numeric" name="detail_amounts[{{ $post }}][]" value="{{ number_format((float)$detail->amount, 0, ',', '.') }}"
-                                               placeholder="0" class="w-full rounded-e-lg border-gray-300 border-s-0 text-sm min-h-[44px] js-detail-amount">
+                                           class="flex-1 min-w-0 rounded-lg border-gray-300 text-sm min-h-[44px]">
+                                    <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                                        <div class="flex items-center flex-1 sm:w-36">
+                                            <span class="px-2 py-2 rounded-s-lg bg-gray-100 border border-e-0 border-gray-300 text-xs text-gray-400">Rp</span>
+                                            <input type="text" inputmode="numeric" name="detail_amounts[{{ $post }}][]" value="{{ number_format((float)$detail->amount, 0, ',', '.') }}"
+                                                   placeholder="0" class="w-full rounded-e-lg border-gray-300 border-s-0 text-sm min-h-[44px] js-detail-amount">
+                                        </div>
+                                        <button type="button" class="js-remove-detail text-red-400 hover:text-red-600 p-2 min-h-[44px] min-w-[44px] shrink-0" aria-label="Hapus">✕</button>
                                     </div>
-                                    <button type="button" class="js-remove-detail text-red-400 hover:text-red-600 p-2 min-h-[44px] min-w-[44px] shrink-0" aria-label="Hapus">✕</button>
                                 </div>
                             @endforeach
                         @endif
@@ -148,14 +151,16 @@
             section.querySelector('.js-add-detail').addEventListener('click', function() {
                 var post = section.dataset.post;
                 var row = document.createElement('div');
-                row.className = 'js-detail-row flex gap-2 items-center';
+                row.className = 'js-detail-row flex flex-col sm:flex-row gap-2 sm:items-center';
                 row.innerHTML =
-                    '<input type="text" name="details[' + post + '][]" value="" placeholder="mis. Ganti oli mesin" maxlength="255" class="flex-1 rounded-lg border-gray-300 text-sm min-h-[44px]">' +
-                    '<div class="flex items-center w-36 shrink-0">' +
+                    '<input type="text" name="details[' + post + '][]" value="" placeholder="mis. Ganti oli mesin" maxlength="255" class="flex-1 min-w-0 rounded-lg border-gray-300 text-sm min-h-[44px]">' +
+                    '<div class="flex items-center gap-2 w-full sm:w-auto shrink-0">' +
+                    '<div class="flex items-center flex-1 sm:w-36">' +
                     '<span class="px-2 py-2 rounded-s-lg bg-gray-100 border border-e-0 border-gray-300 text-xs text-gray-400">Rp</span>' +
                     '<input type="text" inputmode="numeric" name="detail_amounts[' + post + '][]" value="" placeholder="0" class="w-full rounded-e-lg border-gray-300 border-s-0 text-sm min-h-[44px] js-detail-amount">' +
                     '</div>' +
-                    '<button type="button" class="js-remove-detail text-red-400 hover:text-red-600 p-2 min-h-[44px] min-w-[44px] shrink-0" aria-label="Hapus">✕</button>';
+                    '<button type="button" class="js-remove-detail text-red-400 hover:text-red-600 p-2 min-h-[44px] min-w-[44px] shrink-0" aria-label="Hapus">✕</button>' +
+                    '</div>';
                 section.querySelector('.js-details').appendChild(row);
                 bindRow(section, row);
                 row.querySelector('input[type="text"]').focus();
