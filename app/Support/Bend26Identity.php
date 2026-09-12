@@ -32,7 +32,14 @@ class Bend26Identity
                 'pptk' => ['nama' => 'Reni Margatina, S.Kom.', 'nip' => '199305092019032013'],
             ],
             'kode_kegiatan' => '2.07.01.1.09.0002',
-            'ppn_percent' => 11.0,
+            // Tarif PPN per pos (B6c UAT 04-3): pelumas TIDAK dikenakan PPN
+            // (default 0) — "rumah" tetap disiapkan bila kelak kena pajak.
+            'ppn_percent' => [
+                'servis' => 11.0,
+                'suku_cadang' => 11.0,
+                'ac' => 11.0,
+                'pelumas' => 0.0,
+            ],
             // Tarif PPh (PPh 22) per pos — % dari DPP.
             // Jasa (servis, servis AC) 2%; barang (suku cadang, pelumas) 1,5%.
             'pph_percent' => [
@@ -65,23 +72,39 @@ class Bend26Identity
     }
 
     /**
-     * PPN & PPh dari nilai total (cara file contoh):
-     * DPP = total / (1 + ppn_percent); PPN = DPP × ppn_percent;
-     * PPh = DPP × pph_percent pos. Dibulatkan ke rupiah utuh.
+     * PPN & PPh dari nilai total (cara file contoh), tarif PER POS:
+     * DPP = total / (1 + ppn%); PPN = DPP × ppn% (pos tanpa PPN, mis.
+     * pelumas, memakai DPP = total & PPN 0); PPh = DPP × pph% pos.
+     * Dibulatkan ke rupiah utuh.
      *
      * @return array{dpp: float, ppn: float, pph: float, jumlah: float}
      */
     public static function pajak(float $total, string $post, ?array $identity = null): array
     {
         $identity ??= AppSettings::bend26Identity();
-        $ppnPercent = max(0.0, (float) ($identity['ppn_percent'] ?? 11));
-        $pphPercent = max(0.0, (float) ($identity['pph_percent'][$post] ?? 0));
+        $ppnPercent = max(0.0, (float) (self::percent($identity, 'ppn_percent', $post, 0)));
+        $pphPercent = max(0.0, (float) (self::percent($identity, 'pph_percent', $post, 0)));
 
         $dpp = $ppnPercent > 0 ? $total / (1 + $ppnPercent / 100) : $total;
         $ppn = (int) round($dpp * $ppnPercent / 100);
         $pph = (int) round($dpp * $pphPercent / 100);
 
         return ['dpp' => round($dpp, 2), 'ppn' => (float) $ppn, 'pph' => (float) $pph, 'jumlah' => (float) ($ppn + $pph)];
+    }
+
+    /**
+     * Ambil tarif per pos — kompatibel dgn format lama (scalar) & baru
+     * (array per pos).
+     */
+    private static function percent(array $identity, string $key, string $post, float $fallback): float
+    {
+        $value = $identity[$key] ?? null;
+
+        if (is_array($value)) {
+            return (float) ($value[$post] ?? $fallback);
+        }
+
+        return $value === null ? $fallback : (float) $value;
     }
 
     /**

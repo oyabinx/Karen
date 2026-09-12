@@ -14,7 +14,7 @@
         td.label { width: 165px; }
         td.semicolon { width: 8px; }
         .terbilang-row td { padding-top: 0; }
-        .ttd { margin-top: 18px; width: 100%; border-collapse: collapse; }
+        .ttd { margin-top: 4px; width: 100%; border-collapse: collapse; }
         .ttd td { border: none; text-align: center; font-size: 11px; width: 33.33%; vertical-align: top; padding: 2px 6px; }
         .ttd .space { height: 58px; }
         .bawah { margin-top: 14px; width: 100%; border-collapse: collapse; }
@@ -64,7 +64,7 @@
 
     <table class="ttd">
         <tr>
-            <td>Mengetahui dan menyetujui<br><br></td>
+            <td>Mengetahui dan menyetujui</td>
             <td></td>
             <td></td>
         </tr>

@@ -1,7 +1,8 @@
-<x-app-layout title="Input Nota — Maintenance #{{ $maintenance->id }}">
+@php($hasNota = $costs->max('raw_amount') > 0)
+<x-app-layout title="{{ $hasNota ? 'Edit Nota' : 'Input Nota' }} — Maintenance #{{ $maintenance->id }}">
     <div class="mb-4">
         <a href="{{ route('pengurus.maintenances.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Kembali ke jadwal</a>
-        <h1 class="text-2xl font-semibold mt-2">Input Nota Bengkel</h1>
+        <h1 class="text-2xl font-semibold mt-2">{{ $hasNota ? 'Edit Nota Bengkel' : 'Input Nota Bengkel' }}</h1>
         <p class="text-sm text-gray-500 mt-1">
             {{ $maintenance->vehicle->name }} ({{ $maintenance->vehicle->plate_number }}) ·
             {{ $maintenance->start_date->translatedFormat('d M') }}–{{ $maintenance->end_date->translatedFormat('d M Y') }}
@@ -86,8 +87,8 @@
 
         <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pb-4">
             <a href="{{ route('pengurus.maintenances.index') }}" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-center hover:bg-gray-50 min-h-[44px] leading-[44px]">Batal</a>
-            <button type="submit" class="px-6 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[48px]">
-                Simpan Nota & Generate Dokumen
+            <button type="submit" class="px-6 py-2 rounded-lg {{ $hasNota ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-600 hover:bg-emerald-700' }} text-white text-sm font-semibold min-h-[48px]">
+                {{ $hasNota ? 'Selesai Edit' : 'Simpan Nota & Generate Dokumen' }}
             </button>
         </div>
     </form>

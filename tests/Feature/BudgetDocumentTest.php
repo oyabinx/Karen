@@ -25,6 +25,22 @@ class BudgetDocumentTest extends TestCase
         $this->pengurus = User::factory()->create(['role' => 'pengurus']);
     }
 
+    public function test_pajak_bend26_per_pos_pelumas_tanpa_ppn(): void
+    {
+        // Servis: PPN 11% dari DPP (contoh: 1.130.000 → DPP 1.018.018)
+        $servis = \App\Support\Bend26Identity::pajak(1130000, 'servis', \App\Support\Bend26Identity::defaults());
+        $this->assertEquals(1018018.02, $servis['dpp']);
+        $this->assertSame(111982.0, $servis['ppn']); // DPP × 11%
+        $this->assertSame(20360.0, $servis['pph']);  // DPP × 2%
+        $this->assertSame($servis['ppn'] + $servis['pph'], $servis['jumlah']);
+
+        // Pelumas: TIDAK dikenakan PPN (default 0) — DPP = total, PPh tetap jalan
+        $pelumas = \App\Support\Bend26Identity::pajak(750000, 'pelumas', \App\Support\Bend26Identity::defaults());
+        $this->assertSame(750000.0, $pelumas['dpp']);
+        $this->assertSame(0.0, $pelumas['ppn']);
+        $this->assertSame(11250.0, $pelumas['pph']); // 750.000 × 1,5%
+    }
+
     public function test_simpan_anggaran_dan_hitung_sisa(): void
     {
         $v = Vehicle::factory()->create();

@@ -63,12 +63,24 @@ class AppSettings
 
     /**
      * Identitas dokumen bend26 (nama dinas, pejabat + NIP, No. Rek &
-     * tarif PPh per pos) — JSON, dikonsumsi Bend26Identity.
+     * tarif PPN/PPh per pos) — JSON, dikonsumsi Bend26Identity.
      * Default diambil dari file contoh docs/Bend26 (UAT 04 rev-2).
+     * Tarif PPN lama (scalar) dinormalisasi ke format per-pos.
      */
     public static function bend26Identity(): array
     {
         $stored = json_decode((string) self::get(self::KEY_BEND26_IDENTITY, '{}'), true);
+
+        if (is_array($stored) && isset($stored['ppn_percent']) && ! is_array($stored['ppn_percent'])) {
+            $legacy = (float) $stored['ppn_percent'];
+            unset($stored['ppn_percent']);
+            $stored['ppn_percent'] = [
+                'servis' => $legacy,
+                'suku_cadang' => $legacy,
+                'ac' => $legacy,
+                'pelumas' => 0.0,
+            ];
+        }
 
         return array_replace_recursive(Bend26Identity::defaults(), is_array($stored) ? $stored : []);
     }

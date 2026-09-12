@@ -84,29 +84,31 @@
                         </div>
                     @endforeach
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <x-input-label for="b26_kode_kegiatan" value="Kode Kegiatan" />
-                            <input id="b26_kode_kegiatan" name="b26[kode_kegiatan]" type="text" value="{{ old('b26.kode_kegiatan', $bend26['kode_kegiatan']) }}" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
-                        </div>
-                        <div>
-                            <x-input-label for="b26_ppn" value="Tarif PPN (%)" />
-                            <input id="b26_ppn" name="b26[ppn_percent]" type="number" step="0.01" min="0" max="100" value="{{ old('b26.ppn_percent', $bend26['ppn_percent']) }}" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
-                        </div>
+                    <div>
+                        <x-input-label for="b26_kode_kegiatan" value="Kode Kegiatan" />
+                        <input id="b26_kode_kegiatan" name="b26[kode_kegiatan]" type="text" value="{{ old('b26.kode_kegiatan', $bend26['kode_kegiatan']) }}" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
                     </div>
 
-                    <p class="text-xs font-medium text-gray-500">No. Rek & tarif PPh per pos</p>
+                    <p class="text-xs font-medium text-gray-500 pt-1">Pajak & rekening per pos anggaran — PPN & PPh dipisah per pos (pelumas default PPN 0 = tidak dikenakan)</p>
                     @foreach (\App\Models\VehicleBudget::POSTS as $post)
-                        <div class="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-3 items-end">
-                            <div>
-                                <x-input-label for="b26_rek_{{ $post }}" value="No. Rek — {{ ucfirst(str_replace('_', ' ', $post)) }}" />
-                                <input id="b26_rek_{{ $post }}" name="b26[no_rek][{{ $post }}]" type="text" value="{{ old('b26.no_rek.'.$post, $bend26['no_rek'][$post]) }}" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
+                        @php($posLabel = ucfirst(str_replace('_', ' ', $post)))
+                        <fieldset class="border border-gray-100 rounded-lg p-3">
+                            <legend class="px-1 text-xs font-semibold text-gray-600">{{ $posLabel }}</legend>
+                            <div class="grid grid-cols-1 sm:grid-cols-[1fr_90px_90px] gap-3 items-end">
+                                <div>
+                                    <x-input-label for="b26_rek_{{ $post }}" value="No. Rek" />
+                                    <input id="b26_rek_{{ $post }}" name="b26[no_rek][{{ $post }}]" type="text" value="{{ old('b26.no_rek.'.$post, $bend26['no_rek'][$post]) }}" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
+                                </div>
+                                <div>
+                                    <x-input-label for="b26_ppn_{{ $post }}" value="PPN %" />
+                                    <input id="b26_ppn_{{ $post }}" name="b26[ppn_percent][{{ $post }}]" type="number" step="0.01" min="0" max="100" value="{{ old('b26.ppn_percent.'.$post, $bend26['ppn_percent'][$post]) }}" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
+                                </div>
+                                <div>
+                                    <x-input-label for="b26_pph_{{ $post }}" value="PPh %" />
+                                    <input id="b26_pph_{{ $post }}" name="b26[pph_percent][{{ $post }}]" type="number" step="0.01" min="0" max="100" value="{{ old('b26.pph_percent.'.$post, $bend26['pph_percent'][$post]) }}" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
+                                </div>
                             </div>
-                            <div>
-                                <x-input-label for="b26_pph_{{ $post }}" value="PPh (%)" />
-                                <input id="b26_pph_{{ $post }}" name="b26[pph_percent][{{ $post }}]" type="number" step="0.01" min="0" max="100" value="{{ old('b26.pph_percent.'.$post, $bend26['pph_percent'][$post]) }}" class="block mt-1 w-full rounded-lg border-gray-300 text-sm">
-                            </div>
-                        </div>
+                        </fieldset>
                     @endforeach
                 </div>
             </details>

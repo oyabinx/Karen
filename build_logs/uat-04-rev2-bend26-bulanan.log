@@ -92,3 +92,23 @@
    3 pos; biaya ×1,13 tepat).
  • Docs + UAT/04 (baris verifikasi b) + TASKLIST-UAT04.md.
  • Commit + push GitHub (oyabinx/Karen).
+
+────────────────────────────────────────────────────────────────────
+ REV-3 (2026-09-12): 3 REVISI REVIEW USER — SEMUA SELESAI
+────────────────────────────────────────────────────────────────────
+ • B4b → CP1: form edit nota berjudul "Edit Nota Bengkel" + tombol
+   ORANYE "Selesai Edit" (label "Simpan Nota & Generate Dokumen"
+   hanya saat input pertama).
+ • B6b → CP2: bend26 spasi atas/bawah "Mengetahui dan menyetujui"
+   dihilangkan (margin 18→4px + <br><br> dihapus; berlaku 4 pos).
+ • B6c → CP3: PPN PER POS — defaults {servis 11, suku cadang 11,
+   ac 11, pelumas 0}; pajak() baca per pos (DPP=total bila PPN 0,
+   PPh tetap jalan); normalisasi setting lama (scalar→array) di
+   AppSettings; UI admin: kelompok per pos (No. Rek + PPN% + PPh%),
+   field PPN global dihapus; validasi ppn_percent.*.
+ • Test: +1 (pajak servis vs pelumas tanpa PPN) → 244/244 hijau.
+ • Verifikasi PDF: bend26 pelumas PPN 0 + PPh 34.748 (1,5% ×
+   2.316.501) ✓; servis PPN 205.234 + PPh 37.315 = Jml 242.549 ✓;
+   spasi "Mengetahui..." hilang ✓.
+ • UAT/04 baris baru: B4c, B6d, B6c2 (⬜ menunggu verifikasi user).
+ • Checkpoint file: TASKLIST-UAT04-REV3.md (semua [x]).
