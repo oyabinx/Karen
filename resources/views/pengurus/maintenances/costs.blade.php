@@ -86,7 +86,7 @@
         <x-input-error :messages="$errors->get('details')" class="mb-4" />
 
         <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pb-4">
-            <a href="{{ route('pengurus.maintenances.index') }}" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-center hover:bg-gray-50 min-h-[44px] leading-[44px]">Batal</a>
+            <a href="{{ route('pengurus.maintenances.index') }}" class="w-full sm:w-auto px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 text-center min-h-[40px] leading-[40px]">Batal</a>
             <button type="submit" class="px-6 py-2 rounded-lg {{ $hasNota ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-600 hover:bg-emerald-700' }} text-white text-sm font-semibold min-h-[48px]">
                 {{ $hasNota ? 'Selesai Edit' : 'Simpan Nota & Generate Dokumen' }}
             </button>

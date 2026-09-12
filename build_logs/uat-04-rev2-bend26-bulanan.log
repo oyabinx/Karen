@@ -144,3 +144,20 @@
    lama (text-xs py-2 ≈36px) lebih kecil dari Batal sehingga
    hierarki terbalik. Teks keduanya rata tengah. Desktop tetap
    rata kanan sebaris.
+
+ TAMBAHAN (2026-09-13): HIERARKI TOMBOL "BATAL" DI FORM LAIN
+────────────────────────────────────────────────────────────────────
+ • Sapuan seluruh view: pola Batal (44px font-medium) berdampingan
+   dengan x-primary-button Breeze (~36px) hanya ada di 3 form —
+   semuanya dirapikan dengan pola form peminjaman (utama 48px
+   indigo tebal di atas, Batal 40px outline di bawah):
+   - pengurus/vehicles/form.blade.php (Ubah/Tambah Kendaraan) ←
+     dilaporkan user
+   - admin/users/form.blade.php (Ubah/Buat User)
+   - pengurus/maintenances/costs.blade.php (Batal 44→40px; tombol
+     Simpan Nota/Selesai Edit sudah 48px sejak revisi sebelumnya)
+ • Tombol 44px lain yang berdiri sendiri / pasangannya sama-sama
+   44px (modal, filter, pagination) dibiarkan — sudah konsisten.
+ • Verifikasi browser mobile 390px (ubah kendaraan): Simpan 48px
+   weight 600 indigo vs Batal 42px weight 400 outline, rata tengah,
+   tanpa overflow horizontal.

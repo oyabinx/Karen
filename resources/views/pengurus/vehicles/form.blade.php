@@ -78,9 +78,15 @@
             </details>
         </div>
 
+        {{-- Hierarki mobile: aksi utama LEBIH BESAR (48px, tebal, indigo)
+             di atas; sekunder Batal lebih ringan di bawah --}}
         <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
-            <a href="{{ route('pengurus.vehicles.index') }}" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-center hover:bg-gray-50 min-h-[44px] leading-[44px]">Batal</a>
-            <x-primary-button>{{ $vehicle->exists ? 'Simpan Perubahan' : 'Tambah Kendaraan' }}</x-primary-button>
+            <a href="{{ route('pengurus.vehicles.index') }}"
+               class="w-full sm:w-auto px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 text-center min-h-[40px] leading-[40px]">Batal</a>
+            <button type="submit"
+                    class="w-full sm:w-auto min-h-[48px] px-6 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 flex items-center justify-center transition-colors">
+                {{ $vehicle->exists ? 'Simpan Perubahan' : 'Tambah Kendaraan' }}
+            </button>
         </div>
     </form>
 </x-app-layout>
