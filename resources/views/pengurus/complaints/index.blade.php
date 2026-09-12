@@ -39,10 +39,18 @@
                             <p class="font-semibold">{{ $vehicle->name }} <span class="text-gray-400 font-normal">({{ $vehicle->plate_number }})</span></p>
                             <p class="text-xs text-gray-400 mt-0.5">{{ $v['complaints']->count() }} keluhan aktif</p>
                         </div>
-                        <button type="button" onclick="document.getElementById('jadwal-modal-{{ $vehicle->id }}').showModal()"
-                                class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[44px] shrink-0">
-                            🔧 Jadwalkan Maintenance
-                        </button>
+                        @if ($v['maintenanceTerjadwal'])
+                            @php($jm = $v['maintenanceTerjadwal'])
+                            <a href="{{ route('pengurus.maintenances.index') }}"
+                               class="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 min-h-[44px] shrink-0 inline-flex items-center">
+                                🛠 Sedang Maintenance ({{ $jm->start_date->translatedFormat('d M') }}–{{ $jm->end_date->translatedFormat('d M Y') }}) →
+                            </a>
+                        @else
+                            <button type="button" onclick="document.getElementById('jadwal-modal-{{ $vehicle->id }}').showModal()"
+                                    class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[44px] shrink-0">
+                                🔧 Jadwalkan Maintenance
+                            </button>
+                        @endif
                     </div>
 
                     {{-- Daftar keluhan unit ini --}}
@@ -66,7 +74,9 @@
                     </ul>
                 </div>
 
-                {{-- MODAL jadwalkan maintenance: tanggal saja, kendaraan + catatan otomatis --}}
+                {{-- MODAL jadwalkan maintenance: tanggal saja, kendaraan + catatan otomatis
+                     (disembunyikan bila unit sudah punya jadwal terjadwal) --}}
+                @if (! $v['maintenanceTerjadwal'])
                 <dialog id="jadwal-modal-{{ $vehicle->id }}" class="w-[calc(100%-2rem)] sm:w-auto sm:max-w-md rounded-xl p-0 backdrop:bg-gray-900/50">
                     <form method="POST" action="{{ route('pengurus.maintenances.store') }}" class="p-5">
                         @csrf
@@ -106,6 +116,7 @@
                         </div>
                     </form>
                 </dialog>
+                @endif
             @empty
                 <div class="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">Tidak ada keluhan belum selesai. 🎉</div>
             @endforelse

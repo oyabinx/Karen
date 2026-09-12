@@ -50,3 +50,4 @@ semua role untuk dashboard.
 | K4 | Isi tanggal → **Simpan Jadwal** | Tersimpan; menjalankan alur existing: bila menabrak booking aktif → diarahkan ke Penggantian Mobil; cek Jadwal Maintenance → jadwal baru dengan catatan gabungan, **mobil sudah terpilih otomatis** | ⬜ | |
 | K5 | Kembali ke Keluhan Unit setelah jadwalkan | Keluhan tetap tampil (ditandai selesai **manual** oleh pengurus setelah tindak lanjut) | ⬜ | |
 | K6 | Sunting catatan di modal sebelum simpan | Perubahan catatan ikut tersimpan (catatan bisa diedit) | ⬜ | |
+| K7 | Refresh Keluhan Unit setelah jadwalkan (unit masih terjadwal) | Tombol hijau **hilang**, diganti **"🛠 Sedang Maintenance (rentang tanggal) →"** yang membuka halaman Jadwal Maintenance; setelah jadwal ditandai **selesai**, tombol jadwalkan kembali tampil | ⬜ | |

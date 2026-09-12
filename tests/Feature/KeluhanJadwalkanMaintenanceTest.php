@@ -124,4 +124,40 @@ class KeluhanJadwalkanMaintenanceTest extends TestCase
         $this->assertStringNotContainsString('rem bermasalah (Pegawai B', $res->getContent());
         $res->assertSee('setir tidak center (Pegawai A', false);
     }
+
+    public function test_unit_terjadwal_tombol_berubah_sedang_maintenance(): void
+    {
+        $mobilA = Vehicle::factory()->create(['name' => 'Mobil A']);
+        $mobilB = Vehicle::factory()->create(['name' => 'Mobil B']);
+        $this->bookingDenganKeluhan($mobilA, 'Pegawai A', 'setir tidak center');
+        $this->bookingDenganKeluhan($mobilB, 'Pegawai C', 'lampu mati');
+
+        // Mobil A dijadwalkan; mobil B belum
+        $mulai = today()->addDays(5);
+        Maintenance::create([
+            'vehicle_id' => $mobilA->id,
+            'start_date' => $mulai->toDateString(),
+            'end_date' => $mulai->copy()->addDays(2)->toDateString(),
+            'status' => 'terjadwal',
+            'note' => 'Keluhan: setir tidak center',
+        ]);
+
+        $res = $this->actingAs($this->pengurus)->get('/pengurus/complaints');
+
+        // Mobil A: tombol SEDANG MAINTENANCE (+rentang) menggantikan tombol jadwalkan
+        $html = $res->getContent();
+        $this->assertStringContainsString('Sedang Maintenance', $html);
+        $this->assertStringContainsString($mulai->translatedFormat('d M'), $html);
+        $this->assertStringContainsString(route('pengurus.maintenances.index'), $html);
+        // Hanya mobil B yang masih punya tombol + modal jadwalkan
+        // (per unit ber-modal: tombol + judul modal = 2 kemunculan)
+        $this->assertSame(2, substr_count($html, 'Jadwalkan Maintenance'), 'tombol jadwalkan hanya untuk unit tanpa jadwal');
+        $this->assertSame(1, substr_count($html, '<dialog'), 'modal hanya untuk unit tanpa jadwal');
+
+        // Jadwal selesai → tombol jadwalkan kembali
+        Maintenance::where('vehicle_id', $mobilA->id)->update(['status' => 'selesai']);
+        $res2 = $this->actingAs($this->pengurus)->get('/pengurus/complaints');
+        $this->assertSame(4, substr_count($res2->getContent(), 'Jadwalkan Maintenance'));
+        $this->assertStringNotContainsString('Sedang Maintenance', $res2->getContent());
+    }
 }

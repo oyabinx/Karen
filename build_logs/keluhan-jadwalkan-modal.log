@@ -59,3 +59,18 @@
  • Docs: laporan.md (seksi Keluhan), pengembalian.md (alur tindak
    lanjut), product.md (aturan 31). UAT/06 seksi C2b (K1–K6).
  • Commit + push GitHub (oyabinx/Karen).
+
+────────────────────────────────────────────────────────────────────
+ TAMBAHAN (2026-09-12): TOMBOL SEDANG MAINTENANCE
+────────────────────────────────────────────────────────────────────
+ • Unit dengan jadwal maintenance TERJADWAL → tombol hijau
+   "Jadwalkan Maintenance" DIGANTI "🛠 Sedang Maintenance
+   (rentang) →" menuju halaman Jadwal Maintenance; modal
+   disembunyikan (validasi anti-overlap tidak relevan).
+ • Jadwal berstatus selesai → tombol jadwalkan kembali otomatis.
+ • Test: +1 (unit terjadwal = 1 tombol jadwalkan & 1 modal utk
+   unit lain; selesai → tombol kembali). 243/243 hijau.
+ • Verifikasi browser: kartu Avanza menampilkan "Sedang
+   Maintenance (12 Sep–12 Sep 2026)" sesuai jadwal terjadwal
+   unit; href → /pengurus/maintenances.
+ • Docs: laporan.md, product.md (aturan 31), UAT/06 K7.

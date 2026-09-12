@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pengurus;
 
 use App\Http\Controllers\Controller;
 use App\Models\Complaint;
+use App\Models\Maintenance;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -64,6 +65,18 @@ class ComplaintController extends Controller
             // Kendaraan dengan keluhan terbaru di atas
             ->sortByDesc(fn ($v) => $v['complaints']->first()->created_at->getTimestamp())
             ->values();
+
+        // Unit yang SUDAH terjadwal → tombol "Sedang Maintenance" (bukan jadwalkan lagi)
+        $terjadwal = Maintenance::query()
+            ->where('status', 'terjadwal')
+            ->whereIn('vehicle_id', $perVehicle->map(fn ($v) => $v['vehicle']->id))
+            ->orderBy('start_date')
+            ->get()
+            ->groupBy('vehicle_id');
+
+        $perVehicle = $perVehicle->map(fn ($v) => $v + [
+            'maintenanceTerjadwal' => $terjadwal->get($v['vehicle']->id)?->first(),
+        ]);
 
         return view('pengurus.complaints.index', [
             'status' => $status,
