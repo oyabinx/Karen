@@ -3,7 +3,7 @@
 ## Deskripsi
 Setelah selesai menggunakan mobil, pegawai menekan tombol **"Selesai"** pada peminjaman aktifnya (dashboard atau halaman Peminjaman Saya). Sistem membuka **pop-up konfirmasi** dengan **textbox keluhan opsional** — boleh dikosongkan bila tidak ada keluhan. Setelah submit, status peminjaman menjadi `dikembalikan` dan mobil **segera tersedia** kembali untuk dipinjam.
 
-> **Kesepakatan penting (revisi):** keluhan **hanya catatan/pelaporan** — TIDAK otomatis menyisihkan mobil, TIDAK mengubah kondisi/kendaraan menjadi maintenance, dan mobil **tetap bisa dipinjam**. Pengurus yang menilai dan memutuskan manual tindak lanjutnya: bila perlu, jadwalkan maintenance lewat fitur [manajemen_kendaraan.md](manajemen_kendaraan.md) (lengkap dengan penggantian mobil bila menabrak booking). Kondisi `perlu_diperiksa` hanya dapat diatur **manual** oleh pengurus.
+> **Kesepakatan penting (revisi):** keluhan **hanya catatan/pelaporan** — TIDAK otomatis menyisihkan mobil, TIDAK mengubah kondisi/kendaraan menjadi maintenance, dan mobil **tetap bisa dipinjam**. Pengurus yang menilai dan memutuskan manual tindak lanjutnya: dari menu **Keluhan Unit** (dikelompokkan per kendaraan), tombol **Jadwalkan Maintenance** membuka modal tanggal dengan catatan gabungan keluhan aktif unit — lihat [laporan.md](laporan.md) — lengkap dengan penggantian mobil bila menabrak booking ([manajemen_kendaraan.md](manajemen_kendaraan.md)). Kondisi `perlu_diperiksa` hanya dapat diatur **manual** oleh pengurus.
 
 ## Spesifikasi
 

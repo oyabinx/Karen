@@ -37,3 +37,16 @@ semua role untuk dashboard.
 | C3 | Dashboard **pegawai** | Banner HP (bila kosong), kartu kuota, kartu peminjaman aktif + **tombol adaptif** (Selesai bila hari ini ≥ mulai / Batalkan bila belum mulai), Riwayat Terakhir (5) | ⬜ | |
 | C4 | Buat keluhan baru (skenario 01-D5) → refresh dashboard pengurus | Kartu Keluhan naik +1 | ⬜ | |
 | C5 | Dashboard **pengurus** dengan pajak jatuh tempo ≤3 minggu (skenario 03-A11b) | Banner **"⚠ Peringatan Pajak Kendaraan"** dengan nama unit + jenis + sisa hari / "LEWAT n hari" | ⬜ | |
+
+## C2b. Keluhan Unit — per Kendaraan + Jadwalkan Langsung *(rev user pasca-UAT 04)*
+
+**Skenario**: pegawai A kembalikan mobil A dengan keluhan "setir tidak center"; hari berikutnya pegawai B pinjam mobil A yang sama lalu kembalikan dengan keluhan "rem bermasalah".
+
+| No | Langkah | Hasil Diharapkan | Status | Catatan |
+|----|---------|------------------|--------|---------|
+| K1 | Menu **Keluhan Unit** (tab Belum Selesai) | **Satu kartu per kendaraan**: nama + plat + jumlah keluhan aktif; semua keluhan unit tercantum (isi, pelapor, waktu pengembalian) + tombol Tandai selesai per keluhan | ⬜ | |
+| K2 | Cek kartu mobil A | **Kedua keluhan tergabung dalam satu kartu** ("setir tidak center" oleh pegawai A + "rem bermasalah" oleh pegawai B) — badge "2 keluhan aktif" | ⬜ | |
+| K3 | Tekan **🔧 Jadwalkan Maintenance** | Modal: tanggal mulai/selesai (mulai ≥ hari ini) + **catatan terisi otomatis gabungan**: "Keluhan: rem bermasalah (Pegawai B, …); setir tidak center (Pegawai A, …)" — tanpa perlu memilih mobil | ⬜ | |
+| K4 | Isi tanggal → **Simpan Jadwal** | Tersimpan; menjalankan alur existing: bila menabrak booking aktif → diarahkan ke Penggantian Mobil; cek Jadwal Maintenance → jadwal baru dengan catatan gabungan, **mobil sudah terpilih otomatis** | ⬜ | |
+| K5 | Kembali ke Keluhan Unit setelah jadwalkan | Keluhan tetap tampil (ditandai selesai **manual** oleh pengurus setelah tindak lanjut) | ⬜ | |
+| K6 | Sunting catatan di modal sebelum simpan | Perubahan catatan ikut tersimpan (catatan bisa diedit) | ⬜ | |

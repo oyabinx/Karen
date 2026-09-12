@@ -1,0 +1,61 @@
+╔══════════════════════════════════════════════════════════════════╗
+║ KAREN — KELUHAN UNIT PER KENDARAAN + JADWALKAN MAINTENANCE MODAL  ║
+║      (catatan gabungan otomatis — 242 test hijau)                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Tanggal : 2026-09-12
+  Status  : ✅ 242/242 test HIJAU (+3) — alur diverifikasi browser
+
+────────────────────────────────────────────────────────────────────
+ MASALAH (rev user)
+────────────────────────────────────────────────────────────────────
+ 1. Untuk menjadwalkan maintenance dari keluhan, pengurus harus
+    hafal plat + keluhan lalu isi ulang form manual di Jadwal
+    Maintenance — bolak-balik menu bila lupa (mobil banyak).
+ 2. Keluhan dari beberapa peminjam berbeda pada unit yang sama
+    harus tergabung otomatis di catatan maintenance.
+
+────────────────────────────────────────────────────────────────────
+ SKEMA BARU
+────────────────────────────────────────────────────────────────────
+ • Keluhan Unit tab "Belum Selesai" kini KARTU PER KENDARAAN
+   (ComplaintController::index): semua keluhan aktif unit satu
+   kartu (isi + pelapor + waktu kembali) + "Tandai selesai" per
+   keluhan; kendaraan dengan keluhan terbaru di atas; urutan
+   keluhan deterministik (orderByDesc id).
+ • Tombol "🔧 Jadwalkan Maintenance" per kartu → MODAL (native
+   <dialog>): tanggal mulai/selesai (min hari ini, end.min
+   mengikuti start via onchange) + catatan TEXTAREA terisi
+   GABUNGAN: "Keluhan: rem bermasalah (Galih, 12 Sep); setir
+   berat (Pegawai Contoh, 11 Sep)" (Str::limit 255, bisa
+   disunting) + vehicle_id hidden.
+ • Submit → POST /pengurus/maintenances (MaintenanceRequest
+   existing: mulai ≥ hari ini, rentang valid, anti-overlap,
+   anti-tabrak event) → alur lanjutan TIDAK berubah (deteksi
+   tabrakan booking → redirect Penggantian Mobil).
+ • Keluhan TIDAK otomatis selesai saat dijadwalkan (aturan
+   existing: manual oleh pengurus). Tab "Selesai" tetap daftar
+   datar + Buka kembali (paginasi dipertahankan).
+ • Banner error validasi di halaman keluhan (modal tertutup saat
+   back() dengan error).
+
+────────────────────────────────────────────────────────────────────
+ VERIFIKASI
+────────────────────────────────────────────────────────────────────
+ • Test baru KeluhanJadwalkanMaintenanceTest (3):
+   - 2 keluhan unit sama + 1 unit lain → kartu per kendaraan,
+     catatan gabungan berisi keduanya, modal per unit hanya
+     berisi keluhan unitnya.
+   - Simpan dari modal → maintenance tercatat (mobil preset,
+     note gabungan, status terjadwal); keluhan tetap 2 belum
+     selesai.
+   - Tandai selesai satu keluhan → kartu "1 keluhan aktif",
+     catatan gabungan menyusut otomatis.
+ • Browser (mobile 390px, login pengurus): kartu Avanza "2
+   keluhan aktif" (rem bermasalah — Galih; setir berat —
+   Pegawai Contoh) → modal catatan terisi otomatis → isi
+   tanggal H+3..H+5 → Simpan → "Jadwal maintenance tersimpan.",
+   maintenance #8 tersimpan note=gabungan, keluhan tetap manual.
+ • Docs: laporan.md (seksi Keluhan), pengembalian.md (alur tindak
+   lanjut), product.md (aturan 31). UAT/06 seksi C2b (K1–K6).
+ • Commit + push GitHub (oyabinx/Karen).
