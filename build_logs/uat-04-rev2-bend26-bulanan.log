@@ -112,3 +112,18 @@
    spasi "Mengetahui..." hilang ✓.
  • UAT/04 baris baru: B4c, B6d, B6c2 (⬜ menunggu verifikasi user).
  • Checkpoint file: TASKLIST-UAT04-REV3.md (semua [x]).
+
+────────────────────────────────────────────────────────────────────
+ TAMBAHAN (2026-09-12): HALAMAN LOGIN
+────────────────────────────────────────────────────────────────────
+ • Toggle lihat/sembunyikan sandi (ikon mata, Alpine) — komponen
+   baru x-password-input; dipasang di login, confirm-password,
+   dan reset-password (2 field). Diverifikasi browser: type
+   password ⇄ text saat ikon diklik.
+ • Logo Laravel diganti x-karen-logo — mark kubus isometrik "K"
+   dari SVG buatan user, warna gradient PERSIS file yang di-paste
+   (merah-koral + ungu-indigo; id gradient di-prefix k- agar tidak
+   bentrok). Latar rect & garis grid file asli dibuang (gradient
+   latar tidak terdefinisi di file) — hanya mark K. ViewBox
+   dirapatkan ke bounds mark (280 93 240 285).
+ • 244/244 test tetap hijau.
