@@ -43,3 +43,9 @@ Karen adalah **satu codebase web responsive** (tidak ada aplikasi mobile terpisa
 - Semua layout ditulis **mobile-first** (default = mobile, lalu `lg:` untuk desktop) — konsisten dengan Tailwind.
 - Komponen Blade partial (`resources/views/components/`) menerima kedua pola; dilarang membuat halaman mobile terpisah.
 - Ikon memakai satu set (Heroicons bawaan Breeze), ukuran seragam.
+
+
+## App-Shell (rev UAT 04-B12)
+- Layout aplikasi memakai kerangka **app-shell**: `body` `h-dvh overflow-hidden`; area konten scroll **di dalam kontainernya sendiri** (`main` flex-1 `overflow-y-auto`).
+- Bar navigasi bawah mobile **berada dalam alur dokumen** (bukan `fixed` menimpa) — secara fisik **tidak mungkin menutupi konten**; topbar mobile statis di atas area scroll; sidebar desktop menjadi kolom flex (tidak lagi `fixed`).
+- Konsekuensi: padding bawah besar (pb-36) tidak diperlukan lagi; sticky form pencarian memakai `top-0` (header di luar scroll container).

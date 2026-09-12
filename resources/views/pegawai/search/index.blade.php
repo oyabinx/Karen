@@ -28,7 +28,7 @@
     @endif
 
     {{-- Form pencarian (sticky di mobile — docs/feature/ui_responsive.md) --}}
-    <form method="GET" class="sticky top-14 lg:top-0 z-30 bg-gray-100 py-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+    <form method="GET" class="sticky top-0 z-30 bg-gray-100 py-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
         <div class="flex-1">
             <x-input-label for="start_date" value="Tanggal mulai" />
             <x-text-input id="start_date" name="start_date" type="date" class="block mt-1 w-full" value="{{ $start }}" min="{{ today()->toDateString() }}" />

@@ -14,12 +14,16 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased bg-gray-100" x-data="{ drawer: false }" @keydown.escape.window="drawer = false">
+    <body class="font-sans text-gray-900 antialiased bg-gray-100 h-dvh overflow-hidden" x-data="{ drawer: false }" @keydown.escape.window="drawer = false">
         @php($menu = \App\Support\KarenMenu::forUser(auth()->user()))
 
-        <div class="min-h-screen lg:flex">
+        {{-- APP-SHELL (rev UAT 04-B12): bar bawah mobile berada DI DALAM
+             alur dokumen (bukan fixed menimpa) — konten scroll pada
+             kontainernya sendiri sehingga bar tidak pernah menutupi
+             informasi. --}}
+        <div class="h-dvh flex flex-col lg:flex-row">
             {{-- SIDEBAR DESKTOP (≥lg) — docs/feature/ui_responsive.md --}}
-            <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-e border-gray-200">
+            <aside class="hidden lg:flex lg:flex-col lg:w-64 shrink-0 bg-white border-e border-gray-200">
                 <div class="flex items-center gap-2 h-16 px-6 border-b border-gray-200">
                     <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold">K</div>
                     <span class="font-semibold text-lg">Karen</span>
@@ -53,9 +57,9 @@
             </aside>
 
             {{-- AREA KONTEN --}}
-            <div class="flex-1 lg:ms-64 flex flex-col min-h-screen">
-                {{-- TOPBAR MOBILE (<lg): hamburger --}}
-                <header class="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200">
+            <div class="flex-1 flex flex-col min-h-0">
+                {{-- TOPBAR MOBILE (<lg): hamburger — statis di atas area scroll --}}
+                <header class="lg:hidden bg-white border-b border-gray-200 shrink-0">
                     <div class="flex items-center justify-between h-14 px-4">
                         <button @click="drawer = true" class="p-2 -ms-2 min-h-[44px] min-w-[44px] text-gray-600" aria-label="Buka menu">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -101,7 +105,7 @@
                     </div>
                 </aside>
 
-                <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-36 lg:pb-8">
+                <main class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 lg:p-8">
                     @if (session('status'))
                         <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
                             {{ __('Tersimpan.') }}
@@ -110,12 +114,11 @@
 
                     {{ $slot }}
                 </main>
-            </div>
-        </div>
 
-        {{-- BOTTOM NAVIGATION MOBILE — aksi utama (docs/feature/ui_responsive.md) --}}
-        @php($canBook = auth()->user()->hasAnyRole('pegawai', 'pengurus'))
-        <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 grid {{ $canBook && Route::has('pegawai.search.index') ? 'grid-cols-4' : 'grid-cols-3' }}">
+                {{-- BOTTOM NAVIGATION MOBILE — aksi utama (docs/feature/ui_responsive.md).
+                     Bagian dari alur dokumen (app-shell): tidak menutupi konten. --}}
+                @php($canBook = auth()->user()->hasAnyRole('pegawai', 'pengurus'))
+                <nav class="lg:hidden bg-white border-t border-gray-200 grid shrink-0 {{ $canBook && Route::has('pegawai.search.index') ? 'grid-cols-4' : 'grid-cols-3' }}">
             <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center py-2 min-h-[56px] text-xs {{ request()->routeIs('dashboard') ? 'text-indigo-600 font-semibold' : 'text-gray-500' }}">
                 <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/></svg>
                 Beranda
@@ -140,7 +143,9 @@
                     Keluar
                 </a>
             @endunless
-        </nav>
+                </nav>
+            </div>
+        </div>
 
         {{-- Form logout global (dipakai bottom-nav) --}}
         <form id="logout-karen" method="POST" action="{{ route('logout') }}" class="hidden">@csrf</form>
