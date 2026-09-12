@@ -37,7 +37,7 @@
             <x-input-label for="end_date" value="Tanggal selesai" />
             <x-text-input id="end_date" name="end_date" type="date" class="block mt-1 w-full" value="{{ $end }}" min="{{ today()->toDateString() }}" />
         </div>
-        <x-primary-button class="justify-center min-h-[44px]">Cari</x-primary-button>
+        <x-primary-button class="w-full sm:w-auto">Cari</x-primary-button>
     </form>
 
     @foreach ($rangeErrors as $error)
@@ -68,7 +68,7 @@
                                 </span>
                             @else
                                 <a href="{{ route('pegawai.bookings.create', ['vehicle_id' => $v->id, 'start_date' => $start, 'end_date' => $end]) }}"
-                                   class="block text-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px] leading-[44px]">
+                                   class="block text-center px-4 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px] leading-[48px]">
                                     Pinjam Mobil Ini
                                 </a>
                             @endif

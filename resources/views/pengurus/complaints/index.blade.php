@@ -42,12 +42,12 @@
                         @if ($v['maintenanceTerjadwal'])
                             @php($jm = $v['maintenanceTerjadwal'])
                             <a href="{{ route('pengurus.maintenances.index') }}"
-                               class="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 min-h-[44px] shrink-0 inline-flex items-center">
+                               class="px-5 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 min-h-[48px] shrink-0 inline-flex items-center">
                                 🛠 Sedang Maintenance ({{ $jm->start_date->translatedFormat('d M') }}–{{ $jm->end_date->translatedFormat('d M Y') }}) →
                             </a>
                         @else
                             <button type="button" onclick="document.getElementById('jadwal-modal-{{ $vehicle->id }}').showModal()"
-                                    class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[44px] shrink-0">
+                                    class="px-5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[48px] shrink-0">
                                 🔧 Jadwalkan Maintenance
                             </button>
                         @endif
@@ -109,10 +109,10 @@
 
                         <p class="text-xs text-gray-400 mt-3">Menyimpan akan memeriksa tabrakan dengan peminjaman aktif — bila menabrak, Anda diarahkan ke halaman Penggantian Mobil seperti biasa.</p>
 
-                        <div class="mt-4 flex justify-end gap-3">
+                        <div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                             <button type="button" onclick="this.closest('dialog').close()"
-                                    class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50 min-h-[44px]">Batal</button>
-                            <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[44px]">Simpan Jadwal</button>
+                                    class="w-full sm:w-auto px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 text-center min-h-[40px]">Batal</button>
+                            <button type="submit" class="w-full sm:w-auto px-5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[48px]">Simpan Jadwal</button>
                         </div>
                     </form>
                 </dialog>

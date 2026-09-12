@@ -23,9 +23,9 @@
                 @endforeach
             </select>
         </div>
-        <button class="px-4 rounded-lg bg-gray-800 text-white text-sm min-h-[44px]">Terapkan</button>
+        <button class="px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold min-h-[48px]">Terapkan</button>
         <a href="{{ route('pengurus.reports.index', array_filter(['from' => $from, 'to' => $to, 'bidang' => $bidangId]) + ['export' => 1, 'with_budget' => 1]) }}"
-           class="px-4 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 min-h-[44px] flex items-center justify-center">⬇ Export CSV</a>
+           class="px-4 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[48px] flex items-center justify-center">⬇ Export CSV</a>
     </form>
 
     {{-- Kartu Pemeliharaan Kendaraan — dipindah ke Laporan (UAT 04-B10) --}}
@@ -46,7 +46,7 @@
             <input id="kartu-year" name="year" type="number" min="2000" max="2100" value="{{ $tahun }}"
                    class="block mt-1 w-full rounded-lg border-gray-300 text-sm" />
         </div>
-        <button type="submit" class="px-4 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px] whitespace-nowrap">Generate Kartu Pemeliharaan</button>
+        <button type="submit" class="px-5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px] whitespace-nowrap">Generate Kartu Pemeliharaan</button>
     </form>
     {{-- Arahkan form ke mobil terpilih (route memakai {vehicle}) --}}
     <script>

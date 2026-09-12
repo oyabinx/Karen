@@ -22,13 +22,13 @@
                     </select>
                 </form>
                 <a href="?bulan={{ $bulan }}@if($vehicleId)&vehicle={{ $vehicleId }}@endif&export=1"
-                   class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 min-h-[44px] flex items-center">⬇ CSV</a>
+                   class="px-5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[48px] flex items-center">⬇ CSV</a>
                 {{-- Generate bend26 BULANAN semua pos bernilai (UAT 04-B6) --}}
                 @if ($perVehicle->isNotEmpty())
                     <form method="POST" action="{{ route('pengurus.documents.bend26') }}">
                         @csrf
                         <input type="hidden" name="month" value="{{ $bulan }}">
-                        <button class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px] whitespace-nowrap">Generate Bend26 {{ \Illuminate\Support\Carbon::parse($bulan.'-01')->translatedFormat('M Y') }}</button>
+                        <button class="px-5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px] whitespace-nowrap">Generate Bend26 {{ \Illuminate\Support\Carbon::parse($bulan.'-01')->translatedFormat('M Y') }}</button>
                     </form>
                 @endif
             </div>

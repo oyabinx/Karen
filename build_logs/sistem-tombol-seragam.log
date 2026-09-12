@@ -1,0 +1,50 @@
+BUILD LOG — Sistem Tombol Seragam Seluruh Aplikasi
+Tanggal: 2026-09-13
+Latar belakang (permintaan user):
+  Setelah perbaikan hierarki tombol di form peminjaman, kendaraan, user,
+  dan nota, user minta SEMUA tombol dicek dan disamakan ke tema yang
+  sama (primer lebih besar/tebal dari sekunder).
+
+Sistem tier (didokumentasikan di docs/feature/ui_responsive.md):
+  • PRIMER   : solid indigo min-h-48 text-sm font-semibold rata tengah
+  • SEKUNDER : outline abu min-h-40 text-sm (Batal/Unduh/Test Koneksi)
+  • KOMPAK   : 44px utk aksi per-baris tabel, pill tab, pagination
+  • Semantik : emerald (selesai/generate), amber (edit/jadwal),
+    red (destruktif) — warna tetap, geometri ikut tier-nya.
+
+Perubahan:
+  1. components/primary-button.blade.php — restyle dari Breeze default
+     (gray-800, text-xs UPPERCASE, ~36px) → tema Karen (indigo 48px
+     semibold). Berdampak ke 20 call site: login, auth password pages,
+     pengaturan, profil ×2, anggaran, impor user ×2, google, jadwal
+     maintenance, wizard event, cari mobil.
+  2. Override min-h-[44px] di call site dibersihkan (Cari, Simpan).
+  3. gray-800 → indigo 48: Cari (users), Filter (bookings, activity
+     logs), Terapkan (reports), Simpan per-bidang, Sinkron Sekarang,
+     Lihat Armada Tersedia.
+  4. indigo 44 medium → 48 semibold: + Tambah User/Kendaraan/Event,
+     + Pinjam Mobil, + Seksi, + Bidang, Generate Bend26, Generate
+     Kartu Pemeliharaan, label unggah file (impor user, google),
+     "Pinjam Mobil Ini" (kartu mobil, py-2 dibuang agar tak menumpuk
+     jadi 64px).
+  5. Semantik → 48: Export CSV ×2, Konfirmasi Event, Batalkan
+     Peminjaman (replacements), 🔧 Jadwalkan Maintenance, 🛠 Sedang
+     Maintenance, Atur Pengganti; modal: Ya Batalkan/Selesai—Kembalikan
+     (pembuka + footer), Simpan Jadwal.
+  6. Sekunder → 40: Batal modal pengembalian & modal jadwal keluhan,
+     ⬇ Unduh Template CSV, ⬇ Unduh Laporan Gagal, ⬇ Unduh PDF,
+     🔌 Test Koneksi, tombol outline halaman penggantian.
+  7. Footer modal jadwal keluhan: flex justify-end → flex-col-reverse
+     sm:justify-end (konsisten pola mobile).
+
+Dibiarkan (disengaja, tier kompak/navigasi): pill tab filter 44px,
+pagination, link teks tabel (Ubah/Tandai selesai), tombol padat text-xs
+di list konflik event & pilihan unit pengganti, Keluar menu, ikon.
+
+Verifikasi:
+  - npm run build ulang (kelas baru: min-h-48/font-semibold variasi).
+  - Browser mobile 390px: /pengurus/vehicles (+ Tambah 48/600 indigo,
+    pill 44), /pegawai/search (Cari 48 tanpa uppercase, Pinjam Mobil
+    Ini 48 rata tengah — ditemukan & diperbaiki bug 64px akibat
+    py-2+leading menumpuk), tanpa overflow horizontal.
+  - Full suite: 246 passed.

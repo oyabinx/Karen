@@ -29,7 +29,7 @@
             <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="rounded-lg border-gray-300 text-sm w-full" title="Dari">
             <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="rounded-lg border-gray-300 text-sm w-full" title="Sampai">
         </div>
-        <button class="px-4 rounded-lg bg-gray-800 text-white text-sm min-h-[44px]">Filter</button>
+        <button class="px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold min-h-[48px]">Filter</button>
     </form>
 
     {{-- Daftar log --}}

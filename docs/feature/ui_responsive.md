@@ -49,3 +49,17 @@ Karen adalah **satu codebase web responsive** (tidak ada aplikasi mobile terpisa
 - Layout aplikasi memakai kerangka **app-shell**: `body` `h-dvh overflow-hidden`; area konten scroll **di dalam kontainernya sendiri** (`main` flex-1 `overflow-y-auto`).
 - Bar navigasi bawah mobile **berada dalam alur dokumen** (bukan `fixed` menimpa) — secara fisik **tidak mungkin menutupi konten**; topbar mobile statis di atas area scroll; sidebar desktop menjadi kolom flex (tidak lagi `fixed`).
 - Konsekuensi: padding bawah besar (pb-36) tidak diperlukan lagi; sticky form pencarian memakai `top-0` (header di luar scroll container).
+
+## Sistem Tombol (rev UAT 04 — "tema tombol Karen")
+Semua tombol aksi mengikuti hierarki tiga tier; **aksi utama selalu LEBIH BESAR dan LEBIH TEBAL daripada aksi sekunder** yang berdampingan dengannya:
+
+| Tier | Bentuk | Kapan dipakai |
+|------|--------|---------------|
+| **Primer** | solid indigo `min-h-[48px]` `text-sm font-semibold` `rounded-lg` rata tengah (`x-primary-button` / `bg-indigo-600`) | Simpan/Cari/Filter/Terapkan, "+ Tambah X", Generate dokumen, CTA "Pinjam Mobil Ini", label unggah file |
+| **Sekunder** | outline `min-h-[40px]` `text-sm` abu (`border-gray-300 text-gray-600 hover:bg-gray-50`) | Batal, Unduh Template/PDF, Test Koneksi |
+| **Kompak** | 44px, `text-sm`/`text-xs` | aksi per-baris di tabel/daftar padat (Ubah, Pilih, Ganti unit, Tandai selesai), pill tab filter, pagination |
+
+- **Warna semantik** menggantikan indigo TAPI mempertahankan geometri tier-nya: **emerald** = selesai/generate dokumen (Selesai—Kembalikan, Simpan Jadwal, Export CSV), **amber** = kondisi edit/jadwal (Selesai Edit, Atur Pengganti, Sedang Maintenance), **red** = destruktif (Batalkan Peminjaman).
+- Pemosisian: pasangan Batal + aksi utama memakai `flex flex-col-reverse sm:flex-row sm:justify-end` — mobile: utama full-width DI ATAS, Batal di bawah; desktop sebaris rata kanan.
+- Komponen `resources/views/components/primary-button.blade.php` = sumber kebenaran tier primer (indigo 48px); timpa warna via class `bg-*`/`hover:bg-*` di call site.
+- Pengecualian yang disengaja: tombol keluar menu, ikon, dan input tetap 44px (touch target navigasi, bukan aksi).

@@ -22,7 +22,7 @@
     @endif
 
     <div class="mb-6">
-        <a href="{{ route('pengurus.replacements.index') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 min-h-[44px]">
+        <a href="{{ route('pengurus.replacements.index') }}" class="inline-flex items-center px-5 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 min-h-[48px]">
             ⚠ Penggantian Mobil Menunggu Konfirmasi
         </a>
     </div>
@@ -53,7 +53,7 @@
                 <x-input-label for="note" value="Catatan (opsional)" />
                 <x-text-input id="note" name="note" type="text" class="block mt-1 w-full" placeholder="mis. servis rutin 40.000 km" />
             </div>
-            <x-primary-button class="justify-center min-h-[44px]">Simpan</x-primary-button>
+            <x-primary-button>Simpan</x-primary-button>
         </form>
 
         {{-- Pesan error VALIDASI ditampilkan SATU BANNER di bawah kotak

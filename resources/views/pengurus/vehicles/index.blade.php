@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-semibold">Data Kendaraan</h1>
             <p class="text-sm text-gray-500">Kelola armada: status peminjaman, kondisi unit, dan foto.</p>
         </div>
-        <a href="{{ route('pengurus.vehicles.create') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px]">+ Tambah Kendaraan</a>
+        <a href="{{ route('pengurus.vehicles.create') }}" class="inline-flex items-center px-5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px]">+ Tambah Kendaraan</a>
     </div>
 
     @if (session('success'))

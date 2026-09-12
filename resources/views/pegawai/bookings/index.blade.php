@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-semibold">Peminjaman Saya</h1>
             <p class="text-sm text-gray-500">Riwayat & status seluruh peminjaman Anda.</p>
         </div>
-        <a href="{{ route('pegawai.search.index') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px]">+ Pinjam Mobil</a>
+        <a href="{{ route('pegawai.search.index') }}" class="inline-flex items-center px-5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px]">+ Pinjam Mobil</a>
     </div>
 
     @if (session('success'))

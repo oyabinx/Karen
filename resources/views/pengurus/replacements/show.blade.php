@@ -67,7 +67,7 @@
                 <form method="POST" action="{{ route('pengurus.replacements.assign', $booking) }}" class="mt-3 pt-3 border-t border-gray-100 mt-auto">
                     @csrf @method('PATCH')
                     <input type="hidden" name="vehicle_id" value="{{ $v->id }}">
-                    <button class="w-full justify-center px-4 py-2 rounded-lg border border-indigo-300 text-indigo-700 text-sm font-medium hover:bg-indigo-50 min-h-[44px]">
+                    <button class="w-full justify-center px-4 rounded-lg border border-indigo-300 text-indigo-700 text-sm hover:bg-indigo-50 min-h-[40px]">
                         {{ $partial ? 'Ganti Seluruh Rentang' : 'Jadikan Pengganti' }}
                     </button>
                 </form>
@@ -85,7 +85,7 @@
         <p class="text-sm text-red-600 mb-3">Batalkan peminjaman ini — jatah kuota bidang peminjam akan dilepas.</p>
         <form method="POST" action="{{ route('pengurus.replacements.cancel', $booking) }}" onsubmit="return confirm('Batalkan peminjaman ini secara permanen?')">
             @csrf @method('PATCH')
-            <button class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 min-h-[44px]">Batalkan Peminjaman</button>
+            <button class="px-5 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 min-h-[48px]">Batalkan Peminjaman</button>
         </form>
     </section>
 </x-app-layout>

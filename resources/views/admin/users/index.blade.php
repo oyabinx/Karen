@@ -6,7 +6,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('admin.users.import') }}" class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium hover:bg-gray-50 min-h-[44px]">Impor CSV</a>
-            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px]">+ Tambah User</a>
+            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px]">+ Tambah User</a>
         </div>
     </div>
 
@@ -38,7 +38,7 @@
                 <option value="nonaktif" {{ ($filters['status'] ?? '') === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
                 <option value="semua" {{ ($filters['status'] ?? '') === 'semua' ? 'selected' : '' }}>Semua</option>
             </select>
-            <button class="px-4 rounded-lg bg-gray-800 text-white text-sm min-h-[44px]">Cari</button>
+            <button class="px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold min-h-[48px]">Cari</button>
         </div>
     </form>
 

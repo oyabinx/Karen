@@ -20,7 +20,7 @@
             <p class="font-semibold text-green-700 mb-3">✓ Semua konflik telah terselesaikan.</p>
             <form method="POST" action="{{ route('pengurus.events.confirm', $event) }}">
                 @csrf @method('PATCH')
-                <button class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 min-h-[44px]">Konfirmasi Event</button>
+                <button class="px-5 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 min-h-[48px]">Konfirmasi Event</button>
             </form>
         </section>
     @else

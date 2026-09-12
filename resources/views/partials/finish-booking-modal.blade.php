@@ -7,12 +7,12 @@
 <div x-data="{ open: false }" @keydown.escape.window="open = false">
     @if ($belumMulai)
         <button @click="open = true"
-                class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 min-h-[44px] {{ $class ?? '' }}">
+                class="px-5 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 min-h-[48px] {{ $class ?? '' }}">
             Batalkan Peminjaman
         </button>
     @else
         <button @click="open = true"
-                class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[44px] {{ $class ?? '' }}">
+                class="px-5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[48px] {{ $class ?? '' }}">
             Selesai — Kembalikan Mobil
         </button>
     @endif
@@ -40,9 +40,9 @@
                 @csrf
                 <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                     <button type="button" @click="open = false"
-                            class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50 min-h-[44px]">Batal</button>
+                            class="w-full sm:w-auto px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 text-center min-h-[40px]">Batal</button>
                     <button type="submit"
-                            class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 min-h-[44px]">
+                            class="w-full sm:w-auto px-5 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 min-h-[48px]">
                         Ya, Batalkan Peminjaman
                     </button>
                 </div>
@@ -69,9 +69,9 @@
 
                 <div class="mt-5 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                     <button type="button" @click="open = false"
-                            class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50 min-h-[44px]">Batal</button>
+                            class="w-full sm:w-auto px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 text-center min-h-[40px]">Batal</button>
                     <button type="submit"
-                            class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[44px]">
+                            class="w-full sm:w-auto px-5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 min-h-[48px]">
                         Selesai — Kembalikan Mobil
                     </button>
                 </div>

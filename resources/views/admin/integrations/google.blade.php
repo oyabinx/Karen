@@ -50,7 +50,7 @@
             <x-input-label for="key_file" value="Unggah / ganti kunci JSON (maks 50 KB)" />
             {{-- Tombol pilih file mencolok + nama file terpilih tampil jelas (UAT B1) --}}
             <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center mt-1">
-                <label class="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[44px] shadow-sm">
+                <label class="cursor-pointer inline-flex items-center justify-center gap-2 px-5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px] shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                     Pilih File Kunci
                     <input id="key_file" name="key_file" type="file" accept=".json,application/json" class="hidden"
@@ -110,11 +110,11 @@
     <div class="max-w-3xl flex flex-col sm:flex-row gap-3 mt-6">
         <form method="POST" action="{{ route('admin.integrasi.google.test') }}">
             @csrf
-            <button class="w-full sm:w-auto px-4 py-2 rounded-lg border border-indigo-300 text-indigo-700 text-sm font-medium hover:bg-indigo-50 min-h-[44px]">🔌 Test Koneksi</button>
+            <button class="w-full sm:w-auto px-4 rounded-lg border border-indigo-300 text-indigo-700 text-sm hover:bg-indigo-50 min-h-[40px]">🔌 Test Koneksi</button>
         </form>
         <form method="POST" action="{{ route('admin.integrasi.google.sync') }}">
             @csrf
-            <button class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-800 text-white text-sm font-medium hover:bg-gray-900 min-h-[44px]">🔄 Sinkron Sekarang</button>
+            <button class="w-full sm:w-auto px-4 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px]">🔄 Sinkron Sekarang</button>
         </form>
     </div>
 

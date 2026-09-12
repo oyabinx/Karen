@@ -35,7 +35,7 @@
                             Kuota
                             <input type="number" name="max_active_bookings" value="{{ $b->max_active_bookings }}" min="1" max="9" required class="rounded-lg border-gray-300 w-20 min-h-[44px]">
                         </label>
-                        <button class="px-4 rounded-lg bg-gray-800 text-white text-sm font-medium min-h-[44px]">Simpan</button>
+                        <button class="px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold min-h-[48px]">Simpan</button>
                     </form>
 
                     {{-- Daftar seksi --}}
@@ -65,7 +65,7 @@
                     <form method="POST" action="{{ route('admin.seksi.store', $b) }}" class="flex gap-2">
                         @csrf
                         <input type="text" name="name" placeholder="Nama seksi baru…" required class="flex-1 rounded-lg border-gray-300 text-sm min-h-[44px]">
-                        <button class="px-4 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px]">+ Seksi</button>
+                        <button class="px-4 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px]">+ Seksi</button>
                     </form>
 
                     {{-- Hapus bidang --}}
@@ -89,7 +89,7 @@
                 Kuota
                 <input type="number" name="max_active_bookings" value="2" min="1" max="9" required class="rounded-lg border-gray-300 w-20 min-h-[44px]">
             </label>
-            <button class="px-4 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px]">+ Bidang</button>
+            <button class="px-4 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px]">+ Bidang</button>
         </form>
     </section>
 </x-app-layout>

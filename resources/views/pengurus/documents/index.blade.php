@@ -52,7 +52,7 @@
                         @endif
                     </p>
                 </div>
-                <a href="{{ route('pengurus.documents.download', $d) }}" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50 min-h-[44px] flex items-center">⬇ Unduh PDF</a>
+                <a href="{{ route('pengurus.documents.download', $d) }}" class="px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 min-h-[40px] flex items-center">⬇ Unduh PDF</a>
             </div>
         @empty
             <div class="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">

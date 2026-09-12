@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-semibold">Event Armada Bidang</h1>
             <p class="text-sm text-gray-500">Pemakaian banyak mobil sekaligus untuk satu bidang — bebas dari kuota, durasi fleksibel (boleh &gt;3 hari).</p>
         </div>
-        <a href="{{ route('pengurus.events.create') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 min-h-[44px]">+ Buat Event</a>
+        <a href="{{ route('pengurus.events.create') }}" class="inline-flex items-center px-5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px]">+ Buat Event</a>
     </div>
 
     @if (session('success'))

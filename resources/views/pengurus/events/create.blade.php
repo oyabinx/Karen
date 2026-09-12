@@ -26,7 +26,7 @@
             <x-text-input id="p_end" name="end_date" type="date" class="block mt-1 w-full" value="{{ $input['end_date'] ?? '' }}" />
         </div>
         <div class="lg:col-span-2">
-            <button class="w-full px-4 rounded-lg bg-gray-800 text-white text-sm font-medium hover:bg-gray-900 min-h-[44px]">Lihat Armada Tersedia</button>
+            <button class="w-full px-4 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 min-h-[48px]">Lihat Armada Tersedia</button>
         </div>
     </form>
 
