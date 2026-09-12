@@ -127,3 +127,11 @@
    latar tidak terdefinisi di file) — hanya mark K. ViewBox
    dirapatkan ke bounds mark (280 93 240 285).
  • 244/244 test tetap hijau.
+
+────────────────────────────────────────────────────────────────────
+ TAMBAHAN (2026-09-12): TOMBOL PINJAM SEKARANG MOBILE
+────────────────────────────────────────────────────────────────────
+ • x-primary-button + justify-center — tombol utama meregang penuh
+   di mobile (flex-col) kini teksnya rata tengah; berlaku global
+   (23 pemakaian: auth, form peminjaman, anggaran, settings, dll).
+   Diverifikasi browser 390px: "PINJAM SEKARANG" terpusat.
