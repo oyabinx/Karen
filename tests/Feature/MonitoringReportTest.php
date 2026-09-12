@@ -153,7 +153,7 @@ class MonitoringReportTest extends TestCase
         $this->actingAs($this->pengurus)
             ->get('/dashboard')
             ->assertOk()
-            ->assertSee('Peminjaman Berjalan Hari Ini')
+            ->assertSee('Armada Hari Ini')
             ->assertSee('Hiace Daftar')
             ->assertSee('Anggaran Maintenance');
     }

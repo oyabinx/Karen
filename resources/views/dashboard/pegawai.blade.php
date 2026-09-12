@@ -50,6 +50,11 @@
         </div>
     @endif
 
+    {{-- Armada hari ini: siapa pakai mobil apa hari ini (kurangi pertanyaan ke pengurus) --}}
+    <div class="mb-6">
+        @include('dashboard.partials.armada-hari-ini')
+    </div>
+
     <div class="bg-white rounded-xl border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-3">
             <h2 class="font-semibold">Riwayat Terakhir</h2>

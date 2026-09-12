@@ -58,26 +58,8 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {{-- Peminjaman berjalan hari ini --}}
-        <section class="bg-white rounded-xl border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="font-semibold">Peminjaman Berjalan Hari Ini</h2>
-                <a href="{{ route('pengurus.bookings.index') }}" class="text-sm text-indigo-600 hover:underline">Semua peminjaman →</a>
-            </div>
-
-            <div class="space-y-2">
-                @forelse ($data['peminjamanHariIni'] as $b)
-                    <div class="flex items-start justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2">
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium truncate">{{ $b->vehicle->name }} <span class="text-gray-400">· {{ $b->user->name }}@if ($b->user->seksi) ({{ $b->user->seksi->bidang->name }})@endif</span></p>
-                            <p class="text-xs text-gray-500 truncate">s.d. {{ $b->end_date->translatedFormat('d M') }} · {{ $b->address }}</p>
-                        </div>
-                    </div>
-                @empty
-                    <p class="text-sm text-gray-400">Tidak ada peminjaman berjalan hari ini.</p>
-                @endforelse
-            </div>
-        </section>
+        {{-- Armada hari ini: dipakai siapa / bengkel / event (panel bersama semua role) --}}
+        @include('dashboard.partials.armada-hari-ini', ['tampilkanLinkSemua' => true])
 
         <div class="space-y-6">
             {{-- Ringkasan anggaran per pos --}}

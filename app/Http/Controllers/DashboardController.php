@@ -33,6 +33,10 @@ class DashboardController extends Controller
                 'pengurus' => $this->pengurusData($user),
                 'pegawai' => $this->pegawaiData($user),
             },
+            // Panel bersama semua role — menjawab "mobil X hari ini siapa
+            // yang pakai?" tanpa harus bertanya ke pengurus
+            // (docs/feature/dashboard.md Armada Hari Ini)
+            'armadaHariIni' => $this->armadaHariIni(),
         ]);
     }
 
@@ -87,13 +91,6 @@ class DashboardController extends Controller
                 'menungguPengganti' => Booking::where('status', Booking::STATUS_MENUNGGU_PENGGANTIAN)->count(),
                 'keluhanBelum' => \App\Models\Complaint::where('resolved', false)->count(),
             ],
-            'peminjamanHariIni' => Booking::with(['user.seksi.bidang', 'vehicle'])
-                ->where('status', Booking::STATUS_DIPINJAM)
-                ->whereDate('start_date', '<=', today())
-                ->whereDate('end_date', '>=', today())
-                ->orderBy('end_date')
-                ->limit(6)
-                ->get(),
             'eventBerjalan' => Event::with('bidang')->withCount('vehicles as armada_count')
                 ->where('status', 'terjadwal')->orderBy('start_date')->limit(3)->get(),
             'anggaran' => $summaryAnggaran,
@@ -117,6 +114,51 @@ class DashboardController extends Controller
                 ->limit(5)
                 ->get(),
         ];
+    }
+
+    /**
+     * Status seluruh armada pada hari ini (docs/feature/dashboard.md
+     * "Armada Hari Ini") — panel bersama semua role supaya pegawai
+     * tidak perlu bertanya ke pengurus "mobil X hari ini siapa yang
+     * pakai?". Satu unit hanya muncul sekali: prioritas dipakai >
+     * bengkel > event.
+     */
+    private function armadaHariIni(): array
+    {
+        $dipakai = Booking::with(['user.seksi.bidang', 'vehicle'])
+            ->whereIn('status', [Booking::STATUS_DIPINJAM, Booking::STATUS_MENUNGGU_PENGGANTIAN])
+            ->whereDate('start_date', '<=', today())
+            ->whereDate('end_date', '>=', today())
+            ->get()
+            ->sortBy(fn (Booking $b) => $b->vehicle->name)
+            ->values();
+
+        $dipakaiIds = $dipakai->pluck('vehicle_id');
+
+        $bengkel = \App\Models\Maintenance::with('vehicle')
+            ->where('status', 'terjadwal')
+            ->whereDate('start_date', '<=', today())
+            ->whereDate('end_date', '>=', today())
+            ->get()
+            ->filter(fn ($m) => ! $dipakaiIds->contains($m->vehicle_id))
+            ->sortBy(fn ($m) => $m->vehicle->name)
+            ->values();
+
+        $sudahTampil = $dipakaiIds->merge($bengkel->pluck('vehicle_id'));
+
+        $eventArmada = Event::with(['bidang', 'vehicles'])
+            ->where('status', 'terjadwal')
+            ->whereDate('start_date', '<=', today())
+            ->whereDate('end_date', '>=', today())
+            ->orderBy('start_date')
+            ->get()
+            ->flatMap(fn (Event $e) => $e->vehicles
+                ->filter(fn (Vehicle $v) => ! $sudahTampil->contains($v->id))
+                ->map(fn (Vehicle $v) => (object) ['vehicle' => $v, 'event' => $e]))
+            ->sortBy(fn ($row) => $row->vehicle->name)
+            ->values();
+
+        return compact('dipakai', 'bengkel', 'eventArmada');
     }
 
     /**

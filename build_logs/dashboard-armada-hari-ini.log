@@ -1,0 +1,62 @@
+BUILD LOG — Dashboard Semua Role: Panel "Armada Hari Ini"
+Tanggal: 2026-09-12
+Latar belakang (permintaan user):
+  Di kantor, pegawai sering bertanya ke pengurus "mobil A hari ini siapa
+  yang pakai?" (tuker unit, barang tertinggal di mobil, dll.). Dashboard
+  admin & pegawai tidak menampilkan info armada sama sekali; hanya
+  pengurus punya "Peminjaman Berjalan Hari Ini" (status dipinjam saja,
+  limit 6, tanpa kontak).
+
+Keputusan (konfirmasi user):
+  • Tampilkan nomor HP peminjam sebagai link tel: → pegawai bisa
+    koordinasi langsung tanpa lewat pengurus.
+  • Cakupan lengkap: unit dipakai + unit di bengkel + unit armada event
+    yang mencakup hari ini.
+
+Perubahan:
+  1. app/Http/Controllers/DashboardController.php
+     - Method private armadaHariIni(): koleksi 'dipakai' (status dipinjam
+       & menunggu_penggantian, jendela hari ini, eager user.seksi.bidang
+       + vehicle), 'bengkel' (maintenance terjadwal hari ini),
+       'eventArmada' (unit event terjadwal hari ini, flatten per unit).
+     - Dedup per unit — prioritas dipakai > bengkel > event.
+     - index() meneruskan 'armadaHariIni' ke ketiga view role.
+     - peminjamanHariIni lama dihapus dari pengurusData().
+  2. resources/views/dashboard/partials/armada-hari-ini.blade.php (baru)
+     - Section card "Armada Hari Ini" + chip ringkas (n dipakai · n di
+       bengkel · n armada event).
+     - Baris beraksen kiri 4px: indigo (dipakai + nama peminjam, bidang,
+       📞 link tel:, s.d. tanggal · tujuan, pill amber "menunggu
+       pengganti"), amber (🔧 di bengkel s.d. … — catatan), abu (📅
+       armada event "nama" (bidang) s.d. …).
+     - Empty state hijau: "Tidak ada armada yang dipakai hari ini".
+     - Opsi tampilkanLinkSemua → link "Semua peminjaman" (hanya
+       pengurus).
+  3. Penempatan:
+     - dashboard/pegawai.blade.php — setelah panel peminjaman aktif,
+       sebelum Riwayat Terakhir.
+     - dashboard/admin.blade.php — setelah kartu statistik, sebelum
+       Struktur Organisasi.
+     - dashboard/pengurus.blade.php — MENGGANTIKAN section
+       "Peminjaman Berjalan Hari Ini" (tampilkanLinkSemua: true).
+  4. Test:
+     - tests/Feature/DashboardTest.php +2:
+       test_dashboard_semua_role_menampilkan_armada_hari_ini
+       (booking+HP, maintenance, event hari ini → ketiga role melihat
+       semua baris + kontak 62…),
+       test_dashboard_armada_hari_ini_kosong_bila_tidak_ada_aktivitas.
+     - tests/Feature/MonitoringReportTest.php: assertion judul
+       "Peminjaman Berjalan Hari Ini" → "Armada Hari Ini".
+  5. Docs: docs/feature/dashboard.md — bagian baru "Panel Bersama:
+     Armada Hari Ini" + skenario uji 4-5.
+
+Verifikasi:
+  - npm run build (kelas border-l-* baru ikut ter-build).
+  - Browser (mobile 390px, pegawai@karen.test): panel tampil dengan
+    chip "1 dipakai · 1 di bengkel", link tel:62812…, baris bengkel;
+    ukuran statis: tanpa overflow horizontal (dokumen & baris), aksen
+    kiri 4px indigo/amber, panel 358px pas konten. Data uji sementara
+    (booking id 10, maintenance id 12) dibersihkan setelah verifikasi.
+  - DashboardTest + MonitoringReportTest: 16 passed (80 assertions).
+
+Hasil akhir: 246 passed (seluruh suite) — lihat run commit.

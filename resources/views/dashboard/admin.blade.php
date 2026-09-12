@@ -24,6 +24,11 @@
         </div>
     </div>
 
+    {{-- Armada hari ini: siapa pakai mobil apa hari ini (kurangi pertanyaan ke pengurus) --}}
+    <div class="mb-6">
+        @include('dashboard.partials.armada-hari-ini')
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {{-- Rincian per role & per bidang --}}
         <section class="bg-white rounded-xl border border-gray-200 p-6">
