@@ -214,7 +214,11 @@ class EventArmadaTest extends TestCase
             ->isAvailable($v, \Illuminate\Support\Carbon::parse('2026-10-02'), \Illuminate\Support\Carbon::parse('2026-10-03')));
     }
 
-    public function test_booking_sudah_diganti_tetap_di_pengganti_saat_event_dibatalkan(): void
+    /**
+     * UAT 05-A10: event dibatalkan setelah booking diganti → booking
+     * PULIH ke unit asal (mobil asal bebas karena event batal).
+     */
+    public function test_booking_sudah_diganti_pulih_ke_unit_asal_saat_event_dibatalkan(): void
     {
         $v = Vehicle::factory()->create();
         $pengganti = Vehicle::factory()->create();
@@ -238,8 +242,78 @@ class EventArmadaTest extends TestCase
             ->patch("/pengurus/events/{$event->id}/cancel");
 
         $booking->refresh();
-        $this->assertSame($pengganti->id, $booking->vehicle_id);
+        $this->assertSame($v->id, $booking->vehicle_id);
+        $this->assertNull($booking->original_vehicle_id);
         $this->assertSame(Booking::STATUS_DIPINJAM, $booking->status);
+    }
+
+    /**
+     * UAT 05-A10: bila unit asal sudah dipakai orang lain pada bagian
+     * rentang di LUAR event, booking tetap aman di penggantinya.
+     */
+    public function test_booking_diganti_tetap_di_pengganti_bila_unit_asal_sudah_dipakai(): void
+    {
+        $v = Vehicle::factory()->create();
+        $pengganti = Vehicle::factory()->create();
+
+        // Booking A di v 10-02..08 — menjorok jauh melewati rentang event
+        $booking = Booking::create([
+            'user_id' => User::factory()->create()->id,
+            'vehicle_id' => $v->id,
+            'start_date' => '2026-10-02',
+            'end_date' => '2026-10-08',
+            'address' => 'Kantor B',
+            'purpose' => 'Rapat',
+        ]);
+
+        // Event 10-01..03 → A diganti ke $pengganti
+        $this->actingAs($this->pengurus)
+            ->post('/pengurus/events', $this->payload(['start_date' => '2026-10-01', 'end_date' => '2026-10-03', 'vehicles' => [$v->id]]));
+        $event = Event::first();
+
+        $this->actingAs($this->pengurus)
+            ->patch("/pengurus/events/{$event->id}/conflicts/{$booking->id}", ['vehicle_id' => $pengganti->id]);
+
+        // Orang lain meminjam v pada ekor rentang (10-05..06, di luar event)
+        Booking::create([
+            'user_id' => User::factory()->create()->id,
+            'vehicle_id' => $v->id,
+            'start_date' => '2026-10-05',
+            'end_date' => '2026-10-06',
+            'address' => 'Kantor C',
+            'purpose' => 'Rapat',
+        ]);
+
+        $this->actingAs($this->pengurus)
+            ->patch("/pengurus/events/{$event->id}/cancel");
+
+        // v tidak bebas utk 10-02..08 → booking TETAP di pengganti
+        $booking->refresh();
+        $this->assertSame($pengganti->id, $booking->vehicle_id);
+        $this->assertSame($v->id, $booking->original_vehicle_id);
+        $this->assertSame(Booking::STATUS_DIPINJAM, $booking->status);
+    }
+
+    /**
+     * UAT 05-A9: daftar event menampilkan rincian armada per event
+     * (menjawab "mobil apa saja yang dipakai event X?").
+     */
+    public function test_daftar_event_menampilkan_rincian_armada(): void
+    {
+        $v1 = Vehicle::factory()->create(['name' => 'Innova Event A', 'plate_number' => 'AB 9001 KL']);
+        $v2 = Vehicle::factory()->create(['name' => 'Brio Event B', 'plate_number' => 'AB 9002 KL']);
+
+        $this->actingAs($this->pengurus)->post('/pengurus/events', $this->payload([
+            'vehicles' => [$v1->id, $v2->id],
+            'jumlah_mobil' => 2,
+        ]));
+
+        $res = $this->actingAs($this->pengurus)->get('/pengurus/events');
+        $res->assertOk()
+            ->assertSee('Lihat armada (2 unit)')
+            ->assertSee('Innova Event A')
+            ->assertSee('AB 9001 KL')
+            ->assertSee('Brio Event B');
     }
 
     public function test_auto_finish_event_lewat_jatuh_tempo(): void

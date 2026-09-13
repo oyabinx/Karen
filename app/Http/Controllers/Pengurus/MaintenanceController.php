@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pengurus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pengurus\MaintenanceRequest;
 use App\Http\Requests\Pengurus\NotaRequest;
+use App\Models\Complaint;
 use App\Models\Maintenance;
 use App\Models\Vehicle;
 use App\Services\BudgetService;
@@ -84,12 +85,25 @@ class MaintenanceController extends Controller
 
     /**
      * Tandai perawatan selesai (input nota & anggaran menyusul di Fase 4b).
+     * UAT 06-K7: keluhan belum selesai pada unit ini otomatis ikut
+     * ditandai selesai — tindak lanjutnya sudah dikerjakan bengkel.
      */
     public function finish(Maintenance $maintenance): RedirectResponse
     {
         $maintenance->update(['status' => 'selesai']);
 
-        return back()->with('success', 'Maintenance ditandai selesai — jadwal ini tidak lagi memblokir ketersediaan.');
+        $keluhan = Complaint::query()
+            ->where('resolved', false)
+            ->whereHas('booking', fn ($q) => $q->where('vehicle_id', $maintenance->vehicle_id))
+            ->get();
+        $keluhan->each->update(['resolved' => true]);
+
+        $pesan = 'Maintenance ditandai selesai — jadwal ini tidak lagi memblokir ketersediaan.';
+        if ($keluhan->isNotEmpty()) {
+            $pesan .= ' '.$keluhan->count().' keluhan unit ini ikut ditandai selesai.';
+        }
+
+        return back()->with('success', $pesan);
     }
 
     /**

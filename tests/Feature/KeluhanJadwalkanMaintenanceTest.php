@@ -104,8 +104,43 @@ class KeluhanJadwalkanMaintenanceTest extends TestCase
         $this->assertStringContainsString('setir tidak center', $m->note);
         $this->assertSame('terjadwal', $m->status);
 
-        // Keluhan TIDAK otomatis selesai (aturan existing: manual oleh pengurus)
+        // Keluhan TIDAK otomatis selesai saat Dijadwalkan (aturan existing) —
+        // tetapi otomatis selesai saat maintenance DITANDAI SELESAI (UAT 06-K7)
         $this->assertSame(2, Complaint::where('resolved', false)->count());
+
+        $this->actingAs($this->pengurus)
+            ->patch("/pengurus/maintenances/{$m->id}/finish")
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $this->assertSame(0, Complaint::where('resolved', false)->count());
+        $this->assertSame(2, Complaint::where('resolved', true)->count());
+    }
+
+    /**
+     * UAT 06-K7: keluhan unit LAIN tidak ikut selesai — hanya unit yang
+     * maintenance-nya ditandai selesai.
+     */
+    public function test_selesai_maintenance_hanya_menyelesaikan_keluhan_unit_itu(): void
+    {
+        $mobilA = Vehicle::factory()->create();
+        $mobilB = Vehicle::factory()->create();
+        $this->bookingDenganKeluhan($mobilA, 'Pegawai A', 'setir tidak center');
+        $this->bookingDenganKeluhan($mobilB, 'Pegawai B', 'AC tidak dingin');
+
+        $m = Maintenance::create([
+            'vehicle_id' => $mobilA->id,
+            'start_date' => today()->toDateString(),
+            'end_date' => today()->addDay()->toDateString(),
+            'note' => 'Keluhan: setir tidak center',
+        ]);
+
+        $this->actingAs($this->pengurus)
+            ->patch("/pengurus/maintenances/{$m->id}/finish")
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(1, Complaint::where('resolved', false)->count());
+        $this->assertSame('AC tidak dingin', Complaint::where('resolved', false)->first()->message);
     }
 
     public function test_keluhan_selesai_ditandai_per_baris_dari_kartu(): void

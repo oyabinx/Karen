@@ -25,7 +25,7 @@ Panel `dashboard/partials/armada-hari-ini` tampil di dashboard **admin, pengurus
 - Shortcut: kelola kendaraan, jadwalkan maintenance, kelola anggaran, buat event, lihat laporan.
 
 ## Pegawai
-- Kartu **peminjaman aktif** (bila ada): mobil, tanggal, alamat, tombol **"Selesai"** (pop-up keluhan opsional → lihat [pengembalian.md](pengembalian.md)).
+- Kartu **peminjaman aktif** (bila ada): mobil, tanggal, alamat, tombol **"Selesai"** (pop-up keluhan opsional → lihat [pengembalian.md](pengembalian.md)). Kartu kuota di atasnya **lebar penuh** — info peminjaman aktif hanya disajikan SEKALI oleh panel ini *(rev UAT 06-C3: dulu tampil 2 kartu, yang kecil tanpa tombol)*.
 - **Armada Hari Ini** (panel bersama, lihat atas).
 - Tombol pintar: **"Pinjam Mobil"** → form cari ketersediaan.
 - Riwayat singkat (5 terakhir) dengan badge status (termasuk "Dikembalikan Otomatis").

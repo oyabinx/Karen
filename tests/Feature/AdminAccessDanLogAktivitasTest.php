@@ -34,6 +34,77 @@ class AdminAccessDanLogAktivitasTest extends TestCase
         $this->actingAs($pegawai)->get('/pengurus/complaints')->assertForbidden();
     }
 
+    /**
+     * UAT 09-B7 + B7b: aktivitas pegawai pun tercatat — membuat
+     * peminjaman, menyelesaikan dengan keluhan, dan membatalkan
+     * sendiri booking masa depan (kolom status + cancelled_at).
+     */
+    public function test_log_peminjaman_keluhan_dan_pembatalan_mandiri(): void
+    {
+        $pegawai = User::factory()->create(['role' => 'pegawai', 'seksi_id' => Seksi::factory()->create()->id]);
+        $v = Vehicle::factory()->create();
+
+        $this->actingAs($pegawai)->post('/pegawai/bookings', [
+            'vehicle_id' => $v->id,
+            'start_date' => today()->toDateString(),
+            'end_date' => today()->toDateString(),
+            'address' => 'Kantor B', 'purpose' => 'Rapat',
+        ])->assertSessionHasNoErrors();
+        $booking = \App\Models\Booking::latest('id')->first();
+
+        $this->actingAs($pegawai)
+            ->post("/pegawai/returns/{$booking->id}", ['complaint' => 'rem berbunyi'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($pegawai->id, ActivityLog::where('model_type', \App\Models\Booking::class)->where('action', 'created')->where('model_id', $booking->id)->value('user_id'));
+        $this->assertNotNull(ActivityLog::where('model_type', \App\Models\Complaint::class)->where('action', 'created')->first());
+
+        $selesai = ActivityLog::where('model_type', \App\Models\Booking::class)->where('action', 'updated')->where('model_id', $booking->id)->first();
+        $this->assertNotNull($selesai);
+        $this->assertArrayHasKey('status', $selesai->changes);
+
+        // B7b: pembatalan mandiri booking masa depan
+        $b2 = \App\Models\Booking::create([
+            'user_id' => $pegawai->id,
+            'vehicle_id' => $v->id,
+            'start_date' => today()->addDays(5)->toDateString(),
+            'end_date' => today()->addDays(6)->toDateString(),
+            'address' => 'Kantor C', 'purpose' => 'Rapat',
+        ]);
+
+        $this->actingAs($pegawai)
+            ->post("/pegawai/returns/{$b2->id}/cancel")
+            ->assertSessionHasNoErrors();
+
+        $batal = ActivityLog::where('model_type', \App\Models\Booking::class)->where('action', 'updated')->where('model_id', $b2->id)->first();
+        $this->assertNotNull($batal);
+        $this->assertSame($pegawai->id, $batal->user_id);
+        $this->assertArrayHasKey('status', $batal->changes);
+        $this->assertArrayHasKey('cancelled_at', $batal->changes);
+    }
+
+    /**
+     * UAT 09-C3: nonaktifkan user → log Menghapus; aktifkan kembali →
+     * perubahan deleted_at tercatat.
+     */
+    public function test_log_nonaktifkan_dan_aktifkan_kembali_user(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $target = User::factory()->create(['role' => 'pegawai']);
+
+        $this->actingAs($admin)->delete("/admin/users/{$target->id}")->assertSessionHasNoErrors();
+
+        $hapus = ActivityLog::where('model_type', User::class)->where('model_id', $target->id)->latest('id')->first();
+        $this->assertSame('deleted', $hapus->action);
+        $this->assertSame($admin->id, $hapus->user_id);
+
+        $this->actingAs($admin)->patch("/admin/users/{$target->id}/restore")->assertSessionHasNoErrors();
+
+        $pulih = ActivityLog::where('model_type', User::class)->where('model_id', $target->id)->latest('id')->first();
+        $this->assertNotSame('deleted', $pulih->action);
+        $this->assertStringContainsString((string) $target->id, json_encode([$pulih->model_id]));
+    }
+
     public function test_log_mencatat_siapa_mengubah_apa_kapan(): void
     {
         $pengurusA = User::factory()->create(['role' => 'pengurus', 'name' => 'Pengurus A']);

@@ -76,5 +76,25 @@
         @endforelse
     </div>
 
-    <div class="mt-4">{{ $bookings->links() }}</div>
+    {{-- Kontrol pagination + pemilih baris (UAT 06-A7): selalu terlihat
+         walau hasil hanya 1 halaman, agar tidak terkesan "tidak berjalan" --}}
+    <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p class="text-sm text-gray-500">
+            Menampilkan <strong>{{ $bookings->firstItem() ?? 0 }}–{{ $bookings->lastItem() ?? 0 }}</strong> dari {{ $bookings->total() }} peminjaman
+        </p>
+        <form method="GET" class="flex items-center gap-2 text-sm text-gray-500">
+            @foreach (['q', 'vehicle', 'bidang', 'status', 'from', 'to'] as $f)
+                @if (request($f))<input type="hidden" name="{{ $f }}" value="{{ request($f) }}">@endif
+            @endforeach
+            <label for="per_page" class="whitespace-nowrap">Baris/halaman:</label>
+            <select id="per_page" name="per_page" onchange="this.form.submit()"
+                    class="rounded-lg border-gray-300 text-sm min-h-[44px]">
+                @foreach ([10, 20, 50, 100] as $n)
+                    <option value="{{ $n }}" @selected(request('per_page', 20) == $n)>{{ $n }}</option>
+                @endforeach
+            </select>
+        </form>
+    </div>
+
+    <div class="mt-3">{{ $bookings->links() }}</div>
 </x-app-layout>

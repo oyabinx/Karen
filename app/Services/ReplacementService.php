@@ -328,4 +328,50 @@ class ReplacementService
 
         return $dikembalikan;
     }
+
+    /**
+     * UAT 05-A10: batalkan event = kembalikan booking yang SUDAH
+     * diganti (karena event ini) ke unit aslinya. Hanya booking yang
+     * penggantinya tumpang-tindih rentang event — selama event masih
+     * terjadwal unit asalnya terkunci, sehingga rentang overlap hanya
+     * bisa digantikan oleh event ini. Bila unit asal ternyata sudah
+     * dipakai orang lain di luar rentang event, booking tetap aman di
+     * penggantinya (tidak pernah menabrak).
+     *
+     * @return int jumlah booking yang berhasil dikembalikan
+     */
+    public function revertReplacedForEvent(\App\Models\Event $event): int
+    {
+        $dikembalikan = 0;
+
+        foreach ($event->vehicles as $asal) {
+            $diganti = Booking::query()
+                ->where('original_vehicle_id', $asal->id)
+                ->where('status', Booking::STATUS_DIPINJAM)
+                ->whereDate('start_date', '<=', $event->end_date)
+                ->whereDate('end_date', '>=', $event->start_date)
+                ->get();
+
+            foreach ($diganti as $booking) {
+                $bebas = $this->availability->isFreeIgnoringBooking(
+                    $asal,
+                    Carbon::parse($booking->start_date),
+                    Carbon::parse($booking->end_date),
+                    $booking->id,
+                );
+
+                if (! $bebas) {
+                    continue;
+                }
+
+                $booking->update([
+                    'vehicle_id' => $asal->id,
+                    'original_vehicle_id' => null,
+                ]);
+                $dikembalikan++;
+            }
+        }
+
+        return $dikembalikan;
+    }
 }

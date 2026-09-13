@@ -8,6 +8,7 @@ Monitoring dan laporan seluruh peminjaman kendaraan untuk pengurus: peminjaman b
 ### Monitoring Peminjaman
 - Tabel semua peminjaman: mobil, peminjam (+ bidang/seksi), tanggal, alamat, keperluan, status (`dipinjam` / `dikembalikan` / auto).
 - Filter: rentang tanggal, mobil, bidang, status.
+- **Pagination** *(rev UAT 06-A7)*: daftar bertingkat dengan **pemilih baris per halaman 10/20/50/100** (default 20) — query string filter terjaga saat pindah halaman; penanda "Menampilkan X–Y dari Z peminjaman" selalu tampil.
 
 ### Laporan
 - Rekap per rentang tanggal (default bulan berjalan):
@@ -27,7 +28,7 @@ Monitoring dan laporan seluruh peminjaman kendaraan untuk pengurus: peminjaman b
 - **Tab "Belum Selesai": kartu per KENDARAAN** *(rev user UAT 04)* — seluruh keluhan aktif unit terkumpul dalam satu kartu (isi, pelapor, waktu pengembalian), tombol **"Tandai Selesai"** per keluhan.
 - Tombol pada kartu bersyarat: unit **belum** punya jadwal → **"🔧 Jadwalkan Maintenance"** membuka **modal tanggal** (mulai/selesai, mulai ≥ hari ini) — kendaraan terisi otomatis dan **catatan terisi gabungan seluruh keluhan aktif**; unit **sudah terjadwal** → tombol **"🛠 Sedang Maintenance (rentang) →"** menuju halaman Jadwal Maintenance (tombol jadwalkan & modal disembunyikan; kembali otomatis setelah jadwal berstatus selesai) (`Keluhan: rem bermasalah (Galih, 12 Sep); setir berat (Pegawai Contoh, 11 Sep)` — boleh disunting, maks 255). Submit memakai alur maintenance existing (validasi rentang/overlap + pemeriksaan tabrakan booking → penggantian mobil).
 - Tab "Selesai": daftar datar riwayat + "Buka kembali".
-- Keluhan tidak otomatis selesai saat maintenance dijadwalkan (tetap manual oleh pengurus); tidak otomatis mengubah kondisi mobil.
+- Keluhan tidak otomatis selesai saat maintenance **dijadwalkan** (tetap manual oleh pengurus); namun **otomatis ditandai selesai untuk seluruh keluhan unit** saat jadwal maintenance-nya **ditandai selesai** *(rev UAT 06-K7 — tindak lanjutnya sudah dikerjakan bengkel; pengurus tidak perlu menandai dua kali)*. Tidak pernah otomatis mengubah kondisi mobil.
 
 ## Endpoint
 | Method | Path | Keterangan |

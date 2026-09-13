@@ -11,21 +11,29 @@ admin: `pengurus2@karen.test`) untuk uji "pengurus mana yang mengubah".
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| A1 | Login admin → sidebar | Muncul seksi **Kendaraan** & **Monitoring** lengkap + Administrasi (…, **Log Aktivitas**) | ⬜ | |
-| A2 | Buka Keluhan Unit (`/pengurus/complaints`) | 200 — daftar keluhan tampil | ⬜ | |
-| A3 | Buka Monitoring (`/pengurus/bookings`) | 200 — filter & daftar peminjaman | ⬜ | |
-| A4 | Buka Laporan (`/pengurus/reports`) + Export CSV | 200; CSV terunduh | ⬜ | |
-| A5 | Coba `Tandai selesai` satu keluhan (admin) | Berfungsi (admin kini ikut bisa menindaklanjuti) | ⬜ | |
-| A6 | Login admin → `/pegawai/search` | **Tetap 403** — admin tidak meminjam | ⬜ | |
+| A1 | Login admin → sidebar | Muncul seksi **Kendaraan** & **Monitoring** lengkap + Administrasi (…, **Log Aktivitas**) | ok | |
+| A2 | Buka Keluhan Unit (`/pengurus/complaints`) | 200 — daftar keluhan tampil | ok | |
+| A3 | Buka Monitoring (`/pengurus/bookings`) | 200 — filter & daftar peminjaman | ok | |
+| A4 | Buka Laporan (`/pengurus/reports`) + Export CSV | 200; CSV terunduh | ok | |
+| A5 | Coba `Tandai selesai` satu keluhan (admin) | Berfungsi (admin kini ikut bisa menindaklanjuti) | ok | |
+| A6 | Login admin → `/pegawai/search` | **Tetap 403** — admin tidak meminjam | ok | |
 
 ## B. Log Aktivitas — siapa mengubah apa
 
 Siapkan: pengurus1 & pengurus2 (dua akun berbeda).
 
+> **PENJELASAN B1 (dari pertanyaan UAT):** "Log Uji 1" hanyalah **nama
+> contoh kendaraan** yang dipakai saat uji — bebas diganti nama lain.
+> Pengurus **tidak perlu membuka log** (memang tidak boleh); pengurus
+> hanya membuat/ mengubah datanya seperti biasa lewat menu Kendaraan.
+> Yang membuka halaman Log Aktivitas adalah **admin** (langkah B3).
+> Alur: pengurus1 menambah kendaraan → pengurus2 mengubahnya → admin
+> membuka Log Aktivitas dan melihat keduanya tercatat.
+
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| B1 | Login **pengurus1** → tambah kendaraan "Log Uji 1" | Tersimpan | ⬜ | |
-| B2 | Logout → login **pengurus2** → ubah status "Log Uji 1" jadi tidak bisa dipinjam | Tersimpan | ⬜ | |
+| B1 | Login **pengurus1** → menu Kendaraan → Tambah Kendaraan, isi nama bebas (mis. "Log Uji 1") | Tersimpan (muncul di daftar kendaraan) | ⬜ | nama "Log Uji 1" hanya contoh — pengurus tidak membuka log |
+| B2 | Logout → login **pengurus2** → di halaman Kendaraan ubah status "Log Uji 1" jadi tidak bisa dipinjam | Tersimpan | ⬜ | |
 | B3 | Login **admin** → **Log Aktivitas** | Dua entri terbaru: "pengurus1 Menambah Kendaraan Log Uji 1" & "pengurus2 Mengubah Kendaraan Log Uji 1 (kolom: status)" | ⬜ | |
 | B4 | Buka **Detail perubahan** entri pengurus2 | Tabel: status `bisa_dipinjam` → `tidak_bisa_dipinjam` | ⬜ | |
 | B5 | Filter **pelaku = pengurus1** | Hanya entri pengurus1 | ⬜ | |

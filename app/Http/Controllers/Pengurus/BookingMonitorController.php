@@ -13,10 +13,13 @@ class BookingMonitorController extends Controller
 {
     /**
      * Monitoring seluruh peminjaman (docs/feature/laporan.md).
+     * UAT 06-A7: jumlah baris per halaman dipilih user (10/20/50/100).
      */
     public function index(Request $request): View
     {
-        $filters = $request->only(['q', 'vehicle', 'bidang', 'status', 'from', 'to']);
+        $filters = $request->only(['q', 'vehicle', 'bidang', 'status', 'from', 'to', 'per_page']);
+        $perPageDiminta = (int) ($filters['per_page'] ?? 20);
+        $perPage = in_array($perPageDiminta, [10, 20, 50, 100], true) ? $perPageDiminta : 20;
 
         $bookings = Booking::query()
             ->with(['user.seksi.bidang', 'vehicle', 'originalVehicle', 'complaint'])
@@ -29,7 +32,7 @@ class BookingMonitorController extends Controller
                 ->whereDate('start_date', '<=', $filters['to'])
                 ->whereDate('end_date', '>=', $filters['from']))
             ->orderByDesc('start_date')
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('pengurus.bookings.index', [

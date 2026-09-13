@@ -1,0 +1,58 @@
+BUILD LOG — Tindak Lanjut UAT 05–09
+Tanggal: 2026-09-13 (tasklist: TASKLIST-UAT05-09.md, semua CP selesai)
+
+CP1 — UAT 06-C3 (dashboard pegawai 2 kartu peminjaman aktif):
+  • Kartu kecil duplikat dihapus; kartu kuota lebar penuh. Peminjaman
+    aktif hanya ditampilkan panel besar bertombol.
+
+CP2 — UAT 06-A7 (pagination monitoring):
+  • BookingMonitorController: per_page divalidasi in:10,20,50,100
+    (default 20); withQueryString menjaga filter.
+  • View: penanda "Menampilkan X–Y dari Z peminjaman" + select
+    baris/halaman (auto-submit) + links(). Kontrol kini SELALU tampil.
+  • Bug saat dev: ternary membaca ulang $filters['per_page'] tanpa ??
+    → 500; diperbaiki dengan variabel $perPageDiminta.
+  • Test: test_monitoring_pagination_dan_pemilihan_baris.
+
+CP3 — UAT 06-K7 (maintenance selesai → keluhan otomatis selesai):
+  • MaintenanceController@finish me-resolve SEMUA keluhan unresolved
+    pada unit itu; flash menyebut jumlah. Keputusan: semua keluhan
+    unit (termasuk yang masuk setelah jadwal dibuat) — sesuai
+    permintaan user, didokumentasikan di laporan.md.
+  • Test: diperluas di KeluhanJadwalkanMaintenanceTest (unit itu saja;
+    unit lain tidak ikut).
+
+CP4 — UAT 05-A9 (daftar armada per event):
+  • Kartu event: tombol "Lihat armada (N unit)" expand daftar nama+plat
+    (Alpine x-show; vehicles sudah di-eager-load).
+  • Test: test_daftar_event_menampilkan_rincian_armada.
+
+CP5 — UAT 05-A10/B6 (batal event memulihkan kondisi):
+  • ReplacementService::revertReplacedForEvent(): booking status
+    dipinjam dengan original_vehicle_id = armada event (overlap
+    rentang event) dikembalikan ke unit asal BILA bebas
+    (isFreeIgnoringBooking); bila sibuk → tetap di pengganti.
+    Aman: selama event terjadwal unit asal terkunci sehingga rentang
+    overlap hanya bisa digeser oleh event itu sendiri.
+  • EventService::cancelEvent memanggil revertReplacedForEvent +
+    revertPendingForVehicle; teks confirm & flash diperbarui.
+  • Test lama "tetap di pengganti" DITULIS ULANG menjadi "pulih ke
+    unit asal"; tambah test kasus unit asal sibuk (booking ekor di
+    luar rentang event).
+
+CP6 — UAT 08-#3 & UAT 09:
+  • autoReturn menunggu_penggantian lewat tempo SUDAH terimplementasi
+    & teruji (AutoReturnTest) — file UAT diberi catatan.
+  • Audit log: coverage B1–B6, B8, C1, C2 sudah ada. Ditambah test
+    B7/B7b (booking+keluhan+batal mandiri → kolom status+cancelled_at)
+    dan C3 (nonaktif/aktif user) di AdminAccessDanLogAktivitasTest.
+  • UAT 09-B1 ditulis ulang + blok PENJELASAN (kebingungan user:
+    "Log Uji 1" = nama contoh kendaraan; log dibuka admin, bukan
+    pengurus).
+
+CP7 — Docs & status:
+  • event_bidang.md §3 + skenario 8 (A9/A10), laporan.md (pagination
+    + K7), dashboard.md (C3), UAT 05/06/08/09 diberi catatan
+    "diimplementasikan — uji ulang".
+
+Hasil akhir: 252 passed (lihat run commit).

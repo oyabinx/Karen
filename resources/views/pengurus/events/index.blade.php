@@ -34,6 +34,23 @@
                     </div>
                 </div>
 
+                {{-- UAT 05-A9: rincian armada per event — menjawab "mobil apa
+                     saja yang dipakai event X?" tanpa harus tanya pengurus --}}
+                <div class="mt-3" x-data="{ buka: false }">
+                    <button type="button" @click="buka = !buka"
+                            class="text-sm text-indigo-600 hover:underline">
+                        <span x-show="!buka">Lihat armada ({{ $e->armada_count }} unit) ▾</span>
+                        <span x-show="buka" x-cloak>Sembunyikan armada ▴</span>
+                    </button>
+                    <ul x-show="buka" x-cloak class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        @foreach ($e->vehicles->sortBy('name') as $unit)
+                            <li class="text-sm bg-gray-50 border border-gray-100 rounded-lg px-3 py-1.5">
+                                {{ $unit->name }} <span class="text-gray-400">· {{ $unit->plate_number }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
                 @if ($e->status === 'terjadwal')
                     <div class="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-x-4 gap-y-1 text-sm">
                         <a href="{{ route('pengurus.events.conflicts', $e) }}" class="text-indigo-600 hover:underline">Konflik & pengganti</a>
@@ -43,7 +60,7 @@
                                 <button class="text-green-600 hover:underline">Konfirmasi</button>
                             </form>
                         @endif
-                        <form method="POST" action="{{ route('pengurus.events.cancel', $e) }}" onsubmit="return confirm('Batalkan event ini? Armada lepas; peminjaman yang belum diganti kembali ke mobil semula.')">
+                        <form method="POST" action="{{ route('pengurus.events.cancel', $e) }}" onsubmit="return confirm('Batalkan event ini? Armada lepas; peminjaman yang ditabrak kembali ke mobil semula (yang sudah diganti dikembalikan bila mobil asalnya bebas).')">
                             @csrf @method('PATCH')
                             <button class="text-red-600 hover:underline">Batalkan Event</button>
                         </form>

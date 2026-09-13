@@ -24,6 +24,40 @@ class MonitoringReportTest extends TestCase
         $this->pengurus = User::factory()->create(['role' => 'pengurus']);
     }
 
+    /**
+     * UAT 06-A7: pemilih baris per halaman + penanda total selalu
+     * terlihat; nilai per_page tak valid jatuh ke default 20.
+     */
+    public function test_monitoring_pagination_dan_pemilihan_baris(): void
+    {
+        $u = User::factory()->create();
+        $v = Vehicle::factory()->create();
+
+        for ($i = 0; $i < 12; $i++) {
+            Booking::create([
+                'user_id' => $u->id,
+                'vehicle_id' => $v->id,
+                'start_date' => today()->subDays($i)->toDateString(),
+                'end_date' => today()->subDays($i)->toDateString(),
+                'address' => 'A', 'purpose' => 'X',
+                'status' => 'dikembalikan',
+            ]);
+        }
+
+        $this->actingAs($this->pengurus)
+            ->get('/pengurus/bookings?per_page=10')
+            ->assertOk()
+            ->assertSee('Menampilkan')
+            ->assertSee('dari 12 peminjaman')
+            ->assertSee('value="10" selected', false);
+
+        // Nilai di luar daftar → fallback 20 (tetap satu halaman, tanpa error)
+        $this->actingAs($this->pengurus)
+            ->get('/pengurus/bookings?per_page=9999')
+            ->assertOk()
+            ->assertSee('dari 12 peminjaman');
+    }
+
     public function test_monitoring_dengan_filter_dan_penanda(): void
     {
         $seksiA = Seksi::factory()->create();

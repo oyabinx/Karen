@@ -38,7 +38,8 @@ Langkah 4 — konfirmasi:
 
 ### 3. Selesai & Pembatalan
 - Event berakhir otomatis setelah `end_date` lewat (scheduler menandai `selesai`; ketersediaan mobil lepas berbasis tanggal).
-- Pembatalan event oleh admin/pengurus: mobil event langsung lepas. **Booking yang sudah digeser tetap memakai mobil penggantinya** (tidak dipindahkan balik) — tercatat di riwayat. Booking yang **belum** diganti dikembalikan ke status `dipinjam` dengan mobil semula **hanya bila mobil itu bebas penuh pada rentang booking** (aturan availability-aware yang sama dengan pembatalan maintenance — lihat [penggantian_mobil.md](penggantian_mobil.md) bagian Batasan revert); bila masih ditahan blokir lain, booking tetap menunggu penggantian.
+- Pembatalan event oleh admin/pengurus: mobil event langsung lepas dan **kondisi sebelum armada dikunci dipulihkan** (UAT 05-A10): booking yang **belum** diganti kembali ke `dipinjam` di mobil semula, dan booking yang **sudah** diganti pun dikembalikan ke unit asalnya — keduanya hanya bila mobil asal bebas penuh pada rentang bookingnya (aturan availability-aware yang sama dengan pembatalan maintenance — lihat [penggantian_mobil.md](penggantian_mobil.md) bagian Batasan revert). Bila unit asal sudah dipakai orang lain di sebagian rentang, booking tetap aman di penggantinya.
+- Daftar event menyediakan **rincian armada per event** — tombol "Lihat armada (N unit)" menampilkan nama + plat tiap mobil (UAT 05-A9) — pengurus bisa menjawab "mobil apa saja yang dipakai event X?" tanpa membuka database.
 
 ### 4. Perubahan Skema
 - `events`: `id`, `name`, `bidang_id` FK, `start_date`, `end_date`, `note` NULL, `status` ENUM('terjadwal','selesai','dibatalkan'), `created_by` FK users, `timestamps`.
@@ -71,6 +72,6 @@ Langkah 4 — konfirmasi:
 5. Pegawai lain mencari mobil pada rentang event → tidak melihat armada event.
 6. Satu booking tanpa kandidat pengganti → pembuat event wajib membatalkan booking itu atau mengganti pilihan mobil event.
 7. Event kedua mencoba menabrak armada event pertama → mobil tersebut tidak bisa dipilih.
-8. Batalkan event → mobil lepas; booking yang sudah digeser tetap di mobil penggantinya.
+8. Batalkan event → mobil lepas; booking yang ditabrak kembali ke mobil semula (yang sudah diganti pun dikembalikan bila mobil asalnya bebas).
 9. `end_date` lewat → scheduler menandai event `selesai` (idempoten).
 10. Pegawai membuat event → 403 (hanya admin & pengurus).

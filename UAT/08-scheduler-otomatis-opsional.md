@@ -26,13 +26,13 @@ newgrp docker
 
 | No | Pemeriksaan | Hasil Diharapkan | Status | Catatan |
 |----|-------------|------------------|--------|---------|
-| 1 | Booking lewat tempo tanpa tombol Selesai → autoReturn | Status **Dikembalikan** + badge otomatis + waktu kembali terisi | ⬜ | |
-| 2 | Booking `end_date` HARI INI → autoReturn | **Tidak berubah** (masih Dipinjam — berlaku hingga 24:00) | ⬜ | |
-| 3 | Booking **menunggu pengganti** lewat tempo → autoReturn | Status **Dibatalkan** + chip **"Dibatalkan {waktu}"** (waktu pembatalan oleh sistem) + kuota bidang lepas (user bisa booking lagi) | ⬜ | |
-| 4 | Jalankan autoReturn dua kali | Tidak ada perubahan ganda (idempoten) | ⬜ | |
-| 5 | Tidak ada keluhan otomatis tercipta | Daftar keluhan tidak bertambah | ⬜ | |
-| 6 | Event lewat `end_date` (buat event kemarin via tinker) → jalankan `app(App\Services\EventService::class)->autoFinish()` | Event berstatus **Selesai**; armada bebas | ⬜ | |
-| 7 | Dashboard admin → kartu Kesehatan Scheduler | Waktu "terakhir" auto-return/auto-finish terisi (setelah langkah di atas) | ⬜ | |
+| 1 | Booking lewat tempo tanpa tombol Selesai → autoReturn | Status **Dikembalikan** + badge otomatis + waktu kembali terisi | ok | |
+| 2 | Booking `end_date` HARI INI → autoReturn | **Tidak berubah** (masih Dipinjam — berlaku hingga 24:00) | ok | |
+| 3 | Booking **menunggu pengganti** lewat tempo → autoReturn | Status **Dibatalkan** + chip **"Dibatalkan {waktu}"** (waktu pembatalan oleh sistem) + kuota bidang lepas (user bisa booking lagi) | ⬜ | perilaku ini sudah diproteksi test otomatis `AutoReturnTest::test_menunggu_penggantian_lewat_tempo_dibatalkan_dan_kuota_lepas` — uji manual tetap disarankan |
+| 4 | Jalankan autoReturn dua kali | Tidak ada perubahan ganda (idempoten) | ok | |
+| 5 | Tidak ada keluhan otomatis tercipta | Daftar keluhan tidak bertambah | ok | |
+| 6 | Event lewat `end_date` (buat event kemarin via tinker) → jalankan `app(App\Services\EventService::class)->autoFinish()` | Event berstatus **Selesai**; armada bebas | ok | |
+| 7 | Dashboard admin → kartu Kesehatan Scheduler | Waktu "terakhir" auto-return/auto-finish terisi (setelah langkah di atas) | ok | |
 
 > Catatan: cron sungguhan (pemicu menit-per-menit) hanya dipasang
 > di server produksi (Fase 10 / README). Di laptop, langkah 2–3

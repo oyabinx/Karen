@@ -156,9 +156,12 @@ class EventService
 
     /**
      * Batalkan event: armada lepas (status dibatalkan — ketersediaan
-     * berbasis tanggal otomatis bebas). Booking yang SUDAH diganti
-     * tetap di penggantinya; yang BELUM dikembalikan ke mobil semula
-     * (konsisten pembatalan maintenance — docs event_bidang.md §3).
+     * berbasis tanggal otomatis bebas). Booking yang BELUM diganti
+     * kembali dipinjam di mobil semula; yang SUDAH diganti pun
+     * dikembalikan ke unit asalnya bila unit itu bebas (UAT 05-A10 —
+     * membatalkan event memulihkan kondisi sebelum armada dikunci;
+     * bila unit asal sudah dipakai orang lain, booking tetap aman di
+     * penggantinya).
      */
     public function cancelEvent(Event $event): int
     {
@@ -166,7 +169,7 @@ class EventService
         // ketersediaan saat menilai kelayakan revert booking
         $event->update(['status' => 'dibatalkan']);
 
-        $dikembalikan = 0;
+        $dikembalikan = $this->replacements->revertReplacedForEvent($event);
 
         foreach ($event->vehicles as $vehicle) {
             $dikembalikan += $this->replacements->revertPendingForVehicle($vehicle);

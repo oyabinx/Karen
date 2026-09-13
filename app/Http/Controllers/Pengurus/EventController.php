@@ -210,8 +210,8 @@ class EventController extends Controller
     }
 
     /**
-     * Batalkan event: armada lepas; booking belum diganti kembali ke
-     * mobil semula; yang sudah diganti tetap di penggantinya.
+     * Batalkan event: armada lepas; booking yang ditabrak (belum maupun
+     * sudah diganti) dikembalikan ke mobil semula bila bebas (UAT 05-A10).
      */
     public function cancel(Event $event): RedirectResponse
     {
