@@ -78,3 +78,21 @@ Hasil akhir: 254 passed (lihat run commit).
  • UAT 10 tabel E ditambah 2 baris troubleshooting.
  • Catatan produksi (Fase 10): deploy harus menjalankan composer
    install dengan composer.lock terbaru agar apiclient v2 terpasang.
+
+ TAMBAHAN 2 (2026-09-14): FIX LANGKAH 5 TEST KONEKSI (FOLDER DRIVE)
+────────────────────────────────────────────────────────────────────
+ • Gejala: langkah 1-4 hijau namun folder Drive 404 terus walau sudah
+   di-share Editor ke service account.
+ • Diagnosis via probe tinker: akses folder SUKSES dengan scope DRIVE
+   penuh tetapi GAGAL dengan scope DRIVE_FILE → akar masalah = scope.
+ • Fix DriveUploader:
+   - addScope(DRIVE_FILE) → addScope(DRIVE) — scope sempit drive.file
+     hanya melihat file yang dibuat/dibuka aplikasi sendiri; folder
+     yang di-share ke service account balas 404. Scope drive penuh
+     tetap aman: SA hanya melihat yang dibagikan kepadanya.
+   - files->get & files->create kini supportsAllDrives=true (folder
+     di Shared Drive/Drive Bersama butuh flag ini).
+ • Verifikasi: Test Koneksi lengkap 5/5 ✅ (folder "Arsip Dokumen"
+   terbaca). Full suite 254 tetap hijau.
+ • Catatan: share Editor di sisi Google bisa perlu beberapa menit
+   sampai berlaku — bila 404 setelah fix, tunggu & coba ulang.

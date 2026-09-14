@@ -27,7 +27,12 @@ class DriveUploader
     public function assertFolderAccessible(): void
     {
         $folderId = $this->settings->get(IntegrationSetting::KEY_DRIVE_FOLDER_ID);
-        $this->drive()->files->get($folderId, ['fields' => 'id, name']);
+        // supportsAllDrives: folder di Shared Drive/Drive Bersama butuh
+        // flag ini — tanpanya API selalu menjawab 404 (UAT 10-C6).
+        $this->drive()->files->get($folderId, [
+            'fields' => 'id, name',
+            'supportsAllDrives' => true,
+        ]);
     }
 
     /**
@@ -48,6 +53,7 @@ class DriveUploader
             'data' => file_get_contents($absolutePath),
             'mimeType' => 'application/pdf',
             'uploadType' => 'multipart',
+            'supportsAllDrives' => true,
         ]);
 
         return $created->id;
@@ -63,7 +69,11 @@ class DriveUploader
 
         $client = new GoogleClient();
         $client->setAuthConfig($key);
-        $client->addScope(GoogleDrive::DRIVE_FILE);
+        // Scope penuh diperlukan: scope sempit DRIVE_FILE hanya melihat
+        // file yang dibuat aplikasi sendiri — folder yang di-share ke
+        // service account menjawab 404 (temuan UAT 10-C6). Service
+        // account tetap hanya melihat apa yang dibagikan kepadanya.
+        $client->addScope(GoogleDrive::DRIVE);
 
         return new GoogleDrive($client);
     }
