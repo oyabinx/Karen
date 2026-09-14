@@ -12,6 +12,7 @@ Admin mengelola akun pengguna sistem: membuat, melihat, mengubah, menonaktifkan,
 ### Tambah User
 - Field: nama, email, password (awal, min 8 karakter **tanpa spasi**), role, seksi (**wajib untuk pegawai dan pengurus**; hanya admin yang boleh tanpa seksi), no. HP (opsional saat pembuatan — **wajib diisi user saat edit profil**).
 - Password awal di-hash; admin bisa mencentang "wajib ganti password saat login pertama" (opsional).
+- **🔑 Reset Sandi oleh admin** *(rev UAT 09-C1)*: TIDAK ada skema "lupa kata sandi" (keputusan desain). Pegawai yang lupa meminta admin; admin menekan **🔑 Reset Sandi** di daftar user → sistem membuat kata sandi acak baru yang **ditampilkan sekali** di pesan sukses untuk disampaikan ke pegawai, lalu pegawai menggantinya sendiri di menu Profil. Kata sandi lama mustahil dilihat (hash satu arah); log aktivitas mencatat "Mereset kata sandi …" tanpa nilainya. Admin tidak bisa me-reset sandinya sendiri lewat jalur ini (gunakan menu Profil).
 
 ### Ubah User
 - Semua field dapat diubah, termasuk role dan seksi.

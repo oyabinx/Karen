@@ -107,6 +107,41 @@ class UserController extends Controller
         return back()->with('success', 'User diaktifkan kembali.');
     }
 
+    /**
+     * Reset kata sandi oleh admin (UAT 09-C1): aplikasi TIDAK punya
+     * skema "lupa kata sandi" (keputusan desain dipertahankan) —
+     * pegawai yang lupa minta admin, admin membuatkan kata sandi baru
+     * (ditampilkan SEKALI di pesan sukses untuk disampaikan), lalu
+     * pegawai menggantinya sendiri di menu Profil. Hash satu arah
+     * membuat kata sandi lama mustahil dilihat — reset inilah
+     * satu-satunya jalurnya.
+     */
+    public function resetPassword(Request $request, User $user): RedirectResponse
+    {
+        if ($user->id === $request->user()->id) {
+            return back()->with('error', 'Ubah kata sandi Anda sendiri lewat menu Profil.');
+        }
+
+        // Acak tanpa karakter yang mudah tertukar (l/1, O/0, dsb.)
+        $karakter = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+        $sandibaru = substr(str_shuffle($karakter), 0, 10);
+
+        $user->update(['password' => $sandibaru]);
+
+        // Jejak audit TANPA nilai sandi (keamanan log tetap dijaga)
+        \App\Models\ActivityLog::create([
+            'user_id' => $request->user()->id,
+            'action' => \App\Models\ActivityLog::ACTION_UPDATED,
+            'model_type' => User::class,
+            'model_id' => $user->id,
+            'model_label' => $user->activityLabel(),
+            'description' => 'Mereset kata sandi '.$user->activityLabel(),
+            'changes' => ['password' => ['lama' => '(tersembunyi)', 'baru' => '(tersembunyi)']],
+        ]);
+
+        return back()->with('success', "Kata sandi baru {$user->name}: {$sandibaru} — sampaikan ke pegawai, lalu minta diganti sendiri di menu Profil. Kata sandi hanya ditampilkan sekali ini.");
+    }
+
     // ── Impor massal CSV ─────────────────────────────────────────
 
     public function template(UserCsvImporter $importer)

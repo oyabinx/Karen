@@ -65,13 +65,18 @@ class VehicleController extends Controller
     }
 
     /**
-     * Soft delete — riwayat booking tetap utuh.
+     * Soft delete — riwayat booking tetap utuh dan tetap bisa dicari
+     * di monitoring (UAT 09-B6). KHUSUS ADMIN: unit rusak berat yang
+     * dihapuskan adalah keputusan aset, bukan operasional harian
+     * pengurus; pengurus cukup memakai "Blokir peminjaman".
      */
-    public function destroy(Vehicle $vehicle): RedirectResponse
+    public function destroy(Request $request, Vehicle $vehicle): RedirectResponse
     {
+        abort_unless($request->user()->isAdmin(), 403, 'Hanya admin yang dapat menghapus kendaraan.');
+
         $vehicle->delete();
 
-        return back()->with('success', 'Kendaraan dinonaktifkan dari daftar (riwayat tetap tersimpan).');
+        return back()->with('success', 'Kendaraan dihapus dari daftar (soft delete) — riwayat peminjaman tetap tersimpan dan dapat dicari di monitoring.');
     }
 
     /**

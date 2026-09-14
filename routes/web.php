@@ -53,6 +53,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::patch('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+        Route::patch('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
 
         Route::get('/users/template', [UserController::class, 'template'])->name('users.template');
         Route::get('/users/import', [UserController::class, 'importPreview'])->name('users.import');

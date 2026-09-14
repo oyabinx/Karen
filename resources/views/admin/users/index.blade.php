@@ -111,8 +111,16 @@
                         <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{{ $u->phone }}</span>
                     @endif
                 </div>
-                <div class="mt-3 flex gap-4 border-t border-gray-100 pt-3">
+                <div class="mt-3 flex flex-wrap gap-4 border-t border-gray-100 pt-3">
                     <a href="{{ route('admin.users.edit', $u) }}" class="text-indigo-600 text-sm font-medium min-h-[44px] flex items-center">Ubah</a>
+                    @if (! $u->trashed())
+                        {{-- UAT 09-C1: pegawai lupa sandi → minta admin reset (tidak ada skema lupa sandi) --}}
+                        <form method="POST" action="{{ route('admin.users.resetPassword', $u) }}"
+                              onsubmit="return confirm('Buat kata sandi baru acak untuk {{ $u->name }}? Kata sandi lama tidak dapat dilihat kembali. Kata sandi baru akan ditampilkan sekali untuk disampaikan ke pegawai.')">
+                            @csrf @method('PATCH')
+                            <button class="text-amber-600 text-sm font-medium min-h-[44px]">🔑 Reset Sandi</button>
+                        </form>
+                    @endif
                     @if ($u->trashed())
                         <form method="POST" action="{{ route('admin.users.restore', $u) }}">
                             @csrf @method('PATCH')

@@ -23,6 +23,15 @@ class User extends Authenticatable
     use LogsActivity;
     use HasFactory, Notifiable, SoftDeletes;
 
+    /**
+     * "Menghapus" user di aplikasi ini = menonaktifkan (soft delete,
+     * UAT 09-C3) — label log disesuaikan supaya tidak menyesatkan.
+     */
+    protected function activityDeletedDescription(string $label): string
+    {
+        return "Menonaktifkan {$label}";
+    }
+
     public function seksi(): BelongsTo
     {
         return $this->belongsTo(Seksi::class);

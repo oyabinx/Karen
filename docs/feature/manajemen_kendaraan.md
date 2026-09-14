@@ -12,7 +12,7 @@ Pengurus **dan admin** mengelola data mobil dinas: menambah/mengubah unit, menga
   - Jatuh Tempo **Pajak Tahunan** & **Pajak 5 Tahunan**.
 - Tombol **Detail Kendaraan** pada setiap kartu membuka modal berisi seluruh data primer + sekunder.
 - **Notifikasi pajak** untuk pengurus: bila hari ini ≤ **3 minggu** sebelum jatuh tempo pajak tahunan/5 tahunan (atau sudah lewat tempo), muncul peringatan pada **dashboard pengurus** dan halaman **Data Kendaraan** (amber = mendekati, merah + "LEWAT n hari" = terlambat).
-- CRUD lengkap; hapus = soft delete (riwayat booking tetap utuh).
+- CRUD lengkap; hapus = soft delete (riwayat booking tetap utuh). **Hapus KHUSUS ADMIN** *(rev UAT 09-B6)* — untuk unit rusak berat yang dihapuskan (keputusan aset, bukan operasional pengurus — pengurus cukup "Blokir peminjaman"); tombol Hapus hanya tampil untuk admin, pengurus ditolak 403. Riwayat peminjaman unit terhapus **tetap tampil & bisa difilter** di Semua Peminjaman (diberi label "(nonaktif)").
 
 ### Status Kendaraan
 - `bisa_dipinjam` / `tidak_bisa_dipinjam` — toggle oleh pengurus (misal mobil dipakai keperluan kantor).

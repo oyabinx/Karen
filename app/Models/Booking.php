@@ -47,14 +47,17 @@ class Booking extends Model
         return $this->belongsTo(User::class);
     }
 
+    // withTrashed: kendaraan yang dihapus (soft delete, UAT 09-B6) tetap
+    // tampil di monitoring/riwayat — nama unit tidak boleh hilang dari
+    // sejarah peminjaman hanya karena unitnya dihapuskan.
     public function vehicle(): BelongsTo
     {
-        return $this->belongsTo(Vehicle::class);
+        return $this->belongsTo(Vehicle::class)->withTrashed();
     }
 
     public function originalVehicle(): BelongsTo
     {
-        return $this->belongsTo(Vehicle::class, 'original_vehicle_id');
+        return $this->belongsTo(Vehicle::class, 'original_vehicle_id')->withTrashed();
     }
 
     public function complaint(): HasOne

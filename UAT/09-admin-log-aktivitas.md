@@ -32,21 +32,21 @@ Siapkan: pengurus1 & pengurus2 (dua akun berbeda).
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| B1 | Login **pengurus1** → menu Kendaraan → Tambah Kendaraan, isi nama bebas (mis. "Log Uji 1") | Tersimpan (muncul di daftar kendaraan) | ⬜ | nama "Log Uji 1" hanya contoh — pengurus tidak membuka log |
-| B2 | Logout → login **pengurus2** → di halaman Kendaraan ubah status "Log Uji 1" jadi tidak bisa dipinjam | Tersimpan | ⬜ | |
-| B3 | Login **admin** → **Log Aktivitas** | Dua entri terbaru: "pengurus1 Menambah Kendaraan Log Uji 1" & "pengurus2 Mengubah Kendaraan Log Uji 1 (kolom: status)" | ⬜ | |
-| B4 | Buka **Detail perubahan** entri pengurus2 | Tabel: status `bisa_dipinjam` → `tidak_bisa_dipinjam` | ⬜ | |
-| B5 | Filter **pelaku = pengurus1** | Hanya entri pengurus1 | ⬜ | |
-| B6 | Filter aksi = Menghapus / objek = Vehicle / cari "Log Uji" / rentang tanggal | Hasil sesuai | ⬜ | |
-| B7 | Pegawai melakukan booking + Selesai berkeluhan | Log aktivitas mencatat Menambah Peminjaman, Mengubah (status), Menambah Keluhan | ⬜ | |
-| B7b | **Pembatalan mandiri**: pegawai batalkan booking masa depan (skenario 01-D9) | Log mencatat **Mengubah Peminjaman (kolom: status, cancelled_at)** dengan pelaku pegawai tersebut | ⬜ | |
-| B8 | Jalankan autoReturn (lihat skenario 08 langkah 2) | Entri baru berpelaku **"Sistem (otomatis)"** | ⬜ | |
-| B9 | Login pegawai → `/admin/activity-logs` | 403 | ⬜ | |
+| B1 | Login **pengurus1** → menu Kendaraan → Tambah Kendaraan, isi nama bebas (mis. "Log Uji 1") | Tersimpan (muncul di daftar kendaraan) | ok | nama "Log Uji 1" hanya contoh — pengurus tidak membuka log |
+| B2 | Logout → login **pengurus2** → di halaman Kendaraan ubah status "Log Uji 1" jadi tidak bisa dipinjam | Tersimpan | ok | |
+| B3 | Login **admin** → **Log Aktivitas** | Dua entri terbaru: "pengurus1 Menambah Kendaraan Log Uji 1" & "pengurus2 Mengubah Kendaraan Log Uji 1 (kolom: status)" | ok | |
+| B4 | Buka **Detail perubahan** entri pengurus2 | Tabel: status `bisa_dipinjam` → `tidak_bisa_dipinjam` | ok | |
+| B5 | Filter **pelaku = pengurus1** | Hanya entri pengurus1 | ok | |
+| B6 | Filter aksi = Menghapus / objek = Vehicle / cari "Log Uji" / rentang tanggal; lalu (baru) **admin** hapus kendaraan uji → cek monitoring | Hasil sesuai; tombol **Hapus** muncul **hanya untuk admin**; kendaraan dihapus **soft delete**; booking/riwayat kendaraan itu **tetap tampil & bisa difilter** di Semua Peminjaman (berlabel "(nonaktif)") | revisi → uji ulang | diimplementasikan 2026-09-14: tombol Hapus admin-only di halaman Kendaraan; pengurus 403; relasi booking withTrashed; filter mobil monitoring memuat unit nonaktif |
+| B7 | Pegawai melakukan booking + Selesai berkeluhan | Log aktivitas mencatat Menambah Peminjaman, Mengubah (status), Menambah Keluhan | ok | |
+| B7b | **Pembatalan mandiri**: pegawai batalkan booking masa depan (skenario 01-D9) | Log mencatat **Mengubah Peminjaman (kolom: status, cancelled_at)** dengan pelaku pegawai tersebut | ok | |
+| B8 | Jalankan autoReturn (lihat skenario 08 langkah 2) | Entri baru berpelaku **"Sistem (otomatis)"** | ok | |
+| B9 | Login pegawai → `/admin/activity-logs` | 403 | ok | |
 
 ## C. Keamanan log
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| C1 | Admin ubah user (nama + password baru sekaligus) → lihat log | `name` tercatat; **password tidak pernah muncul** (nilainya maupun kolomnya) | ⬜ | |
-| C2 | Upload kunci service account di Integrasi Google → periksa log terkait | Isi kunci **tidak pernah tercatat** | ⬜ | |
-| C3 | Nonaktifkan lalu aktifkan kembali satu user | Log Menghapus + perubahan `deleted_at` (aktifkan kembali) | ⬜ | |
+| C1 | Admin klik **🔑 Reset Sandi** pada user → lihat log | Kata sandi baru acak **ditampilkan SEKALI** di pesan sukses (untuk disampaikan ke pegawai, lalu diganti sendiri di menu Profil); log tercatat "Mereset kata sandi …" **tanpa nilai sandi** | revisi → uji ulang | diimplementasikan 2026-09-14. Catatan desain: kata sandi lama mustahil "ditampilkan" (hash satu arah) — alur resmi lupa sandi = minta admin reset; skema lupa password TIDAK ditambahkan |
+| C2 | Upload kunci service account di Integrasi Google → periksa log terkait | Isi kunci **tidak pernah tercatat** | ok | |
+| C3 | Nonaktifkan lalu aktifkan kembali satu user | Log **"Menonaktifkan Pengguna {nama}"** + aktifkan kembali tercatat sebagai perubahan `deleted_at` | revisi → uji ulang | diimplementasikan 2026-09-14 (label kendaraan tetap "Menghapus Kendaraan") |

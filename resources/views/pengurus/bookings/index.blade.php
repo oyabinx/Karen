@@ -10,7 +10,7 @@
         <select name="vehicle" class="rounded-lg border-gray-300 text-sm">
             <option value="">Semua mobil</option>
             @foreach ($vehicles as $v)
-                <option value="{{ $v->id }}" {{ (string) ($filters['vehicle'] ?? '') === (string) $v->id ? 'selected' : '' }}>{{ $v->name }}</option>
+                <option value="{{ $v->id }}" {{ (string) ($filters['vehicle'] ?? '') === (string) $v->id ? 'selected' : '' }}>{{ $v->name }}@if ($v->trashed()) (nonaktif)@endif</option>
             @endforeach
         </select>
         <select name="bidang" class="rounded-lg border-gray-300 text-sm">

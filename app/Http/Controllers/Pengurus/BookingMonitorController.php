@@ -37,7 +37,9 @@ class BookingMonitorController extends Controller
 
         return view('pengurus.bookings.index', [
             'bookings' => $bookings,
-            'vehicles' => Vehicle::orderBy('name')->get(),
+            // withTrashed (UAT 09-B6): admin tetap bisa mencari status
+            // peminjaman kendaraan yang sudah dihapus (rusak berat)
+            'vehicles' => Vehicle::orderBy('name')->withTrashed()->get(),
             'bidangList' => Bidang::orderBy('id')->get(),
             'filters' => $filters,
         ]);

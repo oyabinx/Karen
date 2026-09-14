@@ -99,7 +99,12 @@ class VehicleManagementTest extends TestCase
     {
         $v = Vehicle::factory()->create();
 
+        // UAT 09-B6: hapus kendaraan kini KHUSUS ADMIN — pengurus 403
         $this->actingAs($this->pengurus)
+            ->delete("/pengurus/vehicles/{$v->id}")
+            ->assertForbidden();
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']))
             ->delete("/pengurus/vehicles/{$v->id}")
             ->assertSessionHasNoErrors();
 

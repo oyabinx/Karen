@@ -112,7 +112,9 @@ trait LogsActivity
         $kalimat = match ($action) {
             ActivityLog::ACTION_CREATED => "Menambah {$label}",
             ActivityLog::ACTION_UPDATED => "Mengubah {$label}",
-            ActivityLog::ACTION_DELETED => "Menghapus {$label}",
+            // Model boleh mengganti label hapus (mis. User → "Menonaktifkan",
+            // UAT 09-C3) via override activityDeletedDescription().
+            ActivityLog::ACTION_DELETED => $this->activityDeletedDescription($label),
             ActivityLog::ACTION_RESTORED => "Mengaktifkan kembali {$label}",
             default => "{$label}",
         };
@@ -122,5 +124,10 @@ trait LogsActivity
         }
 
         return $kalimat;
+    }
+
+    protected function activityDeletedDescription(string $label): string
+    {
+        return "Menghapus {$label}";
     }
 }

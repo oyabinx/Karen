@@ -1,0 +1,61 @@
+BUILD LOG — Revisi UAT 09 + UAT 10 (Tutorial Integrasi Google)
+Tanggal: 2026-09-14
+
+Revisi UAT 09 (dari catatan user di file UAT):
+
+B6 — Hapus kendaraan khusus admin + soft delete + riwayat tetap bisa dicari:
+  • VehicleController@destroy: abort 403 kecuali admin; pesan
+    menyebut soft delete.
+  • Tombol "Hapus" (merah, konfirmasi jelas) di kartu kendaraan —
+    hanya dirender utk admin & unit belum terhapus.
+  • Booking::vehicle()/originalVehicle() kini withTrashed() — nama
+    unit tetap tampil di monitoring/riwayat/dashboard meski unit
+    dihapus.
+  • Filter mobil di Semua Peminjaman memuat unit terhapus dengan
+    label "(nonaktif)" (Vehicle::withTrashed()).
+  • Test: pengurus 403 + admin soft-delete + assertSoftDeleted;
+    monitoring tetap menampilkan & memfilter booking unit terhapus.
+    Test lama yang menghapus sebagai pengurus diubah ke admin.
+
+C1 — Reset kata sandi oleh admin (pengganti "tampilkan password"):
+  • Kata sandi lama mustahil ditampilkan (bcrypt satu arah) — alur
+    resmi: pegawai lupa → minta admin → admin tekan "🔑 Reset Sandi"
+    → sistem buat sandi acak 10 karakter (tanpa huruf mirip) →
+    DITAMPILKAN SEKALI di flash utk disampaikan → pegawai ganti
+    sendiri di menu Profil. Skema "lupa password" TETAP TIDAK
+    ditambahkan (keputusan user).
+  • Route PATCH /admin/users/{user}/reset-password; tombol di daftar
+    user (bukan untuk diri sendiri — diarahkan ke menu Profil).
+  • Audit log "Mereset kata sandi Pengguna X" TANPA nilai sandi
+    (keamanan log C1 asli tetap dijaga).
+  • Test: flash berisi sandi baru; sandi baru bisa dipakai login;
+    log tanpa nilai; reset diri sendiri ditolak.
+
+C3 — Label log nonaktif user:
+  • LogsActivity: hook activityDeletedDescription() (default
+    "Menghapus {label}"); User meng-override → "Menonaktifkan
+    Pengguna {nama}" (UAT 09-C3). Kendaraan tetap "Menghapus".
+  • Test label persis + restore tetap tercatat perubahan deleted_at.
+
+UAT 10 (baru) — UAT/10-integrasi-google.md:
+  • Tutorial lengkap A–E: (A) Google Cloud Console langkah-per-langkah
+    sampai unduh kunci JSON + catat client_email; (B) spreadsheet
+    staging: 2 tab, format baris Anggaran A2:D (plat|pos|nominal|
+    tahun, pos valid servis/suku_cadang/ac/pelumas), share Editor ke
+    service account, (opsional) folder Drive arsip; (C) konfigurasi
+    di Karen: upload kunci (email tampil), URL spreadsheet, nama tab,
+    Test Koneksi 5 langkah, aktifkan, Sinkron Sekarang; (D) verifikasi
+    (anggaran masuk, tab Realisasi terisi 8 kolom, ubah nilai → sync,
+    log & badge, nonaktif, migrasi ke spreadsheet produksi); (E)
+    tabel troubleshooting (403, tab tidak ditemukan, kunci invalid,
+    plat tidak persis, format nominal).
+  • Format diselaraskan dengan implementasi SheetsBudgetSync (baca
+    'Anggaran'!A2:D upsert per plat+pos+tahun; tulis ulang penuh
+    'Realisasi') dan docs/feature/integrasi_google.md.
+
+Docs: manajemen_kendaraan.md (hapus admin-only + monitoring dengan
+unit nonaktif), manajemen_user.md (Reset Sandi), log_aktivitas.md
+(label Menonaktifkan Pengguna). UAT 09 diperbarui (B6/C1/C3 →
+"revisi → uji ulang" + catatan implementasi).
+
+Hasil akhir: 254 passed (lihat run commit).

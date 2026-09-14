@@ -28,7 +28,7 @@ newgrp docker
 |----|-------------|------------------|--------|---------|
 | 1 | Booking lewat tempo tanpa tombol Selesai → autoReturn | Status **Dikembalikan** + badge otomatis + waktu kembali terisi | ok | |
 | 2 | Booking `end_date` HARI INI → autoReturn | **Tidak berubah** (masih Dipinjam — berlaku hingga 24:00) | ok | |
-| 3 | Booking **menunggu pengganti** lewat tempo → autoReturn | Status **Dibatalkan** + chip **"Dibatalkan {waktu}"** (waktu pembatalan oleh sistem) + kuota bidang lepas (user bisa booking lagi) | ⬜ | perilaku ini sudah diproteksi test otomatis `AutoReturnTest::test_menunggu_penggantian_lewat_tempo_dibatalkan_dan_kuota_lepas` — uji manual tetap disarankan |
+| 3 | Booking **menunggu pengganti** lewat tempo → autoReturn | Status **Dibatalkan** + chip **"Dibatalkan {waktu}"** (waktu pembatalan oleh sistem) + kuota bidang lepas (user bisa booking lagi) | ok | perilaku ini sudah diproteksi test otomatis `AutoReturnTest::test_menunggu_penggantian_lewat_tempo_dibatalkan_dan_kuota_lepas` — uji manual tetap disarankan |
 | 4 | Jalankan autoReturn dua kali | Tidak ada perubahan ganda (idempoten) | ok | |
 | 5 | Tidak ada keluhan otomatis tercipta | Daftar keluhan tidak bertambah | ok | |
 | 6 | Event lewat `end_date` (buat event kemarin via tinker) → jalankan `app(App\Services\EventService::class)->autoFinish()` | Event berstatus **Selesai**; armada bebas | ok | |

@@ -84,25 +84,101 @@ class AdminAccessDanLogAktivitasTest extends TestCase
     }
 
     /**
-     * UAT 09-C3: nonaktifkan user → log Menghapus; aktifkan kembali →
-     * perubahan deleted_at tercatat.
+     * UAT 09-B6: kendaraan terhapus (soft delete) tetap bisa dicari
+     * di monitoring — nama unit tidak hilang dari sejarah peminjaman.
+     */
+    public function test_monitoring_tetap_menampilkan_booking_kendaraan_terhapus(): void
+    {
+        $v = Vehicle::factory()->create(['name' => 'Unit Rusak Berat']);
+        $pegawai = User::factory()->create(['role' => 'pegawai', 'seksi_id' => Seksi::factory()->create()->id]);
+
+        \App\Models\Booking::create([
+            'user_id' => $pegawai->id,
+            'vehicle_id' => $v->id,
+            'start_date' => today()->subDays(2)->toDateString(),
+            'end_date' => today()->subDay()->toDateString(),
+            'address' => 'Kantor B', 'purpose' => 'Rapat',
+            'status' => 'dikembalikan',
+        ]);
+
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->delete("/pengurus/vehicles/{$v->id}")->assertSessionHasNoErrors();
+        $this->assertSoftDeleted('vehicles', ['id' => $v->id]);
+
+        // Monitoring tanpa filter → nama unit terhapus tetap tampil
+        $this->actingAs($admin)
+            ->get('/pengurus/bookings')
+            ->assertOk()
+            ->assertSee('Unit Rusak Berat');
+
+        // Filter dropdown memuat unit nonaktif dan filter tetap berfungsi
+        $this->actingAs($admin)
+            ->get('/pengurus/bookings?vehicle='.$v->id)
+            ->assertOk()
+            ->assertSee('Unit Rusak Berat')
+            ->assertSee('(nonaktif)');
+    }
+
+    /**
+     * UAT 09-C3: nonaktifkan user tercatat sebagai "Menonaktifkan
+     * Pengguna", bukan "Menghapus Pengguna".
      */
     public function test_log_nonaktifkan_dan_aktifkan_kembali_user(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $target = User::factory()->create(['role' => 'pegawai']);
+        $target = User::factory()->create(['role' => 'pegawai', 'name' => 'Pegawai Nonaktif']);
 
         $this->actingAs($admin)->delete("/admin/users/{$target->id}")->assertSessionHasNoErrors();
 
         $hapus = ActivityLog::where('model_type', User::class)->where('model_id', $target->id)->latest('id')->first();
         $this->assertSame('deleted', $hapus->action);
         $this->assertSame($admin->id, $hapus->user_id);
+        // UAT 09-C3: label "Menonaktifkan", bukan "Menghapus"
+        $this->assertSame('Menonaktifkan Pengguna Pegawai Nonaktif', $hapus->description);
 
         $this->actingAs($admin)->patch("/admin/users/{$target->id}/restore")->assertSessionHasNoErrors();
 
         $pulih = ActivityLog::where('model_type', User::class)->where('model_id', $target->id)->latest('id')->first();
         $this->assertNotSame('deleted', $pulih->action);
-        $this->assertStringContainsString((string) $target->id, json_encode([$pulih->model_id]));
+        $this->assertArrayHasKey('deleted_at', $pulih->changes);
+    }
+
+    /**
+     * UAT 09-C1: admin mereset kata sandi pegawai yang lupa — sandi
+     * baru acak ditampilkan SEKALI di flash; log tercatat tanpa nilai;
+     * sandi lama memang mustahil dilihat (hash satu arah).
+     */
+    public function test_admin_reset_kata_sandi_user(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $target = User::factory()->create(['role' => 'pegawai', 'name' => 'Pegawai Lupa']);
+
+        $response = $this->actingAs($admin)
+            ->patch("/admin/users/{$target->id}/reset-password")
+            ->assertSessionHasNoErrors();
+
+        // Flash menampilkan sandi baru tepat satu kali
+        $flash = session('success');
+        $this->assertStringContainsString('Kata sandi baru Pegawai Lupa:', $flash);
+        preg_match('/Kata sandi baru Pegawai Lupa: (\S+) —/', $flash, $m);
+        $sandibaru = $m[1] ?? '';
+        $this->assertSame(10, strlen($sandibaru));
+
+        // Sandi baru benar-benar berlaku (bisa dipakai login)
+        $this->post('/logout');
+        $this->post('/login', ['email' => $target->email, 'password' => $sandibaru])
+            ->assertRedirect('/dashboard');
+
+        // Log: tercatat "Mereset kata sandi" TANPA nilai sandi
+        $log = ActivityLog::where('model_type', User::class)->where('model_id', $target->id)->latest('id')->first();
+        $this->assertSame('Mereset kata sandi Pengguna Pegawai Lupa', $log->description);
+        $this->assertStringNotContainsString($sandibaru, json_encode($log->changes));
+        $this->assertStringNotContainsString($sandibaru, $log->description);
+
+        // Admin tidak boleh me-reset sandi dirinya sendiri via jalur ini
+        $this->actingAs($admin)
+            ->patch("/admin/users/{$admin->id}/reset-password")
+            ->assertSessionHas('error');
     }
 
     public function test_log_mencatat_siapa_mengubah_apa_kapan(): void
@@ -134,8 +210,11 @@ class AdminAccessDanLogAktivitasTest extends TestCase
         $this->assertSame('bisa_dipinjam', $updated->changes['status']['lama']);
         $this->assertSame('tidak_bisa_dipinjam', $updated->changes['status']['baru']);
 
-        // Hapus → log deleted (pelaku tetap tercatat)
-        $this->actingAs($pengurusA)->delete("/pengurus/vehicles/{$v->id}");
+        // Hapus → log deleted (pelaku tetap tercatat). UAT 09-B6: hapus
+        // kendaraan kini KHUSUS ADMIN (soft delete — riwayat tetap utuh)
+        $this->actingAs($pengurusA)->delete("/pengurus/vehicles/{$v->id}")->assertForbidden();
+        $this->actingAs($admin)->delete("/pengurus/vehicles/{$v->id}")->assertSessionHasNoErrors();
+        $this->assertSoftDeleted('vehicles', ['id' => $v->id]);
         $this->assertSame('deleted', ActivityLog::where('model_type', Vehicle::class)->latest('id')->first()->action);
 
         // Halaman log (admin) menampilkan kedua pelaku; pegawai 403

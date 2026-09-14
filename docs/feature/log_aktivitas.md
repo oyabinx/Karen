@@ -12,7 +12,7 @@ Model berpegang trait `LogsActivity`: Kendaraan, Jadwal Maintenance, Peminjaman,
 |------|-------------|
 | Menambah | "Menambah {objek}" |
 | Mengubah | "Mengubah {objek} (kolom: …)" + **nilai lama→baru per kolom** |
-| Menghapus | "Menghapus {objek}" (soft delete; aktivasi kembali tercatat sebagai perubahan `deleted_at` → null) |
+| Menghapus | "Menghapus {objek}" (soft delete; aktivasi kembali tercatat sebagai perubahan `deleted_at` → null). **Khusus User** *(rev UAT 09-C3)*: labelnya "**Menonaktifkan** Pengguna {nama}" — menyesuaikan istilah di UI |
 | Sistem | Ringkasan scheduler (pengembalian otomatis 00:01, penutupan event 00:02) — pelaku "Sistem (otomatis)" |
 
 ### Keamanan

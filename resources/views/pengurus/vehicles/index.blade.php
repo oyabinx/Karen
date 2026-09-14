@@ -95,6 +95,16 @@
                                 <button class="text-amber-600 hover:underline">Tandai perlu diperiksa</button>
                             </form>
                         @endif
+                        {{-- Hapus unit (soft delete) KHUSUS ADMIN — UAT 09-B6:
+                             untuk unit rusak berat yang dihapuskan; riwayat
+                             peminjaman tetap bisa dicari di monitoring --}}
+                        @if (auth()->user()->isAdmin() && ! $v->trashed())
+                            <form method="POST" action="{{ route('pengurus.vehicles.destroy', $v) }}"
+                                  onsubmit="return confirm('Hapus kendaraan ini? Untuk unit rusak berat yang dihapuskan. Riwayat peminjaman TETAP tersimpan dan tetap bisa dicari di monitoring.')">
+                                @csrf @method('DELETE')
+                                <button class="text-red-600 hover:underline">Hapus</button>
+                            </form>
+                        @endif
                     </div>
                 </div>
 
