@@ -59,6 +59,35 @@ class BudgetDocumentTest extends TestCase
         $this->assertDatabaseHas('vehicle_budgets', ['vehicle_id' => $v->id, 'post' => 'servis', 'year' => 2026, 'amount' => 5000000]);
     }
 
+    /**
+     * Form anggaran memakai pemisah ribuan live (UAT 04-A2): nilai
+     * terkirim sebagai "5.000.000" — harus lolos validasi numeric dan
+     * tersimpan sebagai 5000000 (bug: dulu ditolak "harus berupa angka").
+     */
+    public function test_simpan_anggaran_menerima_format_ribuan(): void
+    {
+        $v = Vehicle::factory()->create();
+
+        $this->actingAs($this->pengurus)
+            ->put("/pengurus/vehicles/{$v->id}/budgets", [
+                'year' => 2026,
+                'amounts' => ['servis' => '5.000.000', 'suku_cadang' => '8.000.000', 'ac' => '2.000.000', 'pelumas' => '1.500.000'],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('vehicle_budgets', ['vehicle_id' => $v->id, 'post' => 'servis', 'amount' => 5000000]);
+        $this->assertDatabaseHas('vehicle_budgets', ['vehicle_id' => $v->id, 'post' => 'pelumas', 'amount' => 1500000]);
+
+        // Angka polos tetap diterima (jalur API/Sheets/test lama)
+        $this->actingAs($this->pengurus)
+            ->put("/pengurus/vehicles/{$v->id}/budgets", [
+                'year' => 2026,
+                'amounts' => ['servis' => 6000000, 'suku_cadang' => 0, 'ac' => 0, 'pelumas' => 0],
+            ])
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('vehicle_budgets', ['vehicle_id' => $v->id, 'post' => 'servis', 'amount' => 6000000]);
+    }
+
     public function test_anggaran_tiap_tahun_independen(): void
     {
         $v = Vehicle::factory()->create();
@@ -129,6 +158,30 @@ class BudgetDocumentTest extends TestCase
         $this->assertEquals(339000.0, (float) $m->costs->firstWhere('post', 'pelumas')->taxed_amount);
         $this->assertSame(0.0, (float) $m->costs->firstWhere('post', 'ac')->raw_amount);
         $this->assertCount(0, $m->costs->firstWhere('post', 'ac')->details);
+    }
+
+    /**
+     * Form nota memakai pemisah ribuan live — nilai terkirim sebagai
+     * "300.000" dan harus tersimpan benar (bukan (float) "300.000" = 300).
+     */
+    public function test_input_nota_menerima_format_ribuan(): void
+    {
+        Storage::fake('local');
+
+        $v = Vehicle::factory()->create();
+        $m = Maintenance::create(['vehicle_id' => $v->id, 'start_date' => '2026-09-10', 'end_date' => '2026-09-11']);
+
+        $this->actingAs($this->pengurus)
+            ->put("/pengurus/maintenances/{$m->id}/costs", [
+                'workshop_name' => 'Bengkel Jaya',
+                'details' => ['servis' => ['Tune up']],
+                'detail_amounts' => ['servis' => ['300.000']],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $servis = $m->costs->firstWhere('post', 'servis');
+        $this->assertEquals(300000.0, (float) $servis->raw_amount);
+        $this->assertEquals(339000.0, (float) $servis->taxed_amount);
     }
 
     public function test_nota_tanpa_rincian_bernilai_ditolak(): void

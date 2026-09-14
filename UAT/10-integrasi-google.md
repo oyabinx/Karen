@@ -43,15 +43,15 @@ satu browser.
 | C4 | Isi **nama tab** anggaran `Anggaran` dan realisasi `Realisasi` (default) → Simpan | Tersimpan | ok | harus persis sama dengan nama tab di B2 |
 | C5 | (Opsional) Bagian Drive: aktifkan toggle + tempel URL folder dari B5 → Simpan | Tersimpan | ok | |
 | C6 | Tekan **🔌 Test Koneksi** | **5 langkah bertahap hijau ✅**: kunci terbaca → kredensial diterima Google → spreadsheet terakses → tab ditemukan → folder Drive terakses (bila aktif). Langkah yang gagal menampilkan ❌ + pesan sebabnya | gagal | kalau ada ❌ lihat tabel E |
-| C7 | Bagian Jalankan: aktifkan **integrasi**; interval biarkan 15 menit → Simpan | Badge status integrasi "aktif" | ⬜ | |
-| C8 | Tekan **🔄 Sinkron Sekarang** | Pesan sukses sinkronisasi; baris baru muncul di **Log Sinkronisasi** berstatus `sukses` beserta durasinya | ⬜ | |
+| C7 | Bagian Jalankan: aktifkan **integrasi**; interval biarkan 15 menit → Simpan | Badge status integrasi "aktif" | ok | |
+| C8 | Tekan **🔄 Sinkron Sekarang** | Pesan sukses sinkronisasi; baris baru muncul di **Log Sinkronisasi** berstatus `sukses` beserta durasinya | ok | |
 
 ## D. Verifikasi Hasil Sinkronisasi
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| D1 | Di Karen: menu **Kendaraan** → buka **Anggaran** unit plat `B 1234 XYZ` tahun 2026 | Nilai pos **servis Rp 5.000.000** & **pelumas Rp 1.000.000** tampil — persis dari tab `Anggaran` (upsert per plat+pos+tahun) | ⬜ | |
-| D2 | Buka tab `Realisasi` di spreadsheet | Terisi baris nota otomatis dari Karen — kolom: `plat` · `id maintenance` · `bengkel` · `no. nota` · `tanggal` · `pos` · `nilai raw` · `nilai × koefisien pajak`. Ditulis ulang penuh tiap sinkronisasi | ⬜ | hanya maintenance yang sudah input nota |
+| D1 | Di Karen: menu **Kendaraan** → buka **Anggaran** unit plat `B 1234 XYZ` tahun 2026 | Nilai pos **servis Rp 5.000.000** & **pelumas Rp 1.000.000** tampil — persis dari tab `Anggaran` (upsert per plat+pos+tahun) | ok | |
+| D2 | Buka tab `Realisasi` di spreadsheet | Terisi baris nota otomatis dari Karen — kolom: `plat` · `id maintenance` · `bengkel` · `no. nota` · `tanggal` · `pos` · `nilai raw` · `nilai × koefisien pajak`. Ditulis ulang penuh tiap sinkronisasi | ok | hanya maintenance yang sudah input nota |
 | D3 | Ubah satu nilai di tab `Anggaran` (mis. servis jadi `6000000`) → kembali ke Karen → **Sinkron Sekarang** → refresh halaman Anggaran unit | Nilai di Karen ikut berubah menjadi Rp 6.000.000 | ⬜ | di produksi perubahan ditarik otomatis tiap interval polling oleh scheduler |
 | D4 | Cek **Log Sinkronisasi** & dashboard pengurus | Log mencatat `sukses`; badge status sinkron terakhir tampil di dashboard pengurus | ⬜ | |
 | D5 | Nonaktifkan toggle integrasi → **Sinkron Sekarang** | Task dilewati / badge "nonaktif" — tidak ada error | ⬜ | aktifkan kembali setelah uji |

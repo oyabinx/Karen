@@ -20,6 +20,25 @@ class BudgetSaveRequest extends FormRequest
         ];
     }
 
+    /**
+     * Form anggaran menampilkan pemisah ribuan live ("5.000.000" —
+     * UAT 04-A2); normalisasi ke angka polos SEBELUM validasi numeric
+     * (konvensi sama dengan SheetsBudgetSync): titik ribuan dibuang,
+     * koma desimal menjadi titik.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (is_array($this->input('amounts'))) {
+            $this->merge([
+                'amounts' => collect($this->input('amounts'))
+                    ->map(fn ($v) => is_string($v)
+                        ? str_replace(['.', ','], ['', '.'], trim($v))
+                        : $v)
+                    ->all(),
+            ]);
+        }
+    }
+
     public function attributes(): array
     {
         return [

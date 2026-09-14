@@ -30,14 +30,21 @@ class BudgetService
     /**
      * Simpan total anggaran 4 pos untuk satu mobil & tahun anggaran (upsert).
      *
-     * @param  array<string, numeric>  $amounts  [post => nominal]
+     * @param  array<string, numeric|string>  $amounts  [post => nominal]
      */
     public function setBudgets(Vehicle $vehicle, int $year, array $amounts): void
     {
         foreach (VehicleBudget::POSTS as $post) {
+            // String format ribuan Indonesia ("5.000.000") dinormalisasi
+            // — jangan di-cast float mentah: (float) "5.000.000" = 5.0
+            $nilai = $amounts[$post] ?? 0;
+            if (is_string($nilai)) {
+                $nilai = str_replace(['.', ','], ['', '.'], trim($nilai));
+            }
+
             VehicleBudget::updateOrCreate(
                 ['vehicle_id' => $vehicle->id, 'post' => $post, 'year' => $year],
-                ['amount' => (float) ($amounts[$post] ?? 0)],
+                ['amount' => (float) $nilai],
             );
         }
     }

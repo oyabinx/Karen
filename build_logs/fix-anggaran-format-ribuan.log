@@ -1,0 +1,33 @@
+BUILD LOG — Fix Bug: Simpan Anggaran Ditolak saat Input Format Ribuan
+Tanggal: 2026-09-14
+
+Gejala (laporan user):
+  Form anggaran kendaraan menampilkan pemisah ribuan live (fitur UAT
+  04-A2): ketik 5000000 → tampil "5.000.000". Saat disimpan, sistem
+  menolak: "Anggaran servis harus berupa angka" (×4 pos).
+
+Akar masalah (dua lapis):
+  1. BudgetSaveRequest memvalidasi amounts.* dengan rule `numeric`
+     mentah — PHP menolak "5.000.000" (titik bukan bagian angka
+     valid) → error validasi.
+  2. BudgetService::setBudgets() meng-cast (float) mentah — seandainya
+     lolos validasi, (float) "5.000.000" = 5.0 (bukan 5 juta!).
+
+Perbaikan:
+  • BudgetSaveRequest::prepareForValidation(): normalisasi string
+    amounts.* SEBELUM validasi — titik ribuan dibuang, koma desimal
+    jadi titik (konvensi sama dengan SheetsBudgetSync pull Budgets:
+    str_replace(['.', ','], ['', '.'])). Angka polos tetap diterima.
+  • BudgetService::setBudgets(): parsing string aman (normalisasi
+    sebelum cast) — pengaman untuk pemanggil non-HTTP sekalipun.
+  • Jalur NOTA diperiksa: SUDAH benar sejak awal (BudgetService
+    inputNota strip titik + NotaRequest longgar); ditambah test
+    regresi.
+
+Test (+2, di BudgetDocumentTest):
+  • test_simpan_anggaran_menerima_format_ribuan — "5.000.000" dst
+    lolos validasi & tersimpan 5000000; angka polos tetap jalan.
+  • test_input_nota_menerima_format_ribuan — "300.000" tersimpan
+    raw 300000 / taxed 339000.
+
+Hasil: 256 passed (seluruh suite).
