@@ -59,3 +59,22 @@ unit nonaktif), manajemen_user.md (Reset Sandi), log_aktivitas.md
 "revisi → uji ulang" + catatan implementasi).
 
 Hasil akhir: 254 passed (lihat run commit).
+
+ TAMBAHAN (2026-09-14): FIX UAT 10-C6 "Class Google\Client not found"
+────────────────────────────────────────────────────────────────────
+ • Sebab: composer.json meminta google/apiclient ^1.1 → terpasang
+   v1.1.9 (2020) yang memakai kelas gaya lama Google_Client, sedangkan
+   kode memakai Google\Client (gaya v2).
+ • Fix: composer require google/apiclient:^2.15 -W → v2.19.4
+   (+ google/auth, apiclient-services, firebase/php-jwt v7 — bebas
+   advisory; guzzle turun 8.1.0 → 7.15.x, laravel/framework menerima
+   ^7.8.2||^8.0; full suite 254 tetap hijau).
+ • Verifikasi end-to-end via tinker dengan kunci tersimpan:
+   langkah 1-4 HIJAU (kunci valid, token diterima, spreadsheet
+   "Karen Anggaran STAGING" terakses, kedua tab ada). Langkah 5
+   (folder Drive) 404 → folder belum di-share ke service account
+   (Google menyamarkan folder privat sebagai tidak ada) — perlu
+   tindakan user di sisi Google (B5) atau matikan toggle Drive.
+ • UAT 10 tabel E ditambah 2 baris troubleshooting.
+ • Catatan produksi (Fase 10): deploy harus menjalankan composer
+   install dengan composer.lock terbaru agar apiclient v2 terpasang.

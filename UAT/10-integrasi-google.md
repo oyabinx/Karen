@@ -15,34 +15,34 @@ satu browser.
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| A1 | Buka https://console.cloud.google.com → login akun Google | Dashboard Google Cloud tampil | ⬜ | gratis, tanpa kartu kredit untuk kebutuhan ini |
-| A2 | Klik selector project (bar atas, di samping logo) → **NEW PROJECT** → nama mis. `karen-sync` → **Create** → buka project itu | Project `karen-sync` aktif (nama terlihat di bar atas) | ⬜ | satu project cukup dipakai selamanya |
-| A3 | Menu ☰ → **APIs & Services → Library** → cari **Google Sheets API** → **Enable** | Sheets API berstatus Enabled | ⬜ | |
-| A4 | Ulangi A3 untuk **Google Drive API** (dipakai bila nanti mengaktifkan arsip PDF ke Drive; boleh sekalian saja) | Drive API Enabled | ⬜ | opsional tapi disarankan |
-| A5 | Menu ☰ → **IAM & Admin → Service Accounts** → **+ Create Service Account** → nama mis. `karen-sync` → **Create and Continue** → (role tidak perlu diisi) → **Done** | Daftar memuat service account baru ber-email panjang `karen-sync@karen-sync….iam.gserviceaccount.com` | ⬜ | |
-| A6 | Klik service account itu → tab **KEYS** → **ADD KEY → Create new key** → pilih **JSON** → **Create** | File `.json` terunduh (mis. `karen-sync-….json`) — **ini kuncinya, simpan baik-baik** | ⬜ | |
-| A7 | Buka file JSON itu dengan text editor (Notepad) → cari baris `"client_email"` | Tercatat email service account — **copy alamat ini**, dibutuhkan di langkah B4 | ⬜ | file berisi `"type": "service_account"` — jangan dibagikan ke siapa pun di luar keperluan konfigurasi |
+| A1 | Buka https://console.cloud.google.com → login akun Google | Dashboard Google Cloud tampil | ok | gratis, tanpa kartu kredit untuk kebutuhan ini |
+| A2 | Klik selector project (bar atas, di samping logo) → **NEW PROJECT** → nama mis. `karen-sync` → **Create** → buka project itu | Project `karen-sync` aktif (nama terlihat di bar atas) | ok | satu project cukup dipakai selamanya |
+| A3 | Menu ☰ → **APIs & Services → Library** → cari **Google Sheets API** → **Enable** | Sheets API berstatus Enabled | ok | |
+| A4 | Ulangi A3 untuk **Google Drive API** (dipakai bila nanti mengaktifkan arsip PDF ke Drive; boleh sekalian saja) | Drive API Enabled | ok | opsional tapi disarankan |
+| A5 | Menu ☰ → **IAM & Admin → Service Accounts** → **+ Create Service Account** → nama mis. `karen-sync` → **Create and Continue** → (role tidak perlu diisi) → **Done** | Daftar memuat service account baru ber-email panjang `karen-sync@karen-sync….iam.gserviceaccount.com` | ok |  |
+| A6 | Klik service account itu → tab **KEYS** → **ADD KEY → Create new key** → pilih **JSON** → **Create** | File `.json` terunduh (mis. `karen-sync-….json`) — **ini kuncinya, simpan baik-baik** | ok | |
+| A7 | Buka file JSON itu dengan text editor (Notepad) → cari baris `"client_email"` | Tercatat email service account — **copy alamat ini**, dibutuhkan di langkah B4 | ok | file berisi `"type": "service_account"` — jangan dibagikan ke siapa pun di luar keperluan konfigurasi |
 
 ## B. Menyiapkan Spreadsheet STAGING
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| B1 | Di Google Sheets buat spreadsheet baru, beri nama mis. `Karen Anggaran STAGING` | Spreadsheet kosong terbentuk | ⬜ | JANGAN pakai spreadsheet produksi |
-| B2 | Pastikan ada 2 tab bernama persis `Anggaran` dan `Realisasi` (rename/ tambah tab) | Dua tab ada; nama harus PERSIS (huruf besar-kecil berpengaruh) dan sama dengan yang diisi di Karen (C4) | ⬜ | |
-| B3 | Di tab `Anggaran`, isi mulai **baris 2**, kolom A–D: `plat` · `pos` · `nominal` · `tahun`. Contoh 2 baris uji (plat HARUS sama persis dengan kendaraan terdaftar di Karen): `B 1234 XYZ` · `servis` · `5000000` · `2026` dan `B 1234 XYZ` · `pelumas` · `1000000` · `2026` | 2 baris contoh masuk; baris 1 boleh diberi judul kolom (tidak dibaca sistem — pembacaan mulai A2) | ⬜ | pos valid hanya: `servis`, `suku_cadang`, `ac`, `pelumas`; nominal angka tanpa titik |
-| B4 | Klik **Share/Bagikan** → tempel email service account dari A7 → beri akses **Editor** → Send | Service account tercantum sebagai Editor | ⬜ | tanpa ini koneksi akan 403 (lihat E) |
-| B5 | (Opsional, untuk arsip Drive) buat folder di Google Drive mis. `Karen - Arsip Dokumen` → **Share** ke email service account (Editor) → copy URL folder | URL folder berformat `https://drive.google.com/drive/folders/{id}` siap dipakai di C5 | ⬜ | |
+| B1 | Di Google Sheets buat spreadsheet baru, beri nama mis. `Karen Anggaran STAGING` | Spreadsheet kosong terbentuk | ok | JANGAN pakai spreadsheet produksi |
+| B2 | Pastikan ada 2 tab bernama persis `Anggaran` dan `Realisasi` (rename/ tambah tab) | Dua tab ada; nama harus PERSIS (huruf besar-kecil berpengaruh) dan sama dengan yang diisi di Karen (C4) | ok | |
+| B3 | Di tab `Anggaran`, isi mulai **baris 2**, kolom A–D: `plat` · `pos` · `nominal` · `tahun`. Contoh 2 baris uji (plat HARUS sama persis dengan kendaraan terdaftar di Karen): `B 1234 XYZ` · `servis` · `5000000` · `2026` dan `B 1234 XYZ` · `pelumas` · `1000000` · `2026` | 2 baris contoh masuk; baris 1 boleh diberi judul kolom (tidak dibaca sistem — pembacaan mulai A2) | ok | pos valid hanya: `servis`, `suku_cadang`, `ac`, `pelumas`; nominal angka tanpa titik |
+| B4 | Klik **Share/Bagikan** → tempel email service account dari A7 → beri akses **Editor** → Send | Service account tercantum sebagai Editor | ok | tanpa ini koneksi akan 403 (lihat E) |
+| B5 | (Opsional, untuk arsip Drive) buat folder di Google Drive mis. `Karen - Arsip Dokumen` → **Share** ke email service account (Editor) → copy URL folder | URL folder berformat `https://drive.google.com/drive/folders/{id}` siap dipakai di C5 | ok | |
 
 ## C. Konfigurasi di Karen (admin)
 
 | No | Langkah | Hasil Diharapkan | Status | Catatan |
 |----|---------|------------------|--------|---------|
-| C1 | Login `admin@karen.test` → sidebar **Administrasi → Integrasi Google** (`/admin/integrasi/google`) | Halaman konfigurasi tampil (Kredensial, Sheets, Drive, Jalankan, Log Sinkronisasi) | ⬜ | pengurus membuka URL ini → 403 |
-| C2 | Bagian Kredensial: **pilih file** JSON unduhan A6 → **Simpan Konfigurasi** | Tersimpan; **email service account tampil** sebagai konfirmasi (hasil parsing); kunci tersimpan **terenkripsi di database** — tidak ada file kunci di server | ⬜ | file harus `.json` ≤ 50 KB bertipe service_account |
-| C3 | Bagian Google Sheets: tempel **URL spreadsheet** staging dari B1 (`https://docs.google.com/spreadsheets/d/…/edit`) → Simpan | URL diterima; ID spreadsheet terekstrak otomatis | ⬜ | format URL lain → pesan validasi |
-| C4 | Isi **nama tab** anggaran `Anggaran` dan realisasi `Realisasi` (default) → Simpan | Tersimpan | ⬜ | harus persis sama dengan nama tab di B2 |
-| C5 | (Opsional) Bagian Drive: aktifkan toggle + tempel URL folder dari B5 → Simpan | Tersimpan | ⬜ | |
-| C6 | Tekan **🔌 Test Koneksi** | **5 langkah bertahap hijau ✅**: kunci terbaca → kredensial diterima Google → spreadsheet terakses → tab ditemukan → folder Drive terakses (bila aktif). Langkah yang gagal menampilkan ❌ + pesan sebabnya | ⬜ | kalau ada ❌ lihat tabel E |
+| C1 | Login `admin@karen.test` → sidebar **Administrasi → Integrasi Google** (`/admin/integrasi/google`) | Halaman konfigurasi tampil (Kredensial, Sheets, Drive, Jalankan, Log Sinkronisasi) | ok | pengurus membuka URL ini → 403 |
+| C2 | Bagian Kredensial: **pilih file** JSON unduhan A6 → **Simpan Konfigurasi** | Tersimpan; **email service account tampil** sebagai konfirmasi (hasil parsing); kunci tersimpan **terenkripsi di database** — tidak ada file kunci di server | ok | file harus `.json` ≤ 50 KB bertipe service_account |
+| C3 | Bagian Google Sheets: tempel **URL spreadsheet** staging dari B1 (`https://docs.google.com/spreadsheets/d/…/edit`) → Simpan | URL diterima; ID spreadsheet terekstrak otomatis | ok | format URL lain → pesan validasi |
+| C4 | Isi **nama tab** anggaran `Anggaran` dan realisasi `Realisasi` (default) → Simpan | Tersimpan | ok | harus persis sama dengan nama tab di B2 |
+| C5 | (Opsional) Bagian Drive: aktifkan toggle + tempel URL folder dari B5 → Simpan | Tersimpan | ok | |
+| C6 | Tekan **🔌 Test Koneksi** | **5 langkah bertahap hijau ✅**: kunci terbaca → kredensial diterima Google → spreadsheet terakses → tab ditemukan → folder Drive terakses (bila aktif). Langkah yang gagal menampilkan ❌ + pesan sebabnya | gagal | kalau ada ❌ lihat tabel E |
 | C7 | Bagian Jalankan: aktifkan **integrasi**; interval biarkan 15 menit → Simpan | Badge status integrasi "aktif" | ⬜ | |
 | C8 | Tekan **🔄 Sinkron Sekarang** | Pesan sukses sinkronisasi; baris baru muncul di **Log Sinkronisasi** berstatus `sukses` beserta durasinya | ⬜ | |
 
@@ -61,7 +61,9 @@ satu browser.
 
 | Gejala (pesan Test Koneksi / sync) | Sebab | Solusi |
 |------------------------------------|-------|--------|
+| `Class "Google\Client" not found` (langkah 2 gagal) | Paket `google/apiclient` belum/keliru versi (v1.x tidak punya kelas `Google\Client`) | SUDAH DIPERBAIKI 2026-09-14: proyek kini memakai `google/apiclient` v2.19 — cukup muat ulang halaman & tekan Test Koneksi ulang. Di server produksi nanti: jalankan `composer install` seperti biasa (tercakup di lock) |
 | Langkah 3 ❌ `403 FORBIDDEN — spreadsheet tidak dibagikan…` | Spreadsheet belum di-share ke service account, atau aksesnya bukan Editor | Ulangi B4 dengan email service account yang **persis sama** dengan yang tampil di C2 |
+| Langkah 5 ❌ `404 File not found` (folder Drive) | Folder belum di-share ke service account — Google menyamarkan folder privat sebagai "tidak ada" | Ulangi B5: buka folder Drive → Share → tambah email service account sebagai **Editor**. Belum butuh arsip Drive? Matikan saja toggle Drive — langkah 5 tak lagi diuji |
 | Langkah 4 ❌ tab tidak ditemukan | Nama tab di spreadsheet ≠ nama tab di konfigurasi C4 | Samakan persis (huruf besar-kecil, tanpa spasi berlebih) |
 | Langkah 1–2 ❌ kunci ditolak / tidak valid | File bukan kunci JSON service account, rusak, atau > 50 KB | Unduh ulang kunci dari langkah A6; jangan file kunci tipe lain |
 | Sync gagal `kredensial belum dikonfigurasi` | Kunci dihapus dari konfigurasi | Upload ulang (C2) |
